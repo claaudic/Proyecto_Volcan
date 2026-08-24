@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Monte de Gas El Volcán">
+    <defs>
+        <linearGradient id="marca" x1="2" y1="58" x2="62" y2="10" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#0e9f6e"/>
+            <stop offset="1" stop-color="#38bdf8"/>
+        </linearGradient>
+    </defs>
+    <path d="M2 58 L23 14 L36 38 L45 22 L62 58 Z" fill="url(#marca)"/>
+    <path d="M23 14 L2 58 L23 58 Z" fill="#ffffff" opacity="0.24"/>
+    <path d="M45 22 L36 38 L36 58 L45 58 Z" fill="#ffffff" opacity="0.18"/>
+    <path d="M23 14 L36 38 L33 39 L23 20 Z" fill="#ffffff" opacity="0.38"/>
+</svg>

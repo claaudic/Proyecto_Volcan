@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de administración | Gas El Volcán</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../css/estilos.css">
+    <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body class="cuerpo-admin">
+
+    <a class="salto-contenido" href="#contenidoAdmin">Saltar al contenido</a>
+
+    <div class="admin-layout">
+
+        <aside class="admin-menu">
+            <a class="admin-marca" href="../index.html">
+                <img src="../img/logo.svg" alt="Logo de Gas El Volcán">
+                <span>Gas El Volcán</span>
+            </a>
+
+            <nav aria-label="Menú del panel">
+                <ul class="admin-lista" id="menuAdmin"></ul>
+            </nav>
+
+            <div class="admin-usuario">
+                <p class="admin-usuario-nombre" id="usuarioNombre"></p>
+                <p class="admin-usuario-rol" id="usuarioRol"></p>
+                <button type="button" class="btn btn-salir" id="botonSalir">Cerrar sesión</button>
+            </div>
+        </aside>
+
+        <main class="admin-contenido" id="contenidoAdmin">
+            <header class="admin-encabezado">
+                <div>
+                    <p class="admin-etiqueta">Panel de administración</p>
+                    <h1 id="saludoAdmin">Hola</h1>
+                </div>
+                <a class="btn btn-secundario" href="../index.html">Ver la tienda</a>
+            </header>
+
+            <section class="admin-resumen" aria-labelledby="tituloResumen">
+                <h2 id="tituloResumen" class="visually-hidden">Resumen del catálogo</h2>
+
+                <ul class="admin-tarjetas list-unstyled">
+                    <li class="admin-dato">
+                        <p class="admin-dato-numero">14</p>
+                        <p class="admin-dato-texto">Productos en el catálogo</p>
+                    </li>
+                    <li class="admin-dato">
+                        <p class="admin-dato-numero">4</p>
+                        <p class="admin-dato-texto">Categorías</p>
+                    </li>
+                    <li class="admin-dato">
+                        <p class="admin-dato-numero">3</p>
+                        <p class="admin-dato-texto">Usuarios registrados</p>
+                    </li>
+                </ul>
+            </section>
+
+            <section class="admin-aviso" aria-labelledby="tituloAviso">
+                <h2 id="tituloAviso">Qué puedes hacer aquí</h2>
+                <p id="textoAviso"></p>
+            </section>
+        </main>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/sesion.js"></script>
+    <script src="../js/admin.js"></script>
+</body>
+</html>

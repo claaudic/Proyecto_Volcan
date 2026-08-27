@@ -56,7 +56,7 @@ function mostrarSugerencia(valor) {
         return;
     }
 
-    const propuesta = correo.slice(0, posicion) + "@gasvolcan.cl";
+    const propuesta = correo.slice(0, posicion) + "@gaselvolcan.cl";
     sugerenciaCorreo.dataset.correo = propuesta;
     sugerenciaCorreo.textContent = "¿Quisiste decir " + propuesta + "?";
     sugerenciaCorreo.classList.remove("d-none");

@@ -4,13 +4,13 @@ const USUARIOS = [
     
     {
         nombre: "Claudia Administradora",
-        correo: "admin@gasvolcan.cl",
+        correo: "admin@gaselvolcan.cl",
         contrasena: "Admin1234",
         rol: "ADMINISTRADOR"
     },
     {
         nombre: "Repartidor El Volcán",
-        correo: "repartidor@gasvolcan.cl",
+        correo: "repartidor@gaselvolcan.cl",
         contrasena: "Repart123",
         rol: "REPARTIDOR"
     },
@@ -22,7 +22,7 @@ const USUARIOS = [
     }
 ];
 
-const DOMINIOS_PERMITIDOS = ["@gasvolcan.cl", "@duoc.cl", "@profesor.duoc.cl", "@gmail.com"];
+const DOMINIOS_PERMITIDOS = ["@gaselvolcan.cl", "@duoc.cl", "@profesor.duoc.cl", "@gmail.com"];
 
 function obtenerSesion() {
     const guardado = localStorage.getItem(CLAVE_SESION);
@@ -63,7 +63,7 @@ function validarCorreo(valor) {
     });
 
     if (!dominioValido) {
-        return "Usa un correo @gasvolcan.cl si eres del equipo, o @gmail.com si eres cliente.";
+        return "Usa un correo @gaselvolcan.cl si eres del equipo, o @gmail.com si eres cliente.";
     }
 
     return "";

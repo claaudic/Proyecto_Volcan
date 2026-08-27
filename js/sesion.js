@@ -1,6 +1,7 @@
 const CLAVE_SESION = "usuarioActivo";
 
 const USUARIOS = [
+    
     {
         nombre: "Claudia Administradora",
         correo: "admin@gasvolcan.cl",
@@ -8,10 +9,10 @@ const USUARIOS = [
         rol: "ADMINISTRADOR"
     },
     {
-        nombre: "Vendedor El Volcán",
-        correo: "vendedor@gasvolcan.cl",
-        contrasena: "Vende1234",
-        rol: "VENDEDOR"
+        nombre: "Repartidor El Volcán",
+        correo: "repartidor@gasvolcan.cl",
+        contrasena: "Repart123",
+        rol: "REPARTIDOR"
     },
     {
         nombre: "Cliente de Prueba",

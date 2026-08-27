@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nosotros | Gas El Volcán</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/estilos.css">
+    <link rel="stylesheet" href="css/efectos.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg" data-bs-theme="dark" aria-label="Navegación principal">
+            <div class="container">
+                <a class="navbar-brand" href="index.html">
+                    <img class="marca-logo" src="img/logo.svg" alt="Logo de Gas El Volcán">
+                    <span>Gas El Volcán</span>
+                </a>
+
+                <button
+                    class="navbar-toggler"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#menuPrincipal"
+                    aria-controls="menuPrincipal"
+                    aria-expanded="false"
+                    aria-label="Abrir menú"
+                >
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="menuPrincipal">
+                    <ul class="navbar-nav ms-auto align-items-lg-center">
+                        <li class="nav-item"><a class="nav-link" href="index.html">Inicio</a></li>
+                        <li class="nav-item"><a class="nav-link" href="productos.html">Productos</a></li>
+                        <li class="nav-item"><a class="nav-link active" aria-current="page" href="nosotros.html">Nosotros</a></li>
+                        <li class="nav-item"><a class="nav-link" href="blogs.html">Blogs</a></li>
+                        <li class="nav-item"><a class="nav-link" href="contacto.html">Contacto</a></li>
+                        <li class="nav-item nav-cuenta" id="navCuenta"></li>
+                        <li class="nav-item">
+                            <a class="btn btn-carrito ms-lg-2" href="carrito.html">
+                                Carrito (<span class="carrito-total">0</span>)
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="pagina-intro" aria-labelledby="titulo-nosotros">
+            <div class="container intro-contenido">
+                <div>
+                    <p class="hero-etiqueta">Desde 1998 en Chillán</p>
+                    <h1 id="titulo-nosotros">Repartimos gas en Chillán desde 1998</h1>
+                    <p class="intro-texto">
+                        Distribuidora de Gas El Volcán nació en Chillán, Región de Ñuble,
+                        y desde entonces lleva cilindros de gas licuado hasta la puerta de
+                        hogares, locales comerciales y talleres de la zona.
+                    </p>
+                    <p class="intro-texto">
+                        Hoy trabajamos con dos camiones y tres repartidores, y atendemos
+                        entre 80 y 120 pedidos cada día. Esta tienda en línea nace para que
+                        pedir gas sea tan simple como elegir el cilindro y esperar en casa.
+                    </p>
+                </div>
+
+                <img class="intro-imagen" src="img/hero-camion.jpg" alt="Camión de reparto de Gas El Volcán cargado con cilindros">
+            </div>
+        </section>
+
+        <section class="cifras" aria-labelledby="titulo-cifras">
+            <div class="container" data-revelar>
+                <h2 id="titulo-cifras" class="visually-hidden">La empresa en números</h2>
+                <ul class="cifras-lista list-unstyled">
+                    <li class="cifra">
+                        <p class="cifra-numero">1998</p>
+                        <p class="cifra-texto">Año en que partimos</p>
+                    </li>
+                    <li class="cifra">
+                        <p class="cifra-numero">5</p>
+                        <p class="cifra-texto">Zonas de cobertura</p>
+                    </li>
+                    <li class="cifra">
+                        <p class="cifra-numero">14</p>
+                        <p class="cifra-texto">Productos en catálogo</p>
+                    </li>
+                    <li class="cifra">
+                        <p class="cifra-numero">80–120</p>
+                        <p class="cifra-texto">Pedidos cada día</p>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <div class="relieve" aria-hidden="true">
+            <svg viewBox="0 0 1440 80" preserveAspectRatio="none" focusable="false">
+                <path d="M0 80 L0 48 L96 30 L188 46 L286 22 L384 42 L472 26 L566 44 L664 24 L762 42 L862 28 L960 46 L1072 26 L1172 44 L1272 28 L1362 42 L1440 30 L1440 80 Z"/>
+            </svg>
+        </div>
+
+        <section class="zonas" aria-labelledby="titulo-zonas">
+            <div class="container" data-revelar>
+                <div class="titulo-seccion">
+                    <p>Cobertura</p>
+                    <h2 id="titulo-zonas">Dónde llegamos</h2>
+                </div>
+
+                <div class="tabla-scroll">
+                    <table class="tabla-zonas">
+                        <thead>
+                            <tr>
+                                <th scope="col">Zona</th>
+                                <th scope="col">Comunas cubiertas</th>
+                                <th scope="col">Días de despacho</th>
+                                <th scope="col">Horario</th>
+                                <th scope="col">Entrega estimada</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th scope="row">Zona Centro</th>
+                                <td>Chillán, sectores centro, norte y sur</td>
+                                <td>Lunes a sábado</td>
+                                <td>08:00 – 20:00</td>
+                                <td>1 – 3 horas</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Zona Oriente</th>
+                                <td>Chillán sector oriente, Chillán Viejo</td>
+                                <td>Lunes a viernes</td>
+                                <td>08:00 – 18:00</td>
+                                <td>2 – 4 horas</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Zona Rural</th>
+                                <td>El Carmen, Pinto, San Ignacio</td>
+                                <td>Martes y jueves</td>
+                                <td>08:00 – 16:00</td>
+                                <td>3 – 6 horas</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Zona Sur</th>
+                                <td>Bulnes, Quillón</td>
+                                <td>Miércoles</td>
+                                <td>08:00 – 16:00</td>
+                                <td>4 – 6 horas</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Zona Comercial</th>
+                                <td>Parques industriales y locales comerciales</td>
+                                <td>Lunes a viernes</td>
+                                <td>07:00 – 17:00</td>
+                                <td>Según agenda</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section class="equipo" aria-labelledby="titulo-equipo">
+            <div class="container" data-revelar>
+                <div class="titulo-seccion">
+                    <p>Equipo</p>
+                    <h2 id="titulo-equipo">El equipo detrás de la tienda</h2>
+                </div>
+
+                <ul class="equipo-lista list-unstyled">
+                    <li class="equipo-persona">
+                        <span class="equipo-inicial" aria-hidden="true">CC</span>
+                        <div>
+                            <h3>Claudia Cardoza</h3>
+                            <p>Desarrollo y diseño del sitio</p>
+                        </div>
+                    </li>
+                    <li class="equipo-persona">
+                        <span class="equipo-inicial" aria-hidden="true">NM</span>
+                        <div>
+                            <h3>Nicolás Morales</h3>
+                            <p>Desarrollo y diseño del sitio</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container footer-contenido">
+            <div>
+                <h2>Gas El Volcán</h2>
+                <p>Distribución de gas licuado a domicilio.</p>
+            </div>
+            <div>
+                <h2>Ubicación</h2>
+                <p>Chillán, Región de Ñuble</p>
+            </div>
+            <div>
+                <h2>Navegación</h2>
+                <ul class="footer-enlaces">
+                    <li><a href="productos.html">Productos</a></li>
+                    <li><a href="nosotros.html">Nosotros</a></li>
+                    <li><a href="blogs.html">Blogs</a></li>
+                    <li><a href="contacto.html">Contacto</a></li>
+                </ul>
+            </div>
+        </div>
+        <p class="copyright">© 2026 Gas El Volcán</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/sesion.js"></script>
+    <script src="js/efectos.js"></script>
+</body>
+</html>

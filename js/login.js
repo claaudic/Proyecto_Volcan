@@ -125,9 +125,17 @@ function ocultarMensajeGeneral() {
 }
 
 function redirigirSegunRol(rol) {
-    if (rol === "ADMINISTRADOR" || rol === "VENDEDOR") {
+
+    if (rol === "ADMINISTRADOR") {
         window.location.href = "admin/index.html";
-    } else {
+    }
+
+    else if (rol === "REPARTIDOR") {
+        window.location.href = "repartidor.html";
+    }
+
+    else {
         window.location.href = "index.html";
     }
+
 }

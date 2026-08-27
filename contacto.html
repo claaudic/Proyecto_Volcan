@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contacto | Gas El Volcán</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/estilos.css">
+    <link rel="stylesheet" href="css/efectos.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg" data-bs-theme="dark" aria-label="Navegación principal">
+            <div class="container">
+                <a class="navbar-brand" href="index.html">
+                    <img class="marca-logo" src="img/logo.svg" alt="Logo de Gas El Volcán">
+                    <span>Gas El Volcán</span>
+                </a>
+
+                <button
+                    class="navbar-toggler"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#menuPrincipal"
+                    aria-controls="menuPrincipal"
+                    aria-expanded="false"
+                    aria-label="Abrir menú"
+                >
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="menuPrincipal">
+                    <ul class="navbar-nav ms-auto align-items-lg-center">
+                        <li class="nav-item"><a class="nav-link" href="index.html">Inicio</a></li>
+                        <li class="nav-item"><a class="nav-link" href="productos.html">Productos</a></li>
+                        <li class="nav-item"><a class="nav-link" href="nosotros.html">Nosotros</a></li>
+                        <li class="nav-item"><a class="nav-link" href="blogs.html">Blogs</a></li>
+                        <li class="nav-item"><a class="nav-link active" aria-current="page" href="contacto.html">Contacto</a></li>
+                        <li class="nav-item nav-cuenta" id="navCuenta"></li>
+                        <li class="nav-item">
+                            <a class="btn btn-carrito ms-lg-2" href="carrito.html">
+                                Carrito (<span class="carrito-total">0</span>)
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section class="pagina-encabezado" aria-labelledby="titulo-contacto">
+            <div class="encabezado-fondo" aria-hidden="true">
+                <span class="luz luz-encabezado-verde"></span>
+                <span class="luz luz-encabezado-celeste"></span>
+                <span class="encabezado-arco"></span>
+            </div>
+
+            <div class="container">
+                <nav class="miga" aria-label="Ruta">
+                    <a href="index.html">Inicio</a>
+                    <span aria-hidden="true">/</span>
+                    <span aria-current="page">Contacto</span>
+                </nav>
+                <h1 id="titulo-contacto">Escríbenos</h1>
+                <p class="pagina-bajada">Cuéntanos qué necesitas y te respondemos a la brevedad.</p>
+            </div>
+
+            <svg class="encabezado-monte" viewBox="0 0 1440 60" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+                <path d="M0 60 L0 38 L110 22 L214 40 L318 16 L430 36 L536 20 L648 38 L764 18 L876 36 L992 22 L1104 40 L1216 20 L1330 34 L1440 22 L1440 60 Z"/>
+            </svg>
+        </section>
+
+        <section class="contacto" aria-labelledby="titulo-formulario">
+            <div class="container contacto-grid" data-revelar>
+
+                <div class="tarjeta-panel">
+                    <h2 id="titulo-formulario">Formulario de contacto</h2>
+                    <p class="panel-bajada">Todos los campos marcados con asterisco son obligatorios.</p>
+
+                    <form id="formContacto" novalidate>
+                        <div class="campo">
+                            <label for="nombre">Nombre <abbr title="obligatorio">*</abbr></label>
+                            <input type="text" id="nombre" name="nombre" autocomplete="name" maxlength="100" placeholder="Tu nombre completo" required>
+                            <small class="mensaje-error-campo" id="errorNombre" role="status"></small>
+                        </div>
+
+                        <div class="campo">
+                            <label for="correoContacto">Correo electrónico <abbr title="obligatorio">*</abbr></label>
+                            <input type="email" id="correoContacto" name="correo" autocomplete="email" maxlength="100" placeholder="nombre@gmail.com" required>
+                            <small class="mensaje-error-campo" id="errorCorreoContacto" role="status"></small>
+                        </div>
+
+                        <div class="campo">
+                            <label for="asunto">Asunto</label>
+                            <input type="text" id="asunto" name="asunto" maxlength="100" placeholder="Sobre qué nos escribes" list="asuntosFrecuentes">
+                            <datalist id="asuntosFrecuentes">
+                                <option value="Consulta por un pedido"></option>
+                                <option value="Cobertura en mi comuna"></option>
+                                <option value="Precios y disponibilidad"></option>
+                                <option value="Cuenta comercial"></option>
+                            </datalist>
+                        </div>
+
+                        <div class="campo">
+                            <label for="comentario">Mensaje <abbr title="obligatorio">*</abbr></label>
+                            <textarea id="comentario" name="comentario" rows="6" maxlength="500" placeholder="Cuéntanos qué necesitas" required></textarea>
+                            <div class="campo-pie">
+                                <small class="mensaje-error-campo" id="errorComentario" role="status"></small>
+                                <small class="contador" id="contadorComentario">0 / 500</small>
+                            </div>
+                        </div>
+
+                        <div class="mensaje-exito d-none" id="mensajeExito" role="alert"></div>
+
+                        <button type="submit" class="btn btn-principal">Enviar mensaje</button>
+                    </form>
+                </div>
+
+                <aside class="contacto-lateral">
+                    <div class="tarjeta-panel">
+                        <h2>Datos de la distribuidora</h2>
+                        <ul class="pie-contacto lista-datos">
+                            <li>
+                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                    <path d="M12 21s7-5.5 7-11a7 7 0 10-14 0c0 5.5 7 11 7 11z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                                    <circle cx="12" cy="10" r="2.5" fill="none" stroke="currentColor" stroke-width="2"/>
+                                </svg>
+                                <span>Chillán, Región de Ñuble</span>
+                            </li>
+                            <li>
+                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                    <path d="M5 4h4l2 5-2.5 1.5a12 12 0 005 5L15 13l5 2v4a1 1 0 01-1 1A16 16 0 014 5a1 1 0 011-1z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                                </svg>
+                                <span>Teléfono por definir</span>
+                            </li>
+                            <li>
+                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                    <rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>
+                                    <path d="M3 7l9 6 9-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                                </svg>
+                                <span>Correo por definir</span>
+                            </li>
+                            <li>
+                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                    <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/>
+                                    <path d="M12 7v5l3.5 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                </svg>
+                                <span>Lunes a sábado, 08:00 a 20:00</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="tarjeta-panel">
+                        <h2>¿Prefieres pedir directamente?</h2>
+                        <p class="panel-bajada">Revisa el catálogo y coordina tu despacho.</p>
+                        <a class="btn btn-principal boton-ancho" href="productos.html">Ver productos</a>
+                    </div>
+                </aside>
+
+            </div>
+        </section>
+    <footer>
+        <div class="container pie-grid">
+            <div class="pie-marca">
+                <div class="pie-logo">
+                    <img src="img/logo.svg" alt="">
+                    <span>Gas El Volcán</span>
+                </div>
+                <p>Distribuidora familiar de gas licuado en Chillán, Región de Ñuble. En operación desde 1998.</p>
+            </div>
+
+            <div>
+                <h2>Navegación</h2>
+                <ul class="footer-enlaces">
+                    <li><a href="index.html">Inicio</a></li>
+                    <li><a href="productos.html">Productos</a></li>
+                    <li><a href="nosotros.html">Nosotros</a></li>
+                    <li><a href="blogs.html">Blogs</a></li>
+                    <li><a href="contacto.html">Contacto</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h2>Productos</h2>
+                <ul class="footer-enlaces">
+                    <li><a href="productos.html">Cilindros de Gas</a></li>
+                    <li><a href="productos.html">Reguladores</a></li>
+                    <li><a href="productos.html">Mangueras y Conexiones</a></li>
+                    <li><a href="productos.html">Accesorios</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h2>Contacto</h2>
+                <ul class="pie-contacto">
+                    <li>
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M12 21s7-5.5 7-11a7 7 0 10-14 0c0 5.5 7 11 7 11z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                            <circle cx="12" cy="10" r="2.5" fill="none" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                        <span>Chillán, Región de Ñuble</span>
+                    </li>
+                    <li>
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M5 4h4l2 5-2.5 1.5a12 12 0 005 5L15 13l5 2v4a1 1 0 01-1 1A16 16 0 014 5a1 1 0 011-1z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                        </svg>
+                        <span>Teléfono por definir</span>
+                    </li>
+                    <li>
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>
+                            <path d="M3 7l9 6 9-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                        </svg>
+                        <span>Correo por definir</span>
+                    </li>
+                    <li>
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/>
+                            <path d="M12 7v5l3.5 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        <span>Lunes a sábado, 08:00 a 20:00</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="container">
+            <p class="copyright">© 2026 Gas El Volcán. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/sesion.js"></script>
+    <script src="js/efectos.js"></script>
+    <script src="js/contacto.js"></script>
+</body>
+</html>

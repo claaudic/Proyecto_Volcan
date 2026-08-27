@@ -1,55 +1,113 @@
 const OPCIONES_MENU = [
-    { texto: "Inicio", enlace: "index.html", roles: ["ADMINISTRADOR", "VENDEDOR"] },
-    { texto: "Productos", enlace: "productos.html", roles: ["ADMINISTRADOR", "VENDEDOR"] },
-    { texto: "Órdenes", enlace: "ordenes.html", roles: ["ADMINISTRADOR", "VENDEDOR"] },
-    { texto: "Usuarios", enlace: "usuarios.html", roles: ["ADMINISTRADOR"] }
+    {
+        texto: "Inicio",
+        enlace: "index.html"
+    },
+    {
+        texto: "Productos",
+        enlace: "productos.html"
+    },
+    {
+        texto: "Órdenes",
+        enlace: "ordenes.html"
+    },
+    {
+        texto: "Usuarios",
+        enlace: "usuarios.html"
+    },
+    {
+        texto: "Reportes",
+        enlace: "reportes.html"
+    }
 ];
 
-const TEXTOS_ROL = {
-    ADMINISTRADOR: "Tienes acceso total al sistema: puedes crear, editar y eliminar productos y usuarios, y revisar todas las órdenes.",
-    VENDEDOR: "Puedes revisar el listado de productos y el de órdenes, junto con su detalle. El resto de las opciones no aparece en tu menú."
-};
+
+const TEXTO_ADMIN =
+    "Tienes acceso total al sistema. Puedes crear, editar y desactivar usuarios, asignar roles y revisar todos los reportes y datos del sistema.";
+
+
+// ==========================================
+// COMPROBAR SESIÓN
+// ==========================================
 
 const sesion = obtenerSesion();
 
-if (!sesion || sesion.rol === "CLIENTE") {
+
+// Solo el ADMINISTRADOR puede entrar al panel
+if (!sesion || sesion.rol !== "ADMINISTRADOR") {
+
     window.location.replace("../login.html");
+
 } else {
+
     dibujarPanel(sesion);
+
 }
+
 
 function dibujarPanel(usuario) {
+
     const menu = document.getElementById("menuAdmin");
-    const paginaActual = window.location.pathname.split("/").pop() || "index.html";
 
-    const opciones = OPCIONES_MENU.filter(function (opcion) {
-        return opcion.roles.includes(usuario.rol);
-    });
+    const paginaActual =
+        window.location.pathname.split("/").pop() || "index.html";
 
-    menu.innerHTML = opciones.map(function (opcion) {
-        const activo = opcion.enlace === paginaActual ? " admin-enlace-activo" : "";
-        return '<li><a class="admin-enlace' + activo + '" href="' + opcion.enlace + '">' + opcion.texto + '</a></li>';
+
+    
+    menu.innerHTML = OPCIONES_MENU.map(function (opcion) {
+
+        const activo =
+            opcion.enlace === paginaActual
+                ? " admin-enlace-activo"
+                : "";
+
+        return `
+            <li>
+                <a
+                    class="admin-enlace${activo}"
+                    href="${opcion.enlace}"
+                >
+                    ${opcion.texto}
+                </a>
+            </li>
+        `;
+
     }).join("");
 
-    document.getElementById("saludoAdmin").textContent = "Hola, " + usuario.nombre;
-    document.getElementById("usuarioNombre").textContent = usuario.nombre;
-    document.getElementById("usuarioRol").textContent = etiquetaRol(usuario.rol);
-    document.getElementById("textoAviso").textContent = TEXTOS_ROL[usuario.rol];
 
-    document.getElementById("botonSalir").addEventListener("click", function () {
-        cerrarSesion();
-        window.location.href = "../login.html";
-    });
+const saludo = document.getElementById("saludoAdmin");
+const nombreUsuario = document.getElementById("usuarioNombre");
+const rolUsuario = document.getElementById("usuarioRol");
+const aviso = document.getElementById("textoAviso");
+
+if (saludo) {
+    saludo.textContent = "Hola, " + usuario.nombre;
 }
 
-function etiquetaRol(rol) {
-    if (rol === "ADMINISTRADOR") {
-        return "Administrador";
-    }
+if (nombreUsuario) {
+    nombreUsuario.textContent = usuario.nombre;
+}
 
-    if (rol === "VENDEDOR") {
-        return "Vendedor";
-    }
+if (rolUsuario) {
+    rolUsuario.textContent = "Administrador";
+}
 
-    return "Cliente";
+if (aviso) {
+    aviso.textContent = TEXTO_ADMIN;
+}
+
+    
+const botonSalir = document.getElementById("botonSalir");
+
+if (botonSalir) {
+
+    botonSalir.addEventListener("click", function () {
+
+        cerrarSesion();
+
+        window.location.href = "../login.html";
+
+    });
+
+}
 }

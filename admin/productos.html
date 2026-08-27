@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Productos | Gas El Volcán
+    </title>
+
+
+    
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+
+   
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+
+   
+    <link
+        rel="stylesheet"
+        href="../css/estilos.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="../css/admin.css"
+    >
+
+</head>
+
+
+<body class="cuerpo-admin">
+
+
+    <a
+        class="salto-contenido"
+        href="#contenidoAdmin"
+    >
+        Saltar al contenido
+    </a>
+
+
+    <div class="admin-layout">
+
+
+
+        <aside class="admin-menu">
+
+
+            <a
+                class="admin-marca"
+                href="../index.html"
+            >
+
+                <img
+                    src="../img/logo.svg"
+                    alt="Logo de Gas El Volcán"
+                >
+
+                <span>
+                    Gas El Volcán
+                </span>
+
+            </a>
+
+
+            <nav aria-label="Menú del administrador">
+
+                <ul
+                    class="admin-lista"
+                    id="menuAdmin"
+                ></ul>
+
+            </nav>
+
+
+            <div class="admin-usuario">
+
+                <p
+                    class="admin-usuario-nombre"
+                    id="usuarioNombre"
+                ></p>
+
+                <p
+                    class="admin-usuario-rol"
+                    id="usuarioRol"
+                ></p>
+
+
+                <button
+                    type="button"
+                    class="btn btn-salir"
+                    id="botonSalir"
+                >
+                    Cerrar sesión
+                </button>
+
+            </div>
+
+
+        </aside>
+
+
+
+       
+
+        <main
+            class="admin-contenido"
+            id="contenidoAdmin"
+        >
+
+
+            
+
+            <header class="admin-encabezado">
+
+                <div>
+
+                    <p class="admin-etiqueta">
+                        Administración
+                    </p>
+
+
+                    <h1 id="saludoAdmin">
+                        Gestión de productos
+                    </h1>
+
+
+                    <p>
+                        Administra el catálogo e inventario
+                        de Gas El Volcán.
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="btn btn-principal"
+                    id="btnNuevoProducto"
+                >
+                    + Crear producto
+                </button>
+
+
+            </header>
+
+
+
+           
+
+            <section class="admin-aviso">
+
+                <h2>
+                    Inventario
+                </h2>
+
+                <p id="textoAviso">
+                    Puedes crear, editar, controlar el stock
+                    y desactivar productos.
+                </p>
+
+            </section>
+
+
+
+           
+
+            <section class="row g-4 mt-1">
+
+
+                
+
+                <div class="col-12 col-md-4">
+
+                    <article class="admin-tarjeta h-100">
+
+                        <p>
+                            Productos
+                        </p>
+
+                        <h2 id="totalProductos">
+                            0
+                        </h2>
+
+                    </article>
+
+                </div>
+
+
+
+                
+
+                <div class="col-12 col-md-4">
+
+                    <article class="admin-tarjeta h-100">
+
+                        <p>
+                            Productos activos
+                        </p>
+
+                        <h2 id="productosActivos">
+                            0
+                        </h2>
+
+                    </article>
+
+                </div>
+
+
+
+                
+
+                <div class="col-12 col-md-4">
+
+                    <article class="admin-tarjeta h-100">
+
+                        <p>
+                            Stock crítico
+                        </p>
+
+                        <h2 id="productosStockCritico">
+                            0
+                        </h2>
+
+                    </article>
+
+                </div>
+
+
+            </section>
+
+
+
+            
+
+            <section class="mt-5">
+
+
+                <div class="mb-3">
+
+                    <p class="admin-etiqueta mb-1">
+                        Inventario
+                    </p>
+
+                    <h2>
+                        Lista de productos
+                    </h2>
+
+                </div>
+
+
+
+                <div class="table-responsive">
+
+
+                    <table class="table align-middle">
+
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    Código
+                                </th>
+
+                                <th>
+                                    Producto
+                                </th>
+
+                                <th>
+                                    Categoría
+                                </th>
+
+                                <th>
+                                    Unidad
+                                </th>
+
+                                <th>
+                                    Precio residencial
+                                </th>
+
+                                <th>
+                                    Precio comercial
+                                </th>
+
+                                <th>
+                                    Stock
+                                </th>
+
+                                <th>
+                                    Estado
+                                </th>
+
+                                <th>
+                                    Acciones
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="tablaProductos">
+
+                            
+
+                        </tbody>
+
+
+                    </table>
+
+
+                </div>
+
+
+            </section>
+
+
+        </main>
+
+
+    </div>
+
+
+
+   
+
+    <div
+        class="modal fade"
+        id="modalProducto"
+        tabindex="-1"
+        aria-labelledby="tituloModalProducto"
+        aria-hidden="true"
+    >
+
+
+        <div
+            class="modal-dialog
+                   modal-dialog-centered
+                   modal-lg"
+        >
+
+
+            <div class="modal-content">
+
+
+                
+
+                <div class="modal-header">
+
+
+                    <h2
+                        class="modal-title fs-5"
+                        id="tituloModalProducto"
+                    >
+                        Crear producto
+                    </h2>
+
+
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Cerrar"
+                    ></button>
+
+
+                </div>
+
+
+
+                
+
+                <form id="formProducto">
+
+
+                    <div class="modal-body">
+
+
+                       
+                        <input
+                            type="hidden"
+                            id="productoId"
+                        >
+
+
+
+                       
+
+                        <div class="mb-3">
+
+
+                            <label
+                                for="codigoProducto"
+                                class="form-label"
+                            >
+                                Código
+                            </label>
+
+
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="codigoProducto"
+                                maxlength="20"
+                                placeholder="Ej: CL001"
+                                required
+                            >
+
+
+                            <div
+                                class="text-danger mt-1"
+                                id="errorCodigoProducto"
+                            ></div>
+
+
+                        </div>
+
+
+
+                       
+
+                        <div class="mb-3">
+
+
+                            <label
+                                for="nombreProducto"
+                                class="form-label"
+                            >
+                                Nombre
+                            </label>
+
+
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="nombreProducto"
+                                maxlength="100"
+                                required
+                            >
+
+
+                            <div
+                                class="text-danger mt-1"
+                                id="errorNombreProducto"
+                            ></div>
+
+
+                        </div>
+
+
+
+                        
+
+                        <div class="mb-3">
+
+
+                            <label
+                                for="descripcionProducto"
+                                class="form-label"
+                            >
+                                Descripción
+                            </label>
+
+
+                            <textarea
+                                class="form-control"
+                                id="descripcionProducto"
+                                maxlength="500"
+                                rows="3"
+                            ></textarea>
+
+
+                        </div>
+
+
+
+                        <div class="row">
+
+
+
+                            <div class="col-12 col-md-6 mb-3">
+
+
+                                <label
+                                    for="categoriaProducto"
+                                    class="form-label"
+                                >
+                                    Categoría
+                                </label>
+
+
+                                <select
+                                    class="form-select"
+                                    id="categoriaProducto"
+                                    required
+                                >
+
+
+                                    <option value="">
+                                        Selecciona una categoría
+                                    </option>
+
+
+                                    <option value="Cilindros de Gas">
+                                        Cilindros de Gas
+                                    </option>
+
+
+                                    <option value="Reguladores">
+                                        Reguladores
+                                    </option>
+
+
+                                    <option value="Mangueras y Conexiones">
+                                        Mangueras y Conexiones
+                                    </option>
+
+
+                                    <option value="Accesorios">
+                                        Accesorios
+                                    </option>
+
+
+                                </select>
+
+
+                                <div
+                                    class="text-danger mt-1"
+                                    id="errorCategoriaProducto"
+                                ></div>
+
+
+                            </div>
+
+
+
+                            
+
+                            <div class="col-12 col-md-6 mb-3">
+
+
+                                <label
+                                    for="unidadProducto"
+                                    class="form-label"
+                                >
+                                    Unidad
+                                </label>
+
+
+                                <select
+                                    class="form-select"
+                                    id="unidadProducto"
+                                    required
+                                >
+
+
+                                    <option value="">
+                                        Selecciona una unidad
+                                    </option>
+
+
+                                    <option value="Unidad">
+                                        Unidad
+                                    </option>
+
+
+                                    <option value="Kit">
+                                        Kit
+                                    </option>
+
+
+                                </select>
+
+
+                                <div
+                                    class="text-danger mt-1"
+                                    id="errorUnidadProducto"
+                                ></div>
+
+
+                            </div>
+
+
+                        </div>
+
+
+
+                        
+
+                        <div class="row">
+
+
+                            
+
+                            <div class="col-12 col-md-6 mb-3">
+
+
+                                <label
+                                    for="precioResidencialProducto"
+                                    class="form-label"
+                                >
+                                    Precio residencial
+                                </label>
+
+
+                                <input
+                                    type="number"
+                                    class="form-control"
+                                    id="precioResidencialProducto"
+                                    min="0"
+                                    step="1"
+                                    required
+                                >
+
+
+                                <div
+                                    class="text-danger mt-1"
+                                    id="errorPrecioResidencial"
+                                ></div>
+
+
+                            </div>
+
+
+
+                            
+
+                            <div class="col-12 col-md-6 mb-3">
+
+
+                                <label
+                                    for="precioComercialProducto"
+                                    class="form-label"
+                                >
+                                    Precio comercial
+                                </label>
+
+
+                                <input
+                                    type="number"
+                                    class="form-control"
+                                    id="precioComercialProducto"
+                                    min="0"
+                                    step="1"
+                                    required
+                                >
+
+
+                                <div
+                                    class="text-danger mt-1"
+                                    id="errorPrecioComercial"
+                                ></div>
+
+
+                            </div>
+
+
+                        </div>
+
+
+
+                        
+
+                        <div class="row">
+
+
+                            
+
+                            <div class="col-12 col-md-6 mb-3">
+
+
+                                <label
+                                    for="stockProducto"
+                                    class="form-label"
+                                >
+                                    Stock actual
+                                </label>
+
+
+                                <input
+                                    type="number"
+                                    class="form-control"
+                                    id="stockProducto"
+                                    min="0"
+                                    step="1"
+                                    required
+                                >
+
+
+                                <div
+                                    class="text-danger mt-1"
+                                    id="errorStockProducto"
+                                ></div>
+
+
+                            </div>
+
+
+
+                            
+
+                            <div class="col-12 col-md-6 mb-3">
+
+
+                                <label
+                                    for="stockCriticoProducto"
+                                    class="form-label"
+                                >
+                                    Stock crítico
+                                </label>
+
+
+                                <input
+                                    type="number"
+                                    class="form-control"
+                                    id="stockCriticoProducto"
+                                    min="0"
+                                    step="1"
+                                >
+
+
+                                <small class="text-muted">
+                                    Opcional. Genera una alerta cuando
+                                    el stock llegue a este valor.
+                                </small>
+
+
+                            </div>
+
+
+                        </div>
+
+
+
+
+                        <div class="mb-3">
+
+
+                            <label
+                                for="imagenProducto"
+                                class="form-label"
+                            >
+                                Imagen
+                            </label>
+
+
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="imagenProducto"
+                                placeholder="../img/producto.png"
+                            >
+
+
+                            <small class="text-muted">
+                                Opcional.
+                            </small>
+
+
+                        </div>
+
+
+                    </div>
+
+
+
+
+                    <div class="modal-footer">
+
+
+                        <button
+                            type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal"
+                        >
+                            Cancelar
+                        </button>
+
+
+                        <button
+                            type="submit"
+                            class="btn btn-principal"
+                        >
+                            Guardar producto
+                        </button>
+
+
+                    </div>
+
+
+                </form>
+
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+
+    
+    <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+    ></script>
+
+
+    
+
+    <script src="../js/sesion.js"></script>
+
+    <script src="../js/admin.js"></script>
+
+    <script src="../js/productos-admin.js"></script>
+
+
+</body>
+
+</html>

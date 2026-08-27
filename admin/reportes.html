@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Reportes | Gas El Volcán</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <link rel="stylesheet" href="../css/estilos.css">
+    <link rel="stylesheet" href="../css/admin.css">
+</head>
+
+<body class="cuerpo-admin">
+
+    <a class="salto-contenido" href="#contenidoAdmin">
+        Saltar al contenido
+    </a>
+
+    <div class="admin-layout">
+
+        <!-- MENÚ LATERAL -->
+        <aside class="admin-menu">
+
+            <a class="admin-marca" href="../index.html">
+
+                <img
+                    src="../img/logo.svg"
+                    alt="Logo de Gas El Volcán"
+                >
+
+                <span>
+                    Gas El Volcán
+                </span>
+
+            </a>
+
+            <nav aria-label="Menú del panel">
+
+                <ul
+                    class="admin-lista"
+                    id="menuAdmin"
+                ></ul>
+
+            </nav>
+
+            <div class="admin-usuario">
+
+                <p
+                    class="admin-usuario-nombre"
+                    id="usuarioNombre"
+                ></p>
+
+                <p
+                    class="admin-usuario-rol"
+                    id="usuarioRol"
+                ></p>
+
+                <button
+                    type="button"
+                    class="btn btn-salir"
+                    id="botonSalir"
+                >
+                    Cerrar sesión
+                </button>
+
+            </div>
+
+        </aside>
+
+
+        <!-- CONTENIDO -->
+        <main
+            class="admin-contenido"
+            id="contenidoAdmin"
+        >
+
+            <header class="admin-encabezado">
+
+                <div>
+
+                    <p class="admin-etiqueta">
+                        Administración
+                    </p>
+
+                    <h1 id="saludoAdmin">
+                        Reportes del sistema
+                    </h1>
+
+                    <p>
+                        Revisa información general de usuarios,
+                        pedidos y actividad del sistema.
+                    </p>
+
+                </div>
+
+            </header>
+
+
+            <!-- AVISO -->
+            <section
+                class="admin-aviso"
+                aria-labelledby="tituloAviso"
+            >
+
+                <h2 id="tituloAviso">
+                    Información general
+                </h2>
+
+                <p id="textoAviso">
+                    Como administrador puedes revisar todos
+                    los reportes y datos disponibles.
+                </p>
+
+            </section>
+
+
+            <!-- TARJETAS RESUMEN -->
+            <section class="row g-4 mt-1">
+
+                <div class="col-12 col-md-6 col-xl-3">
+
+                    <article class="admin-tarjeta h-100">
+
+                        <p>
+                            Usuarios registrados
+                        </p>
+
+                        <h2 id="totalUsuarios">
+                            0
+                        </h2>
+
+                    </article>
+
+                </div>
+
+
+                <div class="col-12 col-md-6 col-xl-3">
+
+                    <article class="admin-tarjeta h-100">
+
+                        <p>
+                            Usuarios activos
+                        </p>
+
+                        <h2 id="usuariosActivos">
+                            0
+                        </h2>
+
+                    </article>
+
+                </div>
+
+
+                <div class="col-12 col-md-6 col-xl-3">
+
+                    <article class="admin-tarjeta h-100">
+
+                        <p>
+                            Pedidos registrados
+                        </p>
+
+                        <h2 id="totalPedidos">
+                            0
+                        </h2>
+
+                    </article>
+
+                </div>
+
+
+                <div class="col-12 col-md-6 col-xl-3">
+
+                    <article class="admin-tarjeta h-100">
+
+                        <p>
+                            Pedidos entregados
+                        </p>
+
+                        <h2 id="pedidosEntregados">
+                            0
+                        </h2>
+
+                    </article>
+
+                </div>
+
+            </section>
+
+
+            <!-- USUARIOS POR ROL -->
+            <section class="mt-5">
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+
+                    <div>
+
+                        <p class="admin-etiqueta mb-1">
+                            Usuarios
+                        </p>
+
+                        <h2>
+                            Usuarios por rol
+                        </h2>
+
+                    </div>
+
+                </div>
+
+
+                <div class="table-responsive">
+
+                    <table class="table align-middle">
+
+                        <thead>
+
+                            <tr>
+                                <th>Rol</th>
+                                <th>Cantidad</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            <tr>
+                                <td>
+                                    Administradores
+                                </td>
+
+                                <td id="cantidadAdministradores">
+                                    0
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    Repartidores
+                                </td>
+
+                                <td id="cantidadRepartidores">
+                                    0
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    Clientes
+                                </td>
+
+                                <td id="cantidadClientes">
+                                    0
+                                </td>
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </section>
+
+
+            <!-- ESTADO PEDIDOS -->
+            <section class="mt-5">
+
+                <div class="mb-3">
+
+                    <p class="admin-etiqueta mb-1">
+                        Pedidos
+                    </p>
+
+                    <h2>
+                        Estado de los pedidos
+                    </h2>
+
+                </div>
+
+
+                <div class="table-responsive">
+
+                    <table class="table align-middle">
+
+                        <thead>
+
+                            <tr>
+                                <th>Estado</th>
+                                <th>Cantidad</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            <tr>
+                                <td>
+                                    Pendientes
+                                </td>
+
+                                <td id="pedidosPendientes">
+                                    0
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    En camino
+                                </td>
+
+                                <td id="pedidosEnCamino">
+                                    0
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    Entregados
+                                </td>
+
+                                <td id="pedidosEntregadosTabla">
+                                    0
+                                </td>
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+
+    <script src="../js/sesion.js"></script>
+    <script src="../js/admin.js"></script>
+    <script src="../js/reportes.js"></script>
+
+</body>
+
+</html>

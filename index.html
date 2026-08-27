@@ -9,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/estilos.css">
+    <link rel="stylesheet" href="css/efectos.css">
 </head>
 <body>
     <header>
@@ -48,14 +49,9 @@
                         <li class="nav-item">
                             <a class="nav-link" href="contacto.html">Contacto</a>
                         </li>
+                        <li class="nav-item nav-cuenta" id="navCuenta"></li>
                         <li class="nav-item">
-                            <a class="nav-link" href="login.html">Iniciar sesión</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="registro.html">Registrar usuario</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="btn btn-carrito ms-lg-3" href="carrito.html">
+                            <a class="btn btn-carrito ms-lg-2" href="carrito.html">
                                 Carrito (<span class="carrito-total">0</span>)
                             </a>
                         </li>
@@ -67,6 +63,22 @@
 
     <main>
         <section class="hero" aria-labelledby="titulo-hero">
+            <div class="hero-fondo" aria-hidden="true">
+                <span class="luz luz-verde" data-profundidad="26"></span>
+                <span class="luz luz-celeste" data-profundidad="34"></span>
+                <span class="forma-arco"></span>
+                <svg class="silueta silueta-uno" data-profundidad="18" viewBox="0 0 80 150" focusable="false">
+                    <path d="M18 140 L18 50 Q18 28 40 28 Q62 28 62 50 L62 140 Q62 146 56 146 L24 146 Q18 146 18 140 Z" fill="currentColor"/>
+                    <rect x="33" y="6" width="14" height="24" rx="4" fill="currentColor"/>
+                    <path d="M24 18 Q40 2 56 18" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
+                </svg>
+                <svg class="silueta silueta-dos" data-profundidad="11" viewBox="0 0 80 150" focusable="false">
+                    <path d="M18 140 L18 50 Q18 28 40 28 Q62 28 62 50 L62 140 Q62 146 56 146 L24 146 Q18 146 18 140 Z" fill="currentColor"/>
+                    <rect x="33" y="6" width="14" height="24" rx="4" fill="currentColor"/>
+                    <path d="M24 18 Q40 2 56 18" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round"/>
+                </svg>
+            </div>
+
             <div class="container hero-contenido">
                 <div>
                     <p class="hero-etiqueta">Chillán · Región de Ñuble</p>
@@ -87,7 +99,12 @@
                 </div>
 
                 <div class="hero-imagen">
-                    <img src="img/hero.jpg" alt="Camión de reparto cargado con cilindros de gas licuado">
+                    <span class="hero-piso" aria-hidden="true"></span>
+                    <img src="img/hero-camion.jpg" alt="Camión de reparto cargado con cilindros de gas licuado">
+                    <div class="hero-insignia" data-profundidad="-10">
+                        <p class="hero-insignia-numero">1–3 h</p>
+                        <p class="hero-insignia-texto">Entrega en Chillán centro</p>
+                    </div>
                 </div>
             </div>
         </section>
@@ -99,7 +116,7 @@
         </div>
 
         <section class="productos-destacados" aria-labelledby="titulo-destacados">
-            <div class="container">
+            <div class="container" data-revelar>
                 <div class="titulo-seccion">
                     <p>Nuestro catálogo</p>
                     <h2 id="titulo-destacados">Productos destacados</h2>
@@ -228,7 +245,7 @@
         </section>
 
         <section class="beneficios" aria-labelledby="titulo-beneficios">
-            <div class="container">
+            <div class="container" data-revelar>
                 <h2 id="titulo-beneficios" class="visually-hidden">Por qué comprar con nosotros</h2>
 
                 <ul class="row g-4 text-center list-unstyled">
@@ -286,5 +303,7 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/sesion.js"></script>
+    <script src="js/efectos.js"></script>
 </body>
 </html>

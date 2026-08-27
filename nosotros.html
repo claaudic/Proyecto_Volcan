@@ -52,50 +52,71 @@
     </header>
 
     <main>
-        <section class="pagina-intro" aria-labelledby="titulo-nosotros">
-            <div class="container intro-contenido">
+        <section class="pagina-encabezado" aria-labelledby="titulo-nosotros">
+            <div class="encabezado-fondo" aria-hidden="true">
+                <span class="luz luz-encabezado-verde"></span>
+                <span class="luz luz-encabezado-celeste"></span>
+                <span class="encabezado-arco"></span>
+            </div>
+
+            <div class="container">
+                <nav class="miga" aria-label="Ruta">
+                    <a href="index.html">Inicio</a>
+                    <span aria-hidden="true">/</span>
+                    <span aria-current="page">Nosotros</span>
+                </nav>
+                <h1 id="titulo-nosotros">Somos Gas El Volcán</h1>
+                <p class="pagina-bajada">Una empresa familiar de la Región de Ñuble, dedicada al gas desde 1998.</p>
+            </div>
+
+            <svg class="encabezado-monte" viewBox="0 0 1440 60" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+                <path d="M0 60 L0 38 L110 22 L214 40 L318 16 L430 36 L536 20 L648 38 L764 18 L876 36 L992 22 L1104 40 L1216 20 L1330 34 L1440 22 L1440 60 Z"/>
+            </svg>
+        </section>
+
+        <section class="historia" aria-labelledby="titulo-historia">
+            <div class="container historia-contenido" data-revelar>
                 <div>
-                    <p class="hero-etiqueta">Desde 1998 en Chillán</p>
-                    <h1 id="titulo-nosotros">Repartimos gas en Chillán desde 1998</h1>
+                    <span class="linea-marca" aria-hidden="true"></span>
+                    <h2 id="titulo-historia">Un servicio cercano en Chillán</h2>
                     <p class="intro-texto">
-                        Distribuidora de Gas El Volcán nació en Chillán, Región de Ñuble,
-                        y desde entonces lleva cilindros de gas licuado hasta la puerta de
-                        hogares, locales comerciales y talleres de la zona.
+                        Gas El Volcán nace en 1998 en la ciudad de Chillán, Región de Ñuble,
+                        con el objetivo de acercar la distribución de gas licuado a los hogares
+                        y negocios de la zona.
                     </p>
                     <p class="intro-texto">
-                        Hoy trabajamos con dos camiones y tres repartidores, y atendemos
-                        entre 80 y 120 pedidos cada día. Esta tienda en línea nace para que
-                        pedir gas sea tan simple como elegir el cilindro y esperar en casa.
+                        Somos una empresa familiar. Detrás de cada pedido hay personas que conocen
+                        el territorio y priorizan el trato directo por sobre los procesos impersonales.
                     </p>
+                    <p class="intro-texto">
+                        Trabajamos con cilindros de distintos formatos y con los accesorios necesarios
+                        para instalaciones domésticas y comerciales: reguladores, mangueras, abrazaderas
+                        y equipos de seguridad.
+                    </p>
+
+                    <ul class="datos-par list-unstyled">
+                        <li class="cifra">
+                            <p class="cifra-numero">1998</p>
+                            <p class="cifra-texto">Año de fundación</p>
+                        </li>
+                        <li class="cifra">
+                            <p class="cifra-numero">Ñuble</p>
+                            <p class="cifra-texto">Zona de cobertura</p>
+                        </li>
+                    </ul>
                 </div>
 
-                <img class="intro-imagen" src="img/hero-camion.jpg" alt="Camión de reparto de Gas El Volcán cargado con cilindros">
+                <div class="historia-imagen">
+                    <span class="hero-piso" aria-hidden="true"></span>
+                    <img src="img/familia.jpg" alt="Familia frente a su casa en Chillán">
+                    <div class="hero-insignia">
+                        <p class="hero-insignia-numero">Empresa familiar</p>
+                        <p class="hero-insignia-texto">En Chillán desde 1998</p>
+                    </div>
+                </div>
             </div>
         </section>
 
-        <section class="cifras" aria-labelledby="titulo-cifras">
-            <div class="container" data-revelar>
-                <h2 id="titulo-cifras" class="visually-hidden">La empresa en números</h2>
-                <ul class="cifras-lista list-unstyled">
-                    <li class="cifra">
-                        <p class="cifra-numero">1998</p>
-                        <p class="cifra-texto">Año en que partimos</p>
-                    </li>
-                    <li class="cifra">
-                        <p class="cifra-numero">5</p>
-                        <p class="cifra-texto">Zonas de cobertura</p>
-                    </li>
-                    <li class="cifra">
-                        <p class="cifra-numero">14</p>
-                        <p class="cifra-texto">Productos en catálogo</p>
-                    </li>
-                    <li class="cifra">
-                        <p class="cifra-numero">80–120</p>
-                        <p class="cifra-texto">Pedidos cada día</p>
-                    </li>
-                </ul>
-            </div>
-        </section>
 
         <div class="relieve" aria-hidden="true">
             <svg viewBox="0 0 1440 80" preserveAspectRatio="none" focusable="false">
@@ -103,12 +124,85 @@
             </svg>
         </div>
 
+        <section class="forma-trabajar" aria-labelledby="titulo-forma">
+            <div class="container" data-revelar>
+                <span class="linea-marca" aria-hidden="true"></span>
+                <h2 id="titulo-forma">Nuestra forma de trabajar</h2>
+
+                <ul class="row g-4 list-unstyled tarjetas-valor">
+                    <li class="col-12 col-md-4">
+                        <article class="valor">
+                            <span class="valor-icono valor-icono-verde">
+                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                    <path d="M3 12l4-4 3 3 4-4 3 3 4-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M3 18h18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                </svg>
+                            </span>
+                            <h3>Trato directo</h3>
+                            <p>Coordinas tu pedido con la misma distribuidora. Sin intermediarios.</p>
+                        </article>
+                    </li>
+
+                    <li class="col-12 col-md-4">
+                        <article class="valor">
+                            <span class="valor-icono valor-icono-celeste">
+                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                    <path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                                    <path d="M9 12l2 2 4-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </span>
+                            <h3>Producto sellado</h3>
+                            <p>Los cilindros llegan sellados y con revisión previa a la entrega.</p>
+                        </article>
+                    </li>
+
+                    <li class="col-12 col-md-4">
+                        <article class="valor">
+                            <span class="valor-icono valor-icono-tinta">
+                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                    <path d="M12 21s7-5.5 7-11a7 7 0 10-14 0c0 5.5 7 11 7 11z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                                    <circle cx="12" cy="10" r="2.5" fill="none" stroke="currentColor" stroke-width="2"/>
+                                </svg>
+                            </span>
+                            <h3>Cobertura local</h3>
+                            <p>Trabajamos principalmente en Chillán y comunas cercanas de Ñuble.</p>
+                        </article>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
         <section class="zonas" aria-labelledby="titulo-zonas">
             <div class="container" data-revelar>
                 <div class="titulo-seccion">
                     <p>Cobertura</p>
                     <h2 id="titulo-zonas">Dónde llegamos</h2>
                 </div>
+
+                <form class="cobertura" id="formCobertura" novalidate>
+                    <label for="comuna">¿Llegamos a tu comuna?</label>
+                    <div class="cobertura-fila">
+                        <input
+                            type="text"
+                            id="comuna"
+                            name="comuna"
+                            placeholder="Escribe tu comuna"
+                            autocomplete="address-level2"
+                            list="comunasCubiertas"
+                        >
+                        <datalist id="comunasCubiertas">
+                            <option value="Chillán"></option>
+                            <option value="Chillán Viejo"></option>
+                            <option value="El Carmen"></option>
+                            <option value="Pinto"></option>
+                            <option value="San Ignacio"></option>
+                            <option value="Bulnes"></option>
+                            <option value="Quillón"></option>
+                        </datalist>
+                        <button type="submit" class="btn btn-principal">Revisar</button>
+                    </div>
+                    <div class="resultado-cobertura d-none" id="resultadoCobertura" role="status" aria-live="polite"></div>
+                </form>
 
                 <div class="tabla-scroll">
                     <table class="tabla-zonas">
@@ -162,59 +256,79 @@
                 </div>
             </div>
         </section>
-
-        <section class="equipo" aria-labelledby="titulo-equipo">
-            <div class="container" data-revelar>
-                <div class="titulo-seccion">
-                    <p>Equipo</p>
-                    <h2 id="titulo-equipo">El equipo detrás de la tienda</h2>
-                </div>
-
-                <ul class="equipo-lista list-unstyled">
-                    <li class="equipo-persona">
-                        <span class="equipo-inicial" aria-hidden="true">CC</span>
-                        <div>
-                            <h3>Claudia Cardoza</h3>
-                            <p>Desarrollo y diseño del sitio</p>
-                        </div>
-                    </li>
-                    <li class="equipo-persona">
-                        <span class="equipo-inicial" aria-hidden="true">NM</span>
-                        <div>
-                            <h3>Nicolás Morales</h3>
-                            <p>Desarrollo y diseño del sitio</p>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-        </section>
-    </main>
-
     <footer>
-        <div class="container footer-contenido">
-            <div>
-                <h2>Gas El Volcán</h2>
-                <p>Distribución de gas licuado a domicilio.</p>
+        <div class="container pie-grid">
+            <div class="pie-marca">
+                <div class="pie-logo">
+                    <img src="img/logo.svg" alt="">
+                    <span>Gas El Volcán</span>
+                </div>
+                <p>Distribuidora familiar de gas licuado en Chillán, Región de Ñuble. En operación desde 1998.</p>
             </div>
-            <div>
-                <h2>Ubicación</h2>
-                <p>Chillán, Región de Ñuble</p>
-            </div>
+
             <div>
                 <h2>Navegación</h2>
                 <ul class="footer-enlaces">
+                    <li><a href="index.html">Inicio</a></li>
                     <li><a href="productos.html">Productos</a></li>
                     <li><a href="nosotros.html">Nosotros</a></li>
                     <li><a href="blogs.html">Blogs</a></li>
                     <li><a href="contacto.html">Contacto</a></li>
                 </ul>
             </div>
+
+            <div>
+                <h2>Productos</h2>
+                <ul class="footer-enlaces">
+                    <li><a href="productos.html">Cilindros de Gas</a></li>
+                    <li><a href="productos.html">Reguladores</a></li>
+                    <li><a href="productos.html">Mangueras y Conexiones</a></li>
+                    <li><a href="productos.html">Accesorios</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h2>Contacto</h2>
+                <ul class="pie-contacto">
+                    <li>
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M12 21s7-5.5 7-11a7 7 0 10-14 0c0 5.5 7 11 7 11z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                            <circle cx="12" cy="10" r="2.5" fill="none" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                        <span>Chillán, Región de Ñuble</span>
+                    </li>
+                    <li>
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M5 4h4l2 5-2.5 1.5a12 12 0 005 5L15 13l5 2v4a1 1 0 01-1 1A16 16 0 014 5a1 1 0 011-1z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                        </svg>
+                        <span>Teléfono por definir</span>
+                    </li>
+                    <li>
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>
+                            <path d="M3 7l9 6 9-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                        </svg>
+                        <span>Correo por definir</span>
+                    </li>
+                    <li>
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/>
+                            <path d="M12 7v5l3.5 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        <span>Lunes a sábado, 08:00 a 20:00</span>
+                    </li>
+                </ul>
+            </div>
         </div>
-        <p class="copyright">© 2026 Gas El Volcán</p>
+
+        <div class="container">
+            <p class="copyright">© 2026 Gas El Volcán. Todos los derechos reservados.</p>
+        </div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/sesion.js"></script>
     <script src="js/efectos.js"></script>
+    <script src="js/zonas.js"></script>
 </body>
 </html>

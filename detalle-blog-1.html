@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar sesión | Gas El Volcán</title>
+    <title>Cómo cambiar tu cilindro de forma segura | Gas El Volcán</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/estilos.css">
     <link rel="stylesheet" href="css/efectos.css">
-    <link rel="stylesheet" href="css/login.css">
 </head>
 <body>
     <header>
@@ -38,7 +37,7 @@
                         <li class="nav-item"><a class="nav-link" href="index.html">Inicio</a></li>
                         <li class="nav-item"><a class="nav-link" href="productos.html">Productos</a></li>
                         <li class="nav-item"><a class="nav-link" href="nosotros.html">Nosotros</a></li>
-                        <li class="nav-item"><a class="nav-link" href="blogs.html">Blogs</a></li>
+                        <li class="nav-item"><a class="nav-link active" aria-current="page" href="blogs.html">Blogs</a></li>
                         <li class="nav-item"><a class="nav-link" href="contacto.html">Contacto</a></li>
                         <li class="nav-item nav-cuenta" id="navCuenta"></li>
                         <li class="nav-item">
@@ -52,94 +51,83 @@
         </nav>
     </header>
 
-    <main class="seccion-login">
-        <div class="container">
-            <div class="login-grid">
+    <main>
+        <section class="pagina-encabezado" aria-labelledby="titulo-articulo">
+            <div class="encabezado-fondo" aria-hidden="true">
+                <span class="luz luz-encabezado-verde"></span>
+                <span class="luz luz-encabezado-celeste"></span>
+                <span class="encabezado-arco"></span>
+            </div>
 
-                <section class="login-presentacion">
-                    <p class="login-etiqueta">Acceso al sistema</p>
-                    <h1>Ingresa a tu cuenta</h1>
-                    <p class="login-descripcion">
-                        Accede a Gas El Volcán para revisar tus pedidos,
-                        gestionar entregas o administrar la tienda.
+            <div class="container">
+                <nav class="miga" aria-label="Ruta">
+                    <a href="index.html">Inicio</a>
+                    <span aria-hidden="true">/</span>
+                    <a href="blogs.html">Blogs</a>
+                    <span aria-hidden="true">/</span>
+                    <span aria-current="page">Seguridad</span>
+                </nav>
+                <p class="hero-etiqueta">Seguridad</p>
+                <h1 id="titulo-articulo">Cómo cambiar tu cilindro de forma segura</h1>
+                <p class="pagina-bajada">Seis pasos para reemplazar el cilindro sin riesgos.</p>
+            </div>
+
+            <svg class="encabezado-monte" viewBox="0 0 1440 60" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+                <path d="M0 60 L0 38 L110 22 L214 40 L318 16 L430 36 L536 20 L648 38 L764 18 L876 36 L992 22 L1104 40 L1216 20 L1330 34 L1440 22 L1440 60 Z"/>
+            </svg>
+        </section>
+
+        <section class="articulo">
+            <div class="container">
+                <figure class="articulo-portada">
+                    <img src="img/cl002.jpg" alt="Cilindro de gas licuado de 11 kilogramos">
+                </figure>
+
+                <div class="articulo-cuerpo">
+                    <p class="articulo-entrada">
+                        Cambiar un cilindro es simple, pero hay seis pasos que conviene no saltarse.
+                        La mayoría de las fugas domésticas no vienen del cilindro, sino de una conexión
+                        mal apretada o de una manguera vencida.
                     </p>
 
-                    <div class="login-separador"></div>
+                    <h2>Antes de empezar</h2>
+                    <p>
+                        Apaga todos los artefactos conectados y cualquier llama cercana. No fumes ni
+                        enciendas luces mientras haces el cambio. Trabaja en un lugar ventilado, con
+                        la puerta o la ventana abierta.
+                    </p>
 
-                    <ul class="login-puntos">
-                        <li>
-                            <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
-                                <path d="M4 10.5 L8 14.5 L16 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                            <span>El sistema identifica automáticamente el tipo de cuenta.</span>
-                        </li>
-                        <li>
-                            <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
-                                <path d="M4 10.5 L8 14.5 L16 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                            <span>Clientes, vendedores y administradores ingresan a vistas diferentes.</span>
-                        </li>
-                    </ul>
-                </section>
+                    <h2>Los seis pasos</h2>
+                    <ol class="articulo-pasos">
+                        <li><strong>Cierra la válvula</strong> del cilindro que vas a retirar, girándola hasta el tope.</li>
+                        <li><strong>Suelta el regulador</strong> con cuidado. No fuerces la rosca ni uses herramientas si no hace falta.</li>
+                        <li><strong>Revisa la manguera.</strong> Si está dura, agrietada o lleva más de dos años puesta, cámbiala. Una manguera de 1,5 metros cuesta bastante menos que un accidente.</li>
+                        <li><strong>Conecta el regulador</strong> al cilindro nuevo y ajusta las abrazaderas metálicas en los dos extremos de la manguera.</li>
+                        <li><strong>Comprueba con agua jabonosa.</strong> Pásala por las uniones con la válvula abierta: si aparecen burbujas, hay fuga. Cierra y vuelve a ajustar.</li>
+                        <li><strong>Enciende un artefacto</strong> y confirma que la llama sea azul y estable. Una llama amarilla o irregular indica un problema en la mezcla.</li>
+                    </ol>
 
-                <section class="login-tarjeta">
-                    <div class="login-tarjeta-encabezado">
-                        <img class="login-icono" src="img/logo.svg" alt="">
-                        <h2>Bienvenido</h2>
-                        <p>Escribe tus datos para continuar</p>
+                    <div class="articulo-nota">
+                        <p>
+                            <strong>Si hueles gas y no encuentras el origen:</strong> cierra la válvula,
+                            ventila, no acciones interruptores eléctricos y sal del lugar antes de llamar.
+                        </p>
                     </div>
 
-                    <form id="formLogin" novalidate>
-                        <div class="login-campo">
-                            <label for="correo">Correo electrónico</label>
-                            <input
-                                type="email"
-                                id="correo"
-                                name="correo"
-                                placeholder="nombre@gasvolcan.cl"
-                                autocomplete="email"
-                                maxlength="100"
-                                required
-                            >
-                            <small id="errorCorreo" class="mensaje-error-campo" role="status"></small>
-                            <button type="button" id="sugerenciaCorreo" class="sugerencia d-none"></button>
-                        </div>
-
-                        <div class="login-campo">
-                            <label for="contrasena">Contraseña</label>
-                            <div class="contenedor-contrasena">
-                                <input
-                                    type="password"
-                                    id="contrasena"
-                                    name="contrasena"
-                                    placeholder="Ingresa tu contraseña"
-                                    autocomplete="current-password"
-                                    maxlength="10"
-                                    required
-                                >
-                                <button type="button" id="mostrarContrasena" class="mostrar-contrasena">
-                                    Mostrar
-                                </button>
-                            </div>
-                            <small id="ayudaContrasena" class="mensaje-ayuda">Entre 4 y 10 caracteres</small>
-                            <small id="errorContrasena" class="mensaje-error-campo" role="status"></small>
-                        </div>
-
-                        <div id="mensajeLogin" class="mensaje-login d-none" role="alert"></div>
-
-                        <button type="submit" class="btn btn-principal boton-login">Iniciar sesión</button>
-                    </form>
-
-                    <p class="login-registro">
-                        ¿Eres cliente y todavía no tienes una cuenta?
-                        <a href="registro.html">Crear cuenta</a>
+                    <h2>Qué necesitas tener a mano</h2>
+                    <p>
+                        Un regulador doméstico estándar sirve para los cilindros de 5, 11 y 15 kilos.
+                        Para cocinas industriales o equipos de mayor consumo se usa un regulador de alta
+                        presión. Si vas a instalar un cilindro por primera vez, el kit de conexión trae
+                        el regulador, la manguera de 1,5 metros y las abrazaderas en un solo paquete.
                     </p>
-                </section>
+                </div>
 
+                <nav class="articulo-navegacion" aria-label="Otros artículos">
+                    <a class="articulo-salto" href="detalle-blog-2.html"><span>Siguiente</span><strong>Qué cilindro necesitas según tu consumo</strong></a>
+                </nav>
             </div>
-        </div>
-    </main>
-
+        </section>
     <footer>
         <div class="container pie-grid">
             <div class="pie-marca">
@@ -213,6 +201,5 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/sesion.js"></script>
     <script src="js/efectos.js"></script>
-    <script src="js/login.js"></script>
 </body>
 </html>

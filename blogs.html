@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar sesión | Gas El Volcán</title>
+    <title>Blogs | Gas El Volcán</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/estilos.css">
     <link rel="stylesheet" href="css/efectos.css">
-    <link rel="stylesheet" href="css/login.css">
 </head>
 <body>
     <header>
@@ -38,7 +37,7 @@
                         <li class="nav-item"><a class="nav-link" href="index.html">Inicio</a></li>
                         <li class="nav-item"><a class="nav-link" href="productos.html">Productos</a></li>
                         <li class="nav-item"><a class="nav-link" href="nosotros.html">Nosotros</a></li>
-                        <li class="nav-item"><a class="nav-link" href="blogs.html">Blogs</a></li>
+                        <li class="nav-item"><a class="nav-link active" aria-current="page" href="blogs.html">Blogs</a></li>
                         <li class="nav-item"><a class="nav-link" href="contacto.html">Contacto</a></li>
                         <li class="nav-item nav-cuenta" id="navCuenta"></li>
                         <li class="nav-item">
@@ -52,94 +51,79 @@
         </nav>
     </header>
 
-    <main class="seccion-login">
-        <div class="container">
-            <div class="login-grid">
-
-                <section class="login-presentacion">
-                    <p class="login-etiqueta">Acceso al sistema</p>
-                    <h1>Ingresa a tu cuenta</h1>
-                    <p class="login-descripcion">
-                        Accede a Gas El Volcán para revisar tus pedidos,
-                        gestionar entregas o administrar la tienda.
-                    </p>
-
-                    <div class="login-separador"></div>
-
-                    <ul class="login-puntos">
-                        <li>
-                            <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
-                                <path d="M4 10.5 L8 14.5 L16 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                            <span>El sistema identifica automáticamente el tipo de cuenta.</span>
-                        </li>
-                        <li>
-                            <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
-                                <path d="M4 10.5 L8 14.5 L16 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                            <span>Clientes, vendedores y administradores ingresan a vistas diferentes.</span>
-                        </li>
-                    </ul>
-                </section>
-
-                <section class="login-tarjeta">
-                    <div class="login-tarjeta-encabezado">
-                        <img class="login-icono" src="img/logo.svg" alt="">
-                        <h2>Bienvenido</h2>
-                        <p>Escribe tus datos para continuar</p>
-                    </div>
-
-                    <form id="formLogin" novalidate>
-                        <div class="login-campo">
-                            <label for="correo">Correo electrónico</label>
-                            <input
-                                type="email"
-                                id="correo"
-                                name="correo"
-                                placeholder="nombre@gasvolcan.cl"
-                                autocomplete="email"
-                                maxlength="100"
-                                required
-                            >
-                            <small id="errorCorreo" class="mensaje-error-campo" role="status"></small>
-                            <button type="button" id="sugerenciaCorreo" class="sugerencia d-none"></button>
-                        </div>
-
-                        <div class="login-campo">
-                            <label for="contrasena">Contraseña</label>
-                            <div class="contenedor-contrasena">
-                                <input
-                                    type="password"
-                                    id="contrasena"
-                                    name="contrasena"
-                                    placeholder="Ingresa tu contraseña"
-                                    autocomplete="current-password"
-                                    maxlength="10"
-                                    required
-                                >
-                                <button type="button" id="mostrarContrasena" class="mostrar-contrasena">
-                                    Mostrar
-                                </button>
-                            </div>
-                            <small id="ayudaContrasena" class="mensaje-ayuda">Entre 4 y 10 caracteres</small>
-                            <small id="errorContrasena" class="mensaje-error-campo" role="status"></small>
-                        </div>
-
-                        <div id="mensajeLogin" class="mensaje-login d-none" role="alert"></div>
-
-                        <button type="submit" class="btn btn-principal boton-login">Iniciar sesión</button>
-                    </form>
-
-                    <p class="login-registro">
-                        ¿Eres cliente y todavía no tienes una cuenta?
-                        <a href="registro.html">Crear cuenta</a>
-                    </p>
-                </section>
-
+    <main>
+        <section class="pagina-encabezado" aria-labelledby="titulo-blogs">
+            <div class="encabezado-fondo" aria-hidden="true">
+                <span class="luz luz-encabezado-verde"></span>
+                <span class="luz luz-encabezado-celeste"></span>
+                <span class="encabezado-arco"></span>
             </div>
-        </div>
-    </main>
 
+            <div class="container">
+                <nav class="miga" aria-label="Ruta">
+                    <a href="index.html">Inicio</a>
+                    <span aria-hidden="true">/</span>
+                    <span aria-current="page">Blogs</span>
+                </nav>
+                <h1 id="titulo-blogs">Guías del gas</h1>
+                <p class="pagina-bajada">Cómo usar, elegir y cuidar tu cilindro. Contenido práctico para el día a día.</p>
+            </div>
+
+            <svg class="encabezado-monte" viewBox="0 0 1440 60" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+                <path d="M0 60 L0 38 L110 22 L214 40 L318 16 L430 36 L536 20 L648 38 L764 18 L876 36 L992 22 L1104 40 L1216 20 L1330 34 L1440 22 L1440 60 Z"/>
+            </svg>
+        </section>
+
+        <section class="listado-blogs" aria-labelledby="titulo-listado">
+            <div class="container" data-revelar>
+                <h2 id="titulo-listado" class="visually-hidden">Artículos publicados</h2>
+
+                <ul class="row g-4 list-unstyled">
+                    <li class="col-12 col-md-6 col-lg-4">
+                        <article class="tarjeta-blog">
+                            <a class="blog-imagen" href="detalle-blog-1.html">
+                                <img src="img/cl002.jpg" alt="Cilindro de gas licuado de 11 kilogramos" loading="lazy">
+                            </a>
+                            <div class="blog-cuerpo">
+                                <p class="blog-etiqueta">Seguridad</p>
+                                <h3><a href="detalle-blog-1.html">Cómo cambiar tu cilindro de forma segura</a></h3>
+                                <p class="blog-resumen">Seis pasos para reemplazar el cilindro sin riesgos, revisando el regulador, la manguera y las abrazaderas.</p>
+                                <a class="blog-enlace" href="detalle-blog-1.html">Leer el artículo</a>
+                            </div>
+                        </article>
+                    </li>
+
+                    <li class="col-12 col-md-6 col-lg-4">
+                        <article class="tarjeta-blog">
+                            <a class="blog-imagen" href="detalle-blog-2.html">
+                                <img src="img/cl004.jpg" alt="Cilindro de gas licuado industrial de 45 kilogramos" loading="lazy">
+                            </a>
+                            <div class="blog-cuerpo">
+                                <p class="blog-etiqueta">Guía de compra</p>
+                                <h3><a href="detalle-blog-2.html">Qué cilindro necesitas según tu consumo</a></h3>
+                                <p class="blog-resumen">De 5 a 45 kilos: para qué sirve cada formato y cuál conviene según el tamaño de tu hogar o negocio.</p>
+                                <a class="blog-enlace" href="detalle-blog-2.html">Leer el artículo</a>
+                            </div>
+                        </article>
+                    </li>
+
+                    <li class="col-12 col-md-6 col-lg-4">
+                        <article class="tarjeta-blog">
+                            <a class="blog-imagen" href="detalle-blog-3.html">
+                                <img src="img/ac003.jpg" alt="Detector de gas a batería con alarma sonora y visual" loading="lazy">
+                            </a>
+                            <div class="blog-cuerpo">
+                                <p class="blog-etiqueta">Prevención</p>
+                                <h3><a href="detalle-blog-3.html">Cuándo conviene tener un detector de gas</a></h3>
+                                <p class="blog-resumen">Qué hace un sensor electroquímico, dónde instalarlo y en qué casos deja de ser opcional.</p>
+                                <a class="blog-enlace" href="detalle-blog-3.html">Leer el artículo</a>
+                            </div>
+                        </article>
+                    </li>
+
+                </ul>
+            </div>
+        </section>
     <footer>
         <div class="container pie-grid">
             <div class="pie-marca">
@@ -213,6 +197,5 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/sesion.js"></script>
     <script src="js/efectos.js"></script>
-    <script src="js/login.js"></script>
 </body>
 </html>

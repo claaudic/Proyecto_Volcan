@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Órdenes | Gas El Volcán</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <link rel="stylesheet" href="../css/estilos.css">
+    <link rel="stylesheet" href="../css/admin.css">
+</head>
+
+<body class="cuerpo-admin">
+
+    <a class="salto-contenido" href="#contenidoAdmin">
+        Saltar al contenido
+    </a>
+
+    <div class="admin-layout">
+
+        <!-- MENÚ -->
+        <aside class="admin-menu">
+
+            <a class="admin-marca" href="../index.html">
+
+                <img
+                    src="../img/logo.svg"
+                    alt="Logo de Gas El Volcán"
+                >
+
+                <span>
+                    Gas El Volcán
+                </span>
+
+            </a>
+
+            <nav aria-label="Menú del panel">
+
+                <ul
+                    class="admin-lista"
+                    id="menuAdmin"
+                ></ul>
+
+            </nav>
+
+            <div class="admin-usuario">
+
+                <p
+                    class="admin-usuario-nombre"
+                    id="usuarioNombre"
+                ></p>
+
+                <p
+                    class="admin-usuario-rol"
+                    id="usuarioRol"
+                ></p>
+
+                <button
+                    type="button"
+                    class="btn btn-salir"
+                    id="botonSalir"
+                >
+                    Cerrar sesión
+                </button>
+
+            </div>
+
+        </aside>
+
+
+        <!-- CONTENIDO -->
+        <main
+            class="admin-contenido"
+            id="contenidoAdmin"
+        >
+
+            <header class="admin-encabezado">
+
+                <div>
+
+                    <p class="admin-etiqueta">
+                        Administración
+                    </p>
+
+                    <h1 id="saludoAdmin">
+                        Gestión de órdenes
+                    </h1>
+
+                    <p>
+                        Revisa todos los pedidos registrados
+                        en el sistema.
+                    </p>
+
+                </div>
+
+            </header>
+
+
+            <!-- INFORMACIÓN -->
+            <section class="admin-aviso">
+
+                <h2>
+                    Órdenes del sistema
+                </h2>
+
+                <p id="textoAviso">
+                    Como administrador puedes revisar todos
+                    los pedidos y su estado actual.
+                </p>
+
+            </section>
+
+
+            <!-- RESUMEN -->
+            <section class="row g-4 mt-1">
+
+                <div class="col-12 col-md-4">
+
+                    <article class="admin-tarjeta h-100">
+
+                        <p>
+                            Pendientes
+                        </p>
+
+                        <h2 id="totalPendientes">
+                            0
+                        </h2>
+
+                    </article>
+
+                </div>
+
+
+                <div class="col-12 col-md-4">
+
+                    <article class="admin-tarjeta h-100">
+
+                        <p>
+                            En camino
+                        </p>
+
+                        <h2 id="totalCamino">
+                            0
+                        </h2>
+
+                    </article>
+
+                </div>
+
+
+                <div class="col-12 col-md-4">
+
+                    <article class="admin-tarjeta h-100">
+
+                        <p>
+                            Entregados
+                        </p>
+
+                        <h2 id="totalEntregados">
+                            0
+                        </h2>
+
+                    </article>
+
+                </div>
+
+            </section>
+
+
+            <!-- TABLA -->
+            <section class="mt-5">
+
+                <div class="mb-3">
+
+                    <p class="admin-etiqueta mb-1">
+                        Pedidos
+                    </p>
+
+                    <h2>
+                        Todas las órdenes
+                    </h2>
+
+                </div>
+
+
+                <div class="table-responsive">
+
+                    <table class="table align-middle">
+
+                        <thead>
+
+                            <tr>
+                                <th>N° Pedido</th>
+                                <th>Cliente</th>
+                                <th>Dirección</th>
+                                <th>Repartidor</th>
+                                <th>Total</th>
+                                <th>Estado</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="tablaOrdenes">
+
+                            <!-- JavaScript cargará las órdenes -->
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </section>
+
+        </main>
+
+    </div>
+
+
+    <script src="../js/sesion.js"></script>
+    <script src="../js/admin.js"></script>
+    <script src="../js/ordenes.js"></script>
+
+</body>
+
+</html>

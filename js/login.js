@@ -96,14 +96,42 @@ formLogin.addEventListener("submit", function (evento) {
     const correo = correoInput.value.trim().toLowerCase();
     const contrasena = contrasenaInput.value.trim();
 
-    const usuarioEncontrado = USUARIOS.find(function (usuario) {
-        return usuario.correo.toLowerCase() === correo && usuario.contrasena === contrasena;
-    });
+    const usuariosGuardados = localStorage.getItem("usuariosSistema");
 
-    if (!usuarioEncontrado) {
-        mostrarMensajeGeneral("El correo o la contraseña son incorrectos.");
-        return;
-    }
+let usuariosDisponibles;
+
+if (usuariosGuardados) {
+    usuariosDisponibles = JSON.parse(usuariosGuardados);
+} else {
+    usuariosDisponibles = USUARIOS;
+}
+
+const usuarioEncontrado = usuariosDisponibles.find(function (usuario) {
+
+    return (
+        usuario.correo.toLowerCase() === correo &&
+        usuario.contrasena === contrasena
+    );
+
+});
+
+if (!usuarioEncontrado) {
+
+    mostrarMensajeGeneral(
+        "El correo o la contraseña son incorrectos."
+    );
+
+    return;
+}
+
+if (usuarioEncontrado.activo === false) {
+
+    mostrarMensajeGeneral(
+        "Tu cuenta está desactivada. Contacta al administrador."
+    );
+
+    return;
+}
 
     guardarSesion({
         nombre: usuarioEncontrado.nombre,

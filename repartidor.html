@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Gas El Volcán | Repartidor</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+    <link rel="stylesheet" href="css/estilos.css">
+    <link rel="stylesheet" href="css/efectos.css">
+    <link rel="stylesheet" href="css/repartidor.css">
+</head>
+
+<body>
+
+    <header>
+        <nav
+            class="navbar navbar-expand-lg"
+            data-bs-theme="dark"
+            aria-label="Navegación del repartidor"
+        >
+            <div class="container">
+
+                <a class="navbar-brand" href="repartidor.html">
+                    <img
+                        class="marca-logo"
+                        src="img/logo.svg"
+                        alt="Logo de Gas El Volcán"
+                    >
+                    <span>Gas El Volcán</span>
+                </a>
+
+                <div class="ms-auto d-flex align-items-center gap-3">
+
+                    <span class="panel-rol">
+                        Panel Repartidor
+                    </span>
+
+                    <div
+                        class="nav-cuenta"
+                        id="navCuenta"
+                    ></div>
+
+                </div>
+
+            </div>
+        </nav>
+    </header>
+
+
+    <main class="panel-repartidor">
+
+        <!-- ENCABEZADO -->
+        <section class="repartidor-portada">
+
+            <div class="container">
+
+                <p class="repartidor-etiqueta">
+                    Área de despacho
+                </p>
+
+                <h1>
+                    Mis pedidos asignados
+                </h1>
+
+                <p class="repartidor-descripcion">
+                    Revisa los pedidos de tu ruta y actualiza
+                    el estado de cada entrega.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- RESUMEN -->
+        <section class="container resumen-repartidor">
+
+            <div class="row g-4">
+
+                <div class="col-12 col-md-4">
+
+                    <article class="tarjeta-resumen">
+
+                        <div class="icono-resumen pendiente">
+                            P
+                        </div>
+
+                        <div>
+                            <p>Pendientes</p>
+                            <h2 id="totalPendientes">2</h2>
+                        </div>
+
+                    </article>
+
+                </div>
+
+
+                <div class="col-12 col-md-4">
+
+                    <article class="tarjeta-resumen">
+
+                        <div class="icono-resumen camino">
+                            C
+                        </div>
+
+                        <div>
+                            <p>En camino</p>
+                            <h2 id="totalCamino">1</h2>
+                        </div>
+
+                    </article>
+
+                </div>
+
+
+                <div class="col-12 col-md-4">
+
+                    <article class="tarjeta-resumen">
+
+                        <div class="icono-resumen entregado">
+                            E
+                        </div>
+
+                        <div>
+                            <p>Entregados</p>
+                            <h2 id="totalEntregados">0</h2>
+                        </div>
+
+                    </article>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- PEDIDOS -->
+        <section class="container seccion-pedidos">
+
+            <div class="titulo-pedidos">
+
+                <div>
+
+                    <p>
+                        Ruta actual
+                    </p>
+
+                    <h2>
+                        Pedidos asignados
+                    </h2>
+
+                </div>
+
+                <span>
+                    Solo puedes ver tus pedidos.
+                </span>
+
+            </div>
+
+
+            <div class="tabla-contenedor">
+
+                <div class="table-responsive">
+
+                    <table class="tabla-repartidor">
+
+                        <thead>
+
+                            <tr>
+                                <th>Pedido</th>
+                                <th>Cliente</th>
+                                <th>Dirección</th>
+                                <th>Producto</th>
+                                <th>Estado</th>
+                                <th>Actualizar</th>
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="tablaPedidos">
+
+                            <tr data-estado="pendiente">
+
+                                <td>
+                                    <strong>#1001</strong>
+                                </td>
+
+                                <td>
+                                    Carlos Pérez
+                                </td>
+
+                                <td>
+                                    Av. Ecuador 1250, Chillán
+                                </td>
+
+                                <td>
+                                    Cilindro GLP 15 kg
+                                </td>
+
+                                <td>
+                                    <span class="estado estado-pendiente">
+                                        Pendiente
+                                    </span>
+                                </td>
+
+                                <td>
+
+                                    <select class="selector-estado">
+
+                                        <option value="pendiente" selected>
+                                            Pendiente
+                                        </option>
+
+                                        <option value="camino">
+                                            En camino
+                                        </option>
+
+                                        <option value="entregado">
+                                            Entregado
+                                        </option>
+
+                                    </select>
+
+                                </td>
+
+                            </tr>
+
+
+                            <tr data-estado="pendiente">
+
+                                <td>
+                                    <strong>#1002</strong>
+                                </td>
+
+                                <td>
+                                    María González
+                                </td>
+
+                                <td>
+                                    Los Puelches 430, Chillán
+                                </td>
+
+                                <td>
+                                    Cilindro GLP 11 kg
+                                </td>
+
+                                <td>
+                                    <span class="estado estado-pendiente">
+                                        Pendiente
+                                    </span>
+                                </td>
+
+                                <td>
+
+                                    <select class="selector-estado">
+
+                                        <option value="pendiente" selected>
+                                            Pendiente
+                                        </option>
+
+                                        <option value="camino">
+                                            En camino
+                                        </option>
+
+                                        <option value="entregado">
+                                            Entregado
+                                        </option>
+
+                                    </select>
+
+                                </td>
+
+                            </tr>
+
+
+                            <tr data-estado="camino">
+
+                                <td>
+                                    <strong>#1003</strong>
+                                </td>
+
+                                <td>
+                                    Daniela Soto
+                                </td>
+
+                                <td>
+                                    Las Rosas 321, Chillán Viejo
+                                </td>
+
+                                <td>
+                                    Cilindro GLP 5 kg
+                                </td>
+
+                                <td>
+                                    <span class="estado estado-camino">
+                                        En camino
+                                    </span>
+                                </td>
+
+                                <td>
+
+                                    <select class="selector-estado">
+
+                                        <option value="pendiente">
+                                            Pendiente
+                                        </option>
+
+                                        <option value="camino" selected>
+                                            En camino
+                                        </option>
+
+                                        <option value="entregado">
+                                            Entregado
+                                        </option>
+
+                                    </select>
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <footer>
+
+        <div class="container footer-contenido">
+
+            <div>
+                <h2>Gas El Volcán</h2>
+                <p>Distribución de gas licuado a domicilio.</p>
+            </div>
+
+            <div>
+                <h2>Ubicación</h2>
+                <p>Chillán, Región de Ñuble</p>
+            </div>
+
+            <div>
+                <h2>Repartidor</h2>
+                <p>Gestión de pedidos y entregas asignadas.</p>
+            </div>
+
+        </div>
+
+        <p class="copyright">
+            © 2026 Gas El Volcán
+        </p>
+
+    </footer>
+
+
+    <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+    ></script>
+
+    <script src="js/sesion.js"></script>
+    <script src="js/repartidor.js"></script>
+
+</body>
+
+</html>

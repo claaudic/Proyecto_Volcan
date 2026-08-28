@@ -1,65 +1,24 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Productos | Gas El Volcán</title>
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-    <link
-        href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet"
-    >
-
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
-        rel="stylesheet"
-    >
-
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/estilos.css">
     <link rel="stylesheet" href="css/efectos.css">
 </head>
-
-
 <body>
-
-
-    <!-- NAVBAR -->
     <header>
-
-        <nav
-            class="navbar navbar-expand-lg"
-            data-bs-theme="dark"
-            aria-label="Navegación principal"
-        >
-
+        <nav class="navbar navbar-expand-lg" data-bs-theme="dark" aria-label="Navegación principal">
             <div class="container">
-
-                <a
-                    class="navbar-brand"
-                    href="index.html"
-                >
-
-                    <img
-                        class="marca-logo"
-                        src="img/logo.svg"
-                        alt="Logo de Gas El Volcán"
-                    >
-
-                    <span>
-                        Gas El Volcán
-                    </span>
-
+                <a class="navbar-brand" href="index.html">
+                    <img class="marca-logo" src="img/logo.svg" alt="Logo de Gas El Volcán">
+                    <span>Gas El Volcán</span>
                 </a>
-
 
                 <button
                     class="navbar-toggler"
@@ -70,337 +29,175 @@
                     aria-expanded="false"
                     aria-label="Abrir menú"
                 >
-
-                    <span
-                        class="navbar-toggler-icon"
-                    ></span>
-
+                    <span class="navbar-toggler-icon"></span>
                 </button>
 
-
-                <div
-                    class="collapse navbar-collapse"
-                    id="menuPrincipal"
-                >
-
-                    <ul
-                        class="navbar-nav ms-auto align-items-lg-center"
-                    >
-
+                <div class="collapse navbar-collapse" id="menuPrincipal">
+                    <ul class="navbar-nav ms-auto align-items-lg-center">
+                        <li class="nav-item"><a class="nav-link" href="index.html">Inicio</a></li>
+                        <li class="nav-item"><a class="nav-link active" aria-current="page" href="productos.html">Productos</a></li>
+                        <li class="nav-item"><a class="nav-link" href="nosotros.html">Nosotros</a></li>
+                        <li class="nav-item"><a class="nav-link" href="blogs.html">Blogs</a></li>
+                        <li class="nav-item"><a class="nav-link" href="contacto.html">Contacto</a></li>
+                        <li class="nav-item nav-cuenta" id="navCuenta"></li>
                         <li class="nav-item">
-
-                            <a
-                                class="nav-link"
-                                href="index.html"
-                            >
-                                Inicio
-                            </a>
-
+                            <button type="button" class="btn btn-carrito ms-lg-2" data-bs-toggle="offcanvas" data-bs-target="#panelCarrito" aria-controls="panelCarrito">
+                                Carrito (<span class="carrito-total">0</span>)
+                            </button>
                         </li>
-
-
-                        <li class="nav-item">
-
-                            <a
-                                class="nav-link active"
-                                aria-current="page"
-                                href="productos.html"
-                            >
-                                Productos
-                            </a>
-
-                        </li>
-
-
-                        <li class="nav-item">
-
-                            <a
-                                class="nav-link"
-                                href="nosotros.html"
-                            >
-                                Nosotros
-                            </a>
-
-                        </li>
-
-
-                        <li class="nav-item">
-
-                            <a
-                                class="nav-link"
-                                href="blogs.html"
-                            >
-                                Blogs
-                            </a>
-
-                        </li>
-
-
-                        <li class="nav-item">
-
-                            <a
-                                class="nav-link"
-                                href="contacto.html"
-                            >
-                                Contacto
-                            </a>
-
-                        </li>
-
-
-                        <li
-                            class="nav-item nav-cuenta"
-                            id="navCuenta"
-                        ></li>
-
-
-                        <li class="nav-item">
-
-                            <a
-                                class="btn btn-carrito ms-lg-2"
-                                href="carrito.html"
-                            >
-
-                                Carrito
-                                (<span class="carrito-total">0</span>)
-
-                            </a>
-
-                        </li>
-
                     </ul>
-
                 </div>
-
             </div>
-
         </nav>
-
     </header>
 
-
-
-    <!-- CONTENIDO -->
     <main>
-
-
-        <!-- ENCABEZADO -->
-        <section
-            class="productos-destacados"
-            aria-labelledby="tituloCatalogo"
-        >
-
-            <div
-                class="container"
-                data-revelar
-            >
-
-                <div class="titulo-seccion">
-
-                    <p>
-                        Gas El Volcán
-                    </p>
-
-                    <h1 id="tituloCatalogo">
-                        Catálogo de productos
-                    </h1>
-
-                    <p>
-                        Revisa nuestros cilindros,
-                        reguladores, conexiones y accesorios.
-                    </p>
-
-                </div>
-
-
-
-                <!-- FILTROS -->
-                <div class="row g-3 mb-5">
-
-
-                    <!-- BUSCADOR -->
-                    <div class="col-12 col-md-7">
-
-                        <label
-                            for="buscarProducto"
-                            class="form-label"
-                        >
-                            Buscar producto
-                        </label>
-
-                        <input
-                            type="search"
-                            class="form-control"
-                            id="buscarProducto"
-                            placeholder="Ej: cilindro 11 kg"
-                        >
-
-                    </div>
-
-
-
-                    <!-- CATEGORÍA -->
-                    <div class="col-12 col-md-5">
-
-                        <label
-                            for="filtroCategoria"
-                            class="form-label"
-                        >
-                            Categoría
-                        </label>
-
-                        <select
-                            class="form-select"
-                            id="filtroCategoria"
-                        >
-
-                            <option value="">
-                                Todas las categorías
-                            </option>
-
-                            <option value="Cilindros de Gas">
-                                Cilindros de Gas
-                            </option>
-
-                            <option value="Reguladores">
-                                Reguladores
-                            </option>
-
-                            <option value="Mangueras y Conexiones">
-                                Mangueras y Conexiones
-                            </option>
-
-                            <option value="Accesorios">
-                                Accesorios
-                            </option>
-
-                        </select>
-
-                    </div>
-
-                </div>
-
-
-
-                <!-- PRODUCTOS -->
-                <ul
-                    class="row g-4 list-unstyled"
-                    id="catalogoProductos"
-                >
-                </ul>
-
-
-
-                <!-- SIN RESULTADOS -->
-                <div
-                    class="alert alert-light text-center d-none mt-4"
-                    id="mensajeCatalogo"
-                >
-                    No encontramos productos con esos filtros.
-                </div>
-
-
+        <section class="pagina-encabezado" aria-labelledby="titulo-catalogo">
+            <div class="encabezado-fondo" aria-hidden="true">
+                <span class="luz luz-encabezado-verde"></span>
+                <span class="luz luz-encabezado-celeste"></span>
+                <span class="encabezado-arco"></span>
             </div>
 
+            <div class="container">
+                <nav class="miga" aria-label="Ruta">
+                    <a href="index.html">Inicio</a>
+                    <span aria-hidden="true">/</span>
+                    <span aria-current="page">Productos</span>
+                </nav>
+                <h1 id="titulo-catalogo">Catálogo de productos</h1>
+                <p class="pagina-bajada">Cilindros, reguladores, mangueras y accesorios con despacho a domicilio.</p>
+            </div>
+
+            <svg class="encabezado-monte" viewBox="0 0 1440 60" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+                <path d="M0 60 L0 38 L110 22 L214 40 L318 16 L430 36 L536 20 L648 38 L764 18 L876 36 L992 22 L1104 40 L1216 20 L1330 34 L1440 22 L1440 60 Z"/>
+            </svg>
         </section>
 
+        <section class="catalogo" aria-labelledby="titulo-listado">
+            <div class="container">
+                <h2 id="titulo-listado" class="visually-hidden">Listado de productos</h2>
 
-    </main>
+                <div class="barra-filtros">
+                    <div class="buscador">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/>
+                            <path d="M16.5 16.5 L21 21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        <label for="buscarProducto" class="visually-hidden">Buscar producto</label>
+                        <input type="search" id="buscarProducto" placeholder="Buscar por nombre, código o descripción">
+                    </div>
 
+                    <div class="pildoras" role="group" aria-label="Filtrar por categoría">
+                        <button type="button" class="pildora pildora-activa" data-categoria="">Todas</button>
+                        <button type="button" class="pildora" data-categoria="Cilindros de Gas">Cilindros de Gas</button>
+                        <button type="button" class="pildora" data-categoria="Reguladores">Reguladores</button>
+                        <button type="button" class="pildora" data-categoria="Mangueras y Conexiones">Mangueras y Conexiones</button>
+                        <button type="button" class="pildora" data-categoria="Accesorios">Accesorios</button>
+                    </div>
 
+                    <p class="contador-resultados" id="contadorResultados" role="status" aria-live="polite"></p>
+                </div>
 
-    <!-- FOOTER -->
+                <ul class="row g-4 list-unstyled" id="catalogoProductos"></ul>
+
+                <div class="sin-resultados d-none" id="mensajeCatalogo">
+                    <p class="sin-resultados-titulo">No encontramos productos</p>
+                    <p>Prueba con otra palabra o revisa todas las categorías.</p>
+                    <button type="button" class="btn btn-secundario" id="limpiarFiltros">Ver todo el catálogo</button>
+                </div>
+            </div>
+        </section>
     <footer>
-
-        <div class="container footer-contenido">
-
-
-            <div>
-
-                <h2>
-                    Gas El Volcán
-                </h2>
-
-                <p>
-                    Distribución de gas licuado a domicilio.
-                </p>
-
+        <div class="container pie-grid">
+            <div class="pie-marca">
+                <div class="pie-logo">
+                    <img src="img/logo.svg" alt="">
+                    <span>Gas El Volcán</span>
+                </div>
+                <p>Distribuidora familiar de gas licuado en Chillán, Región de Ñuble. En operación desde 1998.</p>
             </div>
 
-
             <div>
-
-                <h2>
-                    Ubicación
-                </h2>
-
-                <p>
-                    Chillán, Región de Ñuble
-                </p>
-
-            </div>
-
-
-            <div>
-
-                <h2>
-                    Navegación
-                </h2>
-
+                <h2>Navegación</h2>
                 <ul class="footer-enlaces">
-
-                    <li>
-                        <a href="productos.html">
-                            Productos
-                        </a>
-                    </li>
-
-                    <li>
-                        <a href="nosotros.html">
-                            Nosotros
-                        </a>
-                    </li>
-
-                    <li>
-                        <a href="blogs.html">
-                            Blogs
-                        </a>
-                    </li>
-
-                    <li>
-                        <a href="contacto.html">
-                            Contacto
-                        </a>
-                    </li>
-
+                    <li><a href="index.html">Inicio</a></li>
+                    <li><a href="productos.html">Productos</a></li>
+                    <li><a href="nosotros.html">Nosotros</a></li>
+                    <li><a href="blogs.html">Blogs</a></li>
+                    <li><a href="contacto.html">Contacto</a></li>
                 </ul>
-
             </div>
 
+            <div>
+                <h2>Productos</h2>
+                <ul class="footer-enlaces">
+                    <li><a href="productos.html">Cilindros de Gas</a></li>
+                    <li><a href="productos.html">Reguladores</a></li>
+                    <li><a href="productos.html">Mangueras y Conexiones</a></li>
+                    <li><a href="productos.html">Accesorios</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h2>Contacto</h2>
+                <ul class="pie-contacto">
+                    <li>
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M12 21s7-5.5 7-11a7 7 0 10-14 0c0 5.5 7 11 7 11z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                            <circle cx="12" cy="10" r="2.5" fill="none" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                        <span>Chillán, Región de Ñuble</span>
+                    </li>
+                    <li>
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M5 4h4l2 5-2.5 1.5a12 12 0 005 5L15 13l5 2v4a1 1 0 01-1 1A16 16 0 014 5a1 1 0 011-1z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                        </svg>
+                        <a href="tel:+56973214560">+56 9 7321 4560</a>
+                    </li>
+                    <li>
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>
+                            <path d="M3 7l9 6 9-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                        </svg>
+                        <a href="mailto:contacto@gaselvolcan.cl">contacto@gaselvolcan.cl</a>
+                    </li>
+                    <li>
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/>
+                            <path d="M12 7v5l3.5 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        <span>Lunes a sábado, 08:00 a 20:00</span>
+                    </li>
+                </ul>
+            </div>
         </div>
 
-
-        <p class="copyright">
-            © 2026 Gas El Volcán
-        </p>
-
+        <div class="container">
+            <p class="copyright">© 2026 Gas El Volcán. Todos los derechos reservados.</p>
+        </div>
     </footer>
 
-
-
-    <!-- JAVASCRIPT -->
-
-    <script
-        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
-    ></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/sesion.js"></script>
-
-    <script src="js/productos-publico.js"></script>
-
     <script src="js/efectos.js"></script>
-
+    <script src="js/catalogo.js"></script>
+    <script src="js/carrito.js"></script>
+    <script src="js/carrito-panel.js"></script>
+    <script src="js/productos-catalogo.js"></script>
+    <a
+        class="boton-whatsapp"
+        href="https://wa.me/56973214560?text=Hola%2C%20quiero%20hacer%20un%20pedido%20de%20gas."
+        target="_blank"
+        rel="noopener"
+        aria-label="Pedir por WhatsApp"
+    >
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M12.04 2A9.9 9.9 0 002.1 11.9a9.8 9.8 0 001.34 4.95L2 22l5.3-1.38a9.9 9.9 0 004.74 1.2h.01a9.9 9.9 0 009.94-9.9A9.9 9.9 0 0012.04 2zm0 18.02h-.01a8.2 8.2 0 01-4.18-1.14l-.3-.18-3.11.81.83-3.03-.2-.31a8.2 8.2 0 1115 -4.27 8.2 8.2 0 01-8.03 8.12z" fill="currentColor"/>
+            <path d="M16.6 14.2c-.25-.13-1.48-.73-1.7-.81-.23-.09-.4-.13-.56.12-.17.25-.64.81-.79.98-.14.16-.29.18-.54.06a6.7 6.7 0 01-1.97-1.22 7.4 7.4 0 01-1.37-1.7c-.14-.25-.01-.38.11-.5.11-.11.25-.29.37-.44.12-.15.16-.25.25-.42.08-.17.04-.31-.02-.44-.06-.12-.56-1.35-.77-1.85-.2-.48-.4-.42-.56-.43h-.47a.9.9 0 00-.65.31 2.75 2.75 0 00-.86 2.05c0 1.2.88 2.37 1 2.53.12.17 1.72 2.63 4.17 3.69.58.25 1.04.4 1.4.51.58.19 1.11.16 1.53.1.47-.07 1.48-.6 1.69-1.19.2-.58.2-1.08.15-1.19-.06-.1-.23-.17-.48-.29z" fill="currentColor"/>
+        </svg>
+        <span>Pídelo por WhatsApp</span>
+    </a>
 
 </body>
-
 </html>

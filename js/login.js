@@ -96,15 +96,7 @@ formLogin.addEventListener("submit", function (evento) {
     const correo = correoInput.value.trim().toLowerCase();
     const contrasena = contrasenaInput.value.trim();
 
-    const usuariosGuardados = localStorage.getItem("usuariosSistema");
-
-let usuariosDisponibles;
-
-if (usuariosGuardados) {
-    usuariosDisponibles = JSON.parse(usuariosGuardados);
-} else {
-    usuariosDisponibles = USUARIOS;
-}
+    const usuariosDisponibles = obtenerUsuariosDisponibles();
 
 const usuarioEncontrado = usuariosDisponibles.find(function (usuario) {
 
@@ -141,6 +133,35 @@ if (usuarioEncontrado.activo === false) {
 
     redirigirSegunRol(usuarioEncontrado.rol);
 });
+
+function obtenerUsuariosDisponibles() {
+    const guardados = localStorage.getItem("usuariosSistema");
+    let usuarios = [];
+
+    if (guardados) {
+        try {
+            const lista = JSON.parse(guardados);
+
+            if (Array.isArray(lista)) {
+                usuarios = lista;
+            }
+        } catch (error) {
+            usuarios = [];
+        }
+    }
+
+    USUARIOS.forEach(function (base) {
+        const yaExiste = usuarios.some(function (usuario) {
+            return String(usuario.correo).toLowerCase() === base.correo.toLowerCase();
+        });
+
+        if (!yaExiste) {
+            usuarios.push(base);
+        }
+    });
+
+    return usuarios;
+}
 
 function mostrarMensajeGeneral(texto) {
     mensajeLogin.textContent = texto;

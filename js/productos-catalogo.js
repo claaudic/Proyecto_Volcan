@@ -1,13 +1,3 @@
-const IMAGENES_CATALOGO = {
-    CL001: "img/cl001.jpg",
-    CL002: "img/cl002.jpg",
-    CL003: "img/cl003.jpg",
-    CL004: "img/cl004.jpg",
-    RG001: "img/rg001.jpg",
-    MG004: "img/mg004.jpg",
-    AC001: "img/ac001.jpg",
-    AC003: "img/ac003.jpg"
-};
 
 const grillaCatalogo = document.getElementById("catalogoProductos");
 
@@ -35,17 +25,6 @@ if (grillaCatalogo) {
         });
     }
 
-    function imagenDe(producto) {
-        if (producto.imagen && producto.imagen.trim() !== "") {
-            return producto.imagen.replace("../img/", "img/");
-        }
-
-        if (IMAGENES_CATALOGO[producto.codigo]) {
-            return IMAGENES_CATALOGO[producto.codigo];
-        }
-
-        return "img/logo.svg";
-    }
 
     function etiquetaStock(producto) {
         if (producto.stock === 0) {
@@ -88,7 +67,7 @@ if (grillaCatalogo) {
             return '<li class="col-12 col-sm-6 col-lg-3">' +
                 '<article class="tarjeta-producto">' +
                 '<a class="producto-enlace" href="detalle-producto.html?codigo=' + producto.codigo + '">' +
-                '<img src="' + imagenDe(producto) + '" alt="' + producto.nombre + '" loading="lazy">' +
+                '<img src="' + imagenProducto(producto) + '" alt="' + producto.nombre + '" loading="lazy" onerror="this.src=\'' + IMAGEN_RESPALDO + '\'">' +
                 "</a>" +
                 '<div class="tarjeta-contenido">' +
                 '<p class="categoria">' + producto.categoria + "</p>" +

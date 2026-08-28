@@ -1,13 +1,3 @@
-const IMAGENES_PANEL = {
-    CL001: "img/cl001.jpg",
-    CL002: "img/cl002.jpg",
-    CL003: "img/cl003.jpg",
-    CL004: "img/cl004.jpg",
-    RG001: "img/rg001.jpg",
-    MG004: "img/mg004.jpg",
-    AC001: "img/ac001.jpg",
-    AC003: "img/ac003.jpg"
-};
 
 function crearPanelCarrito() {
     if (document.getElementById("panelCarrito")) {
@@ -63,9 +53,6 @@ function generarNumeroPedido() {
     return siguiente;
 }
 
-function imagenPanel(codigo) {
-    return IMAGENES_PANEL[codigo] || "img/logo.svg";
-}
 
 function pintarPanelCarrito() {
     const lista = document.getElementById("panelLista");
@@ -97,7 +84,7 @@ function pintarPanelCarrito() {
         const mas = linea.cantidad >= linea.stock ? " disabled" : "";
 
         return '<li class="panel-item" data-codigo="' + linea.codigo + '">' +
-            '<img src="' + imagenPanel(linea.codigo) + '" alt="' + linea.nombre + '">' +
+            '<img src="' + imagenPorCodigo(linea.codigo) + '" alt="' + linea.nombre + '" onerror="this.src=\'' + IMAGEN_RESPALDO + '\'">' +
             '<div class="panel-datos">' +
             "<h3>" + linea.nombre + "</h3>" +
             '<p class="panel-unidad">' + formatearMonto(linea.precio) + " c/u</p>" +

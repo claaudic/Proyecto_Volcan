@@ -254,3 +254,17 @@ function obtenerCatalogoActivo() {
         return producto.activo !== false;
     });
 }
+
+function imagenProducto(producto) {
+    if (producto.imagen && producto.imagen.trim() !== "") {
+        return producto.imagen.replace("../img/", "img/");
+    }
+
+    return "img/" + String(producto.codigo).toLowerCase() + ".jpg";
+}
+
+function imagenPorCodigo(codigo) {
+    return "img/" + String(codigo).toLowerCase() + ".jpg";
+}
+
+const IMAGEN_RESPALDO = "img/logo.svg";

@@ -17,21 +17,6 @@ const CODIGOS_DESTACADOS = [
 
 
 
-const IMAGENES_PRODUCTOS = {
-
-    CL001: "img/cl001.jpg",
-    CL002: "img/cl002.jpg",
-    CL003: "img/cl003.jpg",
-    CL004: "img/cl004.jpg",
-
-    RG001: "img/rg001.jpg",
-
-    MG004: "img/mg004.jpg",
-
-    AC001: "img/ac001.jpg",
-    AC003: "img/ac003.jpg"
-
-};
 
 
 
@@ -74,34 +59,6 @@ function formatearPrecioPublico(precio) {
 
 
 
-function obtenerImagenProducto(producto) {
-
-    if (
-        producto.imagen &&
-        producto.imagen.trim() !== ""
-    ) {
-
-        return producto.imagen.replace(
-            "../img/",
-            "img/"
-        );
-
-    }
-
-
-    
-    if (IMAGENES_PRODUCTOS[producto.codigo]) {
-
-        return IMAGENES_PRODUCTOS[
-            producto.codigo
-        ];
-
-    }
-
-
-    return "img/logo.svg";
-
-}
 
 
 
@@ -162,7 +119,8 @@ function mostrarProductosPublicos() {
             <article class="tarjeta-producto">
 
                 <img
-                    src="${obtenerImagenProducto(producto)}"
+                    src="${imagenProducto(producto)}"
+                    onerror="this.src='img/logo.svg'"
                     alt="${producto.nombre}"
                 >
 

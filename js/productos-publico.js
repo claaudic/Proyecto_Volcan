@@ -37,29 +37,22 @@ const IMAGENES_PRODUCTOS = {
 
 function obtenerProductosPublicos() {
 
+    if (typeof obtenerCatalogoActivo === "function") {
+        return obtenerCatalogoActivo();
+    }
+
     const productosGuardados =
         localStorage.getItem("productosSistema");
-
 
     if (!productosGuardados) {
         return null;
     }
 
-
     try {
-
         return JSON.parse(productosGuardados);
-
     }
     catch (error) {
-
-        console.error(
-            "No se pudieron cargar los productos.",
-            error
-        );
-
         return null;
-
     }
 
 }

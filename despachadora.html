@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Despacho | Gas El Volcán
+    </title>
+
+
+    <!-- FUENTE -->
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+
+    <!-- BOOTSTRAP -->
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+
+    <!-- CSS DEL PROYECTO -->
+    <link
+        rel="stylesheet"
+        href="css/estilos.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="css/efectos.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="css/despachadora.css"
+    >
+
+</head>
+
+
+<body>
+
+
+    <!-- ====================================== -->
+    <!-- NAVEGACIÓN -->
+    <!-- ====================================== -->
+
+    <header>
+
+        <nav
+            class="navbar navbar-expand-lg"
+            data-bs-theme="dark"
+            aria-label="Navegación de despacho"
+        >
+
+            <div class="container">
+
+
+                <a
+                    class="navbar-brand"
+                    href="index.html"
+                >
+
+                    <img
+                        class="marca-logo"
+                        src="img/logo.svg"
+                        alt="Logo de Gas El Volcán"
+                    >
+
+                    <span>
+                        Gas El Volcán
+                    </span>
+
+                </a>
+
+
+                <button
+                    class="navbar-toggler"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#menuDespacho"
+                    aria-controls="menuDespacho"
+                    aria-expanded="false"
+                    aria-label="Abrir menú"
+                >
+
+                    <span
+                        class="navbar-toggler-icon"
+                    ></span>
+
+                </button>
+
+
+                <div
+                    class="collapse navbar-collapse"
+                    id="menuDespacho"
+                >
+
+                    <ul
+                        class="navbar-nav ms-auto align-items-lg-center"
+                    >
+
+                        <li class="nav-item">
+
+                            <a
+                                class="nav-link active"
+                                href="despachadora.html"
+                            >
+                                Pedidos del día
+                            </a>
+
+                        </li>
+
+
+                        <li
+                            class="nav-item nav-cuenta"
+                            id="navCuenta"
+                        ></li>
+
+                    </ul>
+
+                </div>
+
+            </div>
+
+        </nav>
+
+    </header>
+
+
+
+    <!-- ====================================== -->
+    <!-- CONTENIDO -->
+    <!-- ====================================== -->
+
+    <main>
+
+
+        <!-- HERO -->
+        <section class="despacho-hero">
+
+            <div class="container">
+
+                <p class="despacho-etiqueta">
+                    Operadora / Despachadora
+                </p>
+
+
+                <h1>
+                    Gestión de pedidos del día
+                </h1>
+
+
+                <p class="despacho-descripcion">
+                    Revisa los pedidos registrados,
+                    asigna un repartidor y actualiza
+                    su estado.
+                </p>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ================================== -->
+        <!-- RESUMEN -->
+        <!-- ================================== -->
+
+        <section class="container py-4">
+
+
+            <div class="row g-4">
+
+
+                <!-- TOTAL -->
+
+                <div class="col-12 col-md-3">
+
+                    <article class="despacho-tarjeta">
+
+                        <p>
+                            Pedidos del día
+                        </p>
+
+                        <strong id="totalPedidos">
+                            0
+                        </strong>
+
+                    </article>
+
+                </div>
+
+
+
+                <!-- PENDIENTES -->
+
+                <div class="col-12 col-md-3">
+
+                    <article class="despacho-tarjeta">
+
+                        <p>
+                            Pendientes
+                        </p>
+
+                        <strong id="totalPendientes">
+                            0
+                        </strong>
+
+                    </article>
+
+                </div>
+
+
+
+                <!-- EN CAMINO -->
+
+                <div class="col-12 col-md-3">
+
+                    <article class="despacho-tarjeta">
+
+                        <p>
+                            En camino
+                        </p>
+
+                        <strong id="totalCamino">
+                            0
+                        </strong>
+
+                    </article>
+
+                </div>
+
+
+
+                <!-- ENTREGADOS -->
+
+                <div class="col-12 col-md-3">
+
+                    <article class="despacho-tarjeta">
+
+                        <p>
+                            Entregados
+                        </p>
+
+                        <strong id="totalEntregados">
+                            0
+                        </strong>
+
+                    </article>
+
+                </div>
+
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ================================== -->
+        <!-- INFORMACIÓN DEL ROL -->
+        <!-- ================================== -->
+
+        <section class="container">
+
+            <div class="despacho-aviso">
+
+                <h2>
+                    Panel de despacho
+                </h2>
+
+                <p>
+                    Puedes visualizar todos los pedidos
+                    del día, asignarlos a repartidores
+                    y actualizar su estado.
+                    No tienes acceso a la gestión
+                    de usuarios del sistema.
+                </p>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ================================== -->
+        <!-- PEDIDOS -->
+        <!-- ================================== -->
+
+        <section class="container py-5">
+
+
+            <div class="despacho-titulo">
+
+                <div>
+
+                    <p class="despacho-etiqueta">
+                        Pedidos
+                    </p>
+
+                    <h2>
+                        Pedidos de hoy
+                    </h2>
+
+                </div>
+
+
+                <p id="fechaPedidos">
+                </p>
+
+            </div>
+
+
+
+            <div class="table-responsive despacho-tabla">
+
+
+                <table class="table align-middle mb-0">
+
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                N° Pedido
+                            </th>
+
+                            <th>
+                                Cliente
+                            </th>
+
+                            <th>
+                                Dirección
+                            </th>
+
+                            <th>
+                                Zona
+                            </th>
+
+                            <th>
+                                Repartidor
+                            </th>
+
+                            <th>
+                                Estado
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="tablaPedidosDespacho">
+
+                        <!--
+                            Los pedidos serán cargados
+                            desde despachadora.js
+                        -->
+
+                    </tbody>
+
+
+                </table>
+
+
+            </div>
+
+
+            <!-- SIN PEDIDOS -->
+
+            <div
+                class="despacho-sin-pedidos d-none"
+                id="sinPedidos"
+            >
+
+                <h3>
+                    No hay pedidos registrados
+                </h3>
+
+                <p>
+                    Los pedidos del día aparecerán aquí.
+                </p>
+
+            </div>
+
+
+        </section>
+
+
+    </main>
+
+
+
+    <!-- ====================================== -->
+    <!-- FOOTER -->
+    <!-- ====================================== -->
+
+    <footer>
+
+        <div class="container footer-contenido">
+
+
+            <div>
+
+                <h2>
+                    Gas El Volcán
+                </h2>
+
+                <p>
+                    Distribución de gas licuado
+                    a domicilio.
+                </p>
+
+            </div>
+
+
+            <div>
+
+                <h2>
+                    Zona de operación
+                </h2>
+
+                <p>
+                    Chillán y comunas de cobertura.
+                </p>
+
+            </div>
+
+
+            <div>
+
+                <h2>
+                    Perfil
+                </h2>
+
+                <p>
+                    Operadora / Despachadora
+                </p>
+
+            </div>
+
+
+        </div>
+
+
+        <p class="copyright">
+            © 2026 Gas El Volcán
+        </p>
+
+    </footer>
+
+
+
+    <!-- ====================================== -->
+    <!-- JAVASCRIPT -->
+    <!-- ====================================== -->
+
+    <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+    ></script>
+
+    <script src="js/sesion.js"></script>
+
+    <script src="js/despachadora.js"></script>
+
+    <script src="js/efectos.js"></script>
+
+
+</body>
+
+</html>

@@ -176,15 +176,31 @@ function ocultarMensajeGeneral() {
 function redirigirSegunRol(rol) {
 
     if (rol === "ADMINISTRADOR") {
-        window.location.href = "admin/index.html";
+
+        window.location.href =
+            "admin/index.html";
+
+    }
+
+    else if (rol === "DESPACHADORA") {
+
+        window.location.href =
+            "despachadora.html";
+
     }
 
     else if (rol === "REPARTIDOR") {
-        window.location.href = "repartidor.html";
+
+        window.location.href =
+            "repartidor.html";
+
     }
 
     else {
-        window.location.href = "index.html";
+
+        window.location.href =
+            "index.html";
+
     }
 
 }

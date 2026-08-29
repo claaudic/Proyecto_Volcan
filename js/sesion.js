@@ -8,6 +8,12 @@ const USUARIOS = [
         contrasena: "Admin1234",
         rol: "ADMINISTRADOR"
     },
+     {
+        nombre: "Daniela Despachadora",
+        correo: "despachadora@gaselvolcan.cl",
+        contrasena: "Desp123",
+        rol: "DESPACHADORA"
+    },
     {
         nombre: "Repartidor El Volcán",
         correo: "repartidor@gaselvolcan.cl",
@@ -92,6 +98,7 @@ function primerNombre(nombreCompleto) {
 }
 
 function pintarNavCuenta() {
+
     const contenedor = document.getElementById("navCuenta");
 
     if (!contenedor) {
@@ -100,21 +107,83 @@ function pintarNavCuenta() {
 
     const usuario = obtenerSesion();
 
+    // Si no hay sesión iniciada
     if (!usuario) {
-        contenedor.innerHTML = '<a class="btn btn-cuenta" href="login.html">Ingresar</a>';
+        contenedor.innerHTML =
+            '<a class="btn btn-cuenta" href="login.html">Ingresar</a>';
+
         return;
     }
 
+    // ==========================================
+    // PANEL SEGÚN ROL
+    // ==========================================
+
+    let enlacePanel = "";
+
+    if (usuario.rol === "ADMINISTRADOR") {
+        enlacePanel = "admin/index.html";
+    }
+
+    else if (usuario.rol === "DESPACHADORA") {
+        enlacePanel = "despachadora.html";
+    }
+
+    else if (usuario.rol === "REPARTIDOR") {
+        enlacePanel = "repartidor.html";
+    }
+
+
+    // ==========================================
+    // BOTÓN PANEL
+    // ==========================================
+
+    let botonPanel = "";
+
+    if (enlacePanel !== "") {
+
+        botonPanel =
+            '<a class="btn btn-cuenta" href="' +
+            enlacePanel +
+            '">Panel</a>';
+
+    }
+
+
+    // ==========================================
+    // MOSTRAR CUENTA
+    // ==========================================
+
     contenedor.innerHTML =
         '<div class="cuenta-activa">' +
-        '<span class="cuenta-saludo">Hola, ' + primerNombre(usuario.nombre) + '</span>' +
-        '<button type="button" class="btn btn-cuenta" id="botonCerrarSesion">Salir</button>' +
+
+            '<span class="cuenta-saludo">' +
+                'Hola, ' +
+                primerNombre(usuario.nombre) +
+            '</span>' +
+
+            botonPanel +
+
+            '<button type="button" ' +
+                'class="btn btn-cuenta" ' +
+                'id="botonCerrarSesion">' +
+                'Salir' +
+            '</button>' +
+
         '</div>';
 
-    document.getElementById("botonCerrarSesion").addEventListener("click", function () {
-        cerrarSesion();
-        window.location.reload();
-    });
-}
 
+    // ==========================================
+    // CERRAR SESIÓN
+    // ==========================================
+
+    document
+        .getElementById("botonCerrarSesion")
+        .addEventListener("click", function () {
+
+            cerrarSesion();
+            window.location.reload();
+
+        });
+}
 document.addEventListener("DOMContentLoaded", pintarNavCuenta);

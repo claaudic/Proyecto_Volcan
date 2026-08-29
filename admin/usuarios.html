@@ -10,15 +10,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-    <link
-        href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet"
-    >
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
 
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
-        rel="stylesheet"
-    >
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <link rel="stylesheet" href="../css/estilos.css">
     <link rel="stylesheet" href="../css/admin.css">
@@ -40,10 +35,7 @@
 
             <a class="admin-marca" href="../index.html">
 
-                <img
-                    src="../img/logo.svg"
-                    alt="Logo de Gas El Volcán"
-                >
+                <img src="../img/logo.svg" alt="Logo de Gas El Volcán">
 
                 <span>
                     Gas El Volcán
@@ -54,10 +46,7 @@
 
             <nav aria-label="Menú del panel">
 
-                <ul
-                    class="admin-lista"
-                    id="menuAdmin"
-                ></ul>
+                <ul class="admin-lista" id="menuAdmin"></ul>
 
             </nav>
 
@@ -65,21 +54,11 @@
             <!-- USUARIO CONECTADO -->
             <div class="admin-usuario">
 
-                <p
-                    class="admin-usuario-nombre"
-                    id="usuarioNombre"
-                ></p>
+                <p class="admin-usuario-nombre" id="usuarioNombre"></p>
 
-                <p
-                    class="admin-usuario-rol"
-                    id="usuarioRol"
-                ></p>
+                <p class="admin-usuario-rol" id="usuarioRol"></p>
 
-                <button
-                    type="button"
-                    class="btn btn-salir"
-                    id="botonSalir"
-                >
+                <button type="button" class="btn btn-salir" id="botonSalir">
                     Cerrar sesión
                 </button>
 
@@ -91,10 +70,7 @@
         <!-- ==============================
              CONTENIDO
         =============================== -->
-        <main
-            class="admin-contenido"
-            id="contenidoAdmin"
-        >
+        <main class="admin-contenido" id="contenidoAdmin">
 
             <!-- ENCABEZADO -->
             <header class="admin-encabezado">
@@ -112,11 +88,7 @@
                 </div>
 
 
-                <button
-                    type="button"
-                    class="btn btn-principal"
-                    id="btnNuevoUsuario"
-                >
+                <button type="button" class="btn btn-principal" id="btnNuevoUsuario">
                     + Crear usuario
                 </button>
 
@@ -124,10 +96,7 @@
 
 
             <!-- AVISO -->
-            <section
-                class="admin-aviso"
-                aria-labelledby="tituloAviso"
-            >
+            <section class="admin-aviso" aria-labelledby="tituloAviso">
 
                 <h2 id="tituloAviso">
                     Gestión de usuarios
@@ -204,13 +173,7 @@
     <!-- ==================================
          MODAL CREAR / EDITAR USUARIO
     =================================== -->
-    <div
-        class="modal fade"
-        id="modalUsuario"
-        tabindex="-1"
-        aria-labelledby="tituloModalUsuario"
-        aria-hidden="true"
-    >
+    <div class="modal fade" id="modalUsuario" tabindex="-1" aria-labelledby="tituloModalUsuario" aria-hidden="true">
 
         <div class="modal-dialog modal-dialog-centered">
 
@@ -218,19 +181,11 @@
 
                 <div class="modal-header">
 
-                    <h2
-                        class="modal-title fs-5"
-                        id="tituloModalUsuario"
-                    >
+                    <h2 class="modal-title fs-5" id="tituloModalUsuario">
                         Crear usuario
                     </h2>
 
-                    <button
-                        type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal"
-                        aria-label="Cerrar"
-                    ></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
 
                 </div>
 
@@ -240,34 +195,19 @@
                     <div class="modal-body">
 
                         <!-- ID -->
-                        <input
-                            type="hidden"
-                            id="usuarioId"
-                        >
+                        <input type="hidden" id="usuarioId">
 
 
                         <!-- NOMBRE -->
                         <div class="mb-3">
 
-                            <label
-                                for="nombreUsuario"
-                                class="form-label"
-                            >
+                            <label for="nombreUsuario" class="form-label">
                                 Nombre
                             </label>
 
-                            <input
-                                type="text"
-                                class="form-control"
-                                id="nombreUsuario"
-                                maxlength="50"
-                                required
-                            >
+                            <input type="text" class="form-control" id="nombreUsuario" maxlength="50" required>
 
-                            <div
-                                class="text-danger mt-1"
-                                id="errorNombre"
-                            ></div>
+                            <div class="text-danger mt-1" id="errorNombre"></div>
 
                         </div>
 
@@ -275,25 +215,13 @@
                         <!-- CORREO -->
                         <div class="mb-3">
 
-                            <label
-                                for="correoUsuario"
-                                class="form-label"
-                            >
+                            <label for="correoUsuario" class="form-label">
                                 Correo
                             </label>
 
-                            <input
-                                type="email"
-                                class="form-control"
-                                id="correoUsuario"
-                                maxlength="100"
-                                required
-                            >
+                            <input type="email" class="form-control" id="correoUsuario" maxlength="100" required>
 
-                            <div
-                                class="text-danger mt-1"
-                                id="errorCorreo"
-                            ></div>
+                            <div class="text-danger mt-1" id="errorCorreo"></div>
 
                         </div>
 
@@ -301,26 +229,14 @@
                         <!-- CONTRASEÑA -->
                         <div class="mb-3">
 
-                            <label
-                                for="contrasenaUsuario"
-                                class="form-label"
-                            >
+                            <label for="contrasenaUsuario" class="form-label">
                                 Contraseña
                             </label>
 
-                            <input
-                                type="password"
-                                class="form-control"
-                                id="contrasenaUsuario"
-                                minlength="4"
-                                maxlength="10"
-                                required
-                            >
+                            <input type="password" class="form-control" id="contrasenaUsuario" minlength="4"
+                                maxlength="10" required>
 
-                            <div
-                                class="text-danger mt-1"
-                                id="errorContrasena"
-                            ></div>
+                            <div class="text-danger mt-1" id="errorContrasena"></div>
 
                         </div>
 
@@ -328,29 +244,22 @@
                         <!-- ROL -->
                         <div class="mb-3">
 
-                            <label
-                                for="rolUsuarioForm"
-                                class="form-label"
-                            >
+                            <label for="rolUsuarioForm" class="form-label">
                                 Rol
                             </label>
 
-                            <select
-                                class="form-select"
-                                id="rolUsuarioForm"
-                                required
-                            >
+                            <select class="form-select" id="rolUsuarioForm" required>
 
                                 <option value="">
                                     Selecciona un rol
                                 </option>
 
-                                <option value="ADMINISTRADOR">
-                                    Administrador
-                                </option>
-
                                 <option value="REPARTIDOR">
                                     Repartidor
+                                </option>
+
+                                <option value="DESPACHADORA">
+                                    Operadora / Despachadora
                                 </option>
 
                                 <option value="CLIENTE">
@@ -359,10 +268,7 @@
 
                             </select>
 
-                            <div
-                                class="text-danger mt-1"
-                                id="errorRol"
-                            ></div>
+                            <div class="text-danger mt-1" id="errorRol"></div>
 
                         </div>
 
@@ -371,18 +277,11 @@
 
                     <div class="modal-footer">
 
-                        <button
-                            type="button"
-                            class="btn btn-secondary"
-                            data-bs-dismiss="modal"
-                        >
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                             Cancelar
                         </button>
 
-                        <button
-                            type="submit"
-                            class="btn btn-principal"
-                        >
+                        <button type="submit" class="btn btn-principal">
                             Guardar usuario
                         </button>
 
@@ -397,9 +296,7 @@
     </div>
 
 
-    <script
-        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
-    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
     <script src="../js/sesion.js"></script>
     <script src="../js/admin.js"></script>

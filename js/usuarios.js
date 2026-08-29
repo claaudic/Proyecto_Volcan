@@ -29,28 +29,134 @@ const modalUsuario = new bootstrap.Modal(
 
 function obtenerUsuariosSistema() {
 
-    const guardados = localStorage.getItem(CLAVE_USUARIOS_SISTEMA);
+    const guardados =
+        localStorage.getItem(CLAVE_USUARIOS_SISTEMA);
+
+    let usuariosSistema = [];
 
     if (guardados) {
-        return JSON.parse(guardados);
+
+        try {
+            usuariosSistema = JSON.parse(guardados);
+
+            if (!Array.isArray(usuariosSistema)) {
+                usuariosSistema = [];
+            }
+
+        } catch (error) {
+            usuariosSistema = [];
+        }
     }
 
-    const usuariosIniciales = USUARIOS.map(function (usuario, indice) {
 
-        return {
-            id: indice + 1,
-            nombre: usuario.nombre,
-            correo: usuario.correo,
-            contrasena: usuario.contrasena,
-            rol: usuario.rol,
-            activo: true
-        };
+    // ==========================================
+    // MIGRAR DOMINIO ANTIGUO AL NUEVO
+    // @gasvolcan.cl -> @gaselvolcan.cl
+    // ==========================================
+
+    usuariosSistema.forEach(function (usuario) {
+
+        if (!usuario.correo) {
+            return;
+        }
+
+        usuario.correo =
+            usuario.correo
+                .trim()
+                .toLowerCase()
+                .replace(
+                    "@gasvolcan.cl",
+                    "@gaselvolcan.cl"
+                );
 
     });
 
-    guardarUsuariosSistema(usuariosIniciales);
 
-    return usuariosIniciales;
+    // ==========================================
+    // ELIMINAR DUPLICADOS POR CORREO
+    // ==========================================
+
+    const correosEncontrados = [];
+
+    usuariosSistema =
+        usuariosSistema.filter(function (usuario) {
+
+            const correo =
+                usuario.correo.trim().toLowerCase();
+
+            if (correosEncontrados.includes(correo)) {
+                return false;
+            }
+
+            correosEncontrados.push(correo);
+
+            return true;
+
+        });
+
+
+    // ==========================================
+    // AGREGAR USUARIOS BASE QUE FALTEN
+    // ==========================================
+
+    let siguienteId = 1;
+
+    if (usuariosSistema.length > 0) {
+
+        siguienteId =
+            Math.max(
+                ...usuariosSistema.map(function (usuario) {
+                    return Number(usuario.id) || 0;
+                })
+            ) + 1;
+    }
+
+
+    USUARIOS.forEach(function (usuarioBase) {
+
+        const correoBase =
+            usuarioBase.correo
+                .trim()
+                .toLowerCase();
+
+        const existe =
+            usuariosSistema.some(function (usuario) {
+
+                return (
+                    usuario.correo
+                        .trim()
+                        .toLowerCase()
+                    === correoBase
+                );
+
+            });
+
+
+        if (!existe) {
+
+            usuariosSistema.push({
+
+                id: siguienteId,
+                nombre: usuarioBase.nombre,
+                correo: correoBase,
+                contrasena: usuarioBase.contrasena,
+                rol: usuarioBase.rol,
+                activo: true
+
+            });
+
+            siguienteId++;
+
+        }
+
+    });
+
+
+    guardarUsuariosSistema(
+        usuariosSistema
+    );
+
+    return usuariosSistema;
 }
 
 

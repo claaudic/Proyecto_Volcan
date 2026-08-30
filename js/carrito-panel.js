@@ -163,7 +163,26 @@ document.addEventListener("DOMContentLoaded", function () {
             return suma + linea.cantidad;
         }, 0);
 
-        document.getElementById("panelNumeroPedido").textContent = "N° " + generarNumeroPedido();
+        const numero = generarNumeroPedido();
+        const sesionActiva = obtenerSesion();
+
+        guardarPedido({
+            numero: numero,
+            fecha: new Date().toISOString(),
+            correo: sesionActiva ? sesionActiva.correo : "",
+            lineas: detalle.lineas.map(function (linea) {
+                return {
+                    codigo: linea.codigo,
+                    nombre: linea.nombre,
+                    cantidad: linea.cantidad,
+                    precio: linea.precio,
+                    subtotal: linea.subtotal
+                };
+            }),
+            total: detalle.total
+        });
+
+        document.getElementById("panelNumeroPedido").textContent = "N° " + numero;
         document.getElementById("panelExitoUnidades").textContent =
             unidades === 1 ? "1 producto" : unidades + " productos";
         document.getElementById("panelExitoTotal").textContent = formatearMonto(detalle.total);

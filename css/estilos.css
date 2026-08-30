@@ -2263,3 +2263,126 @@ a:focus-visible,
         height: 260px;
     }
 }
+
+.avatar-cuenta {
+    display: grid;
+    width: 38px;
+    height: 38px;
+    place-items: center;
+    color: var(--blanco);
+    background: var(--degradado);
+    border-radius: 50%;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.avatar-cuenta:hover {
+    color: var(--blanco);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.perfil {
+    padding: 3.5rem 0 5rem;
+    background-color: var(--blanco);
+}
+
+.perfil-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+    gap: 2rem;
+}
+
+.aviso-cobertura-ok {
+    color: var(--verde);
+    font-weight: 600;
+}
+
+.aviso-cobertura-no {
+    color: var(--accion-oscuro);
+    font-weight: 600;
+}
+
+.perfil-sin-pedidos {
+    padding: 2rem 0;
+    text-align: center;
+}
+
+.perfil-sin-pedidos p {
+    margin-bottom: 1.25rem;
+    color: var(--texto-suave);
+}
+
+.lista-pedidos {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+}
+
+.pedido {
+    padding: 1.1rem 1.25rem;
+    border: 1px solid var(--gris-borde);
+    border-left: 3px solid var(--verde);
+    border-radius: var(--radio);
+}
+
+.pedido-cabecera {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.pedido-numero {
+    margin: 0;
+    color: var(--tinta);
+    font-size: 0.9375rem;
+    font-weight: 700;
+}
+
+.pedido-fecha {
+    margin: 0;
+    color: var(--texto-suave);
+    font-size: 0.8125rem;
+}
+
+.pedido-total {
+    color: var(--tinta);
+    font-size: 1.125rem;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.pedido-lineas {
+    margin: 0;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--gris-borde);
+}
+
+.pedido-lineas li {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.35rem;
+    color: var(--texto-suave);
+    font-size: 0.875rem;
+}
+
+.pedido-lineas span {
+    color: var(--tinta);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+    .perfil-grid {
+        grid-template-columns: 1fr;
+    }
+}

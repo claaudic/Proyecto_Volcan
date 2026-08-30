@@ -231,6 +231,17 @@ function mostrarColumnaDerecha(usuario) {
     bloquePedidos.classList.add("d-none");
     bloqueRol.classList.remove("d-none");
 
+    document.querySelectorAll(".solo-cliente").forEach(function (elemento) {
+        elemento.classList.add("d-none");
+    });
+
+    const volver = document.getElementById("navVolverPanel");
+
+    if (volver) {
+        volver.querySelector("a").href = panelDeRol(usuario.rol);
+        volver.classList.remove("d-none");
+    }
+
     document.getElementById("perfilNombreRol").textContent = nombreDeRol(usuario.rol);
 
     document.getElementById("perfilRolNota").textContent =

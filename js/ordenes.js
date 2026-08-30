@@ -66,33 +66,7 @@ const ZONAS_COBERTURA_ORDENES = [
 // DATOS DE PEDIDOS
 // ==========================================
 
-const DATOS_PEDIDOS = [
-
-    {
-        cliente: "Camila Rojas",
-        direccion: "Av. O'Higgins 850",
-        comuna: "Chillán",
-        repartidor: "Repartidor El Volcán",
-        total: 25990
-    },
-
-    {
-        cliente: "Felipe González",
-        direccion: "Av. Bernardo O'Higgins 1240",
-        comuna: "Chillán Viejo",
-        repartidor: "Repartidor El Volcán",
-        total: 41990
-    },
-
-    {
-        cliente: "María Soto",
-        direccion: "Camino a Las Trancas 620",
-        comuna: "Pinto",
-        repartidor: "Repartidor El Volcán",
-        total: 18990
-    }
-
-];
+// Los pedidos vienen de js/pedidos.js
 
 
 // ==========================================
@@ -139,105 +113,30 @@ function buscarZonaOrden(comuna) {
 
 function obtenerOrdenes() {
 
-    const clavesPedidos = [];
+    return obtenerPedidosSistema().map(function (pedido) {
 
-
-    for (let i = 0; i < localStorage.length; i++) {
-
-        const clave = localStorage.key(i);
-
-
-        if (
-            clave &&
-            clave.startsWith("estadoPedido_")
-        ) {
-
-            clavesPedidos.push(clave);
-
-        }
-
-    }
-
-
-    // Ordenamos los números de pedido
-    clavesPedidos.sort(function (a, b) {
-
-        const numeroA = Number(
-            a.replace("estadoPedido_", "")
-        );
-
-        const numeroB = Number(
-            b.replace("estadoPedido_", "")
-        );
-
-
-        return numeroA - numeroB;
-
-    });
-
-
-    return clavesPedidos.map(function (clave, indice) {
-
-        const numeroPedido =
-            clave.replace("estadoPedido_", "");
-
-
-        const datos =
-            DATOS_PEDIDOS[indice] || {
-
-                cliente: "Cliente",
-
-                direccion:
-                    "Dirección registrada",
-
-                comuna:
-                    "Chillán",
-
-                repartidor:
-                    "Repartidor asignado",
-
-                total: 0
-
-            };
-
-
-        const zona =
-            buscarZonaOrden(datos.comuna);
+        const zona = buscarZonaOrden(pedido.comuna);
 
 
         return {
 
-            numero: numeroPedido,
+            numero: pedido.numero,
 
-            cliente: datos.cliente,
+            cliente: pedido.cliente,
 
-            direccion:
-                datos.direccion +
-                ", " +
-                datos.comuna,
+            direccion: pedido.direccion + ", " + pedido.comuna,
 
-            comuna:
-                datos.comuna,
+            comuna: pedido.comuna,
 
-            zona:
-                zona
-                    ? zona.zona
-                    : "Fuera de cobertura",
+            zona: zona ? zona.zona : "Fuera de cobertura",
 
-            entrega:
-                zona
-                    ? zona.entrega
-                    : "No disponible",
+            entrega: zona ? zona.entrega : "No disponible",
 
-            repartidor:
-                datos.repartidor,
+            repartidor: nombreDeRepartidor(pedido.repartidor),
 
-            total:
-                datos.total,
+            total: pedido.total,
 
-            estado:
-                localStorage.getItem(clave) ||
-                "pendiente"
+            estado: pedido.estado
 
         };
 

@@ -12,146 +12,114 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
+    const cuerpoTabla = document.getElementById("tablaPedidos");
+    const sinPedidos = document.getElementById("sinRuta");
+
+
     // ==========================================
-    // OBTENER PEDIDOS
+    // DIBUJAR LA RUTA DEL REPARTIDOR
     // ==========================================
 
-    const pedidos = document.querySelectorAll("#tablaPedidos tr");
+    function dibujarRuta() {
+
+        const pedidos = pedidosDelRepartidor(usuario.correo);
 
 
-    pedidos.forEach(function (pedido) {
+        if (pedidos.length === 0) {
 
-        const selector = pedido.querySelector(".selector-estado");
-        const etiqueta = pedido.querySelector(".estado");
+            cuerpoTabla.innerHTML = "";
+            sinPedidos.classList.remove("d-none");
 
-        const numeroPedido = pedido
-            .querySelector("strong")
-            .textContent
-            .replace("#", "");
+            actualizarResumen(pedidos);
 
-        const clavePedido = "estadoPedido_" + numeroPedido;
-
-
-        // ==========================================
-        // RECUPERAR ESTADO GUARDADO
-        // ==========================================
-
-        const estadoGuardado = localStorage.getItem(clavePedido);
-
-        if (estadoGuardado) {
-            pedido.dataset.estado = estadoGuardado;
-            selector.value = estadoGuardado;
-
-            pintarEstado(
-                pedido,
-                etiqueta,
-                selector,
-                estadoGuardado
-            );
-        } else {
-
-            pintarEstado(
-                pedido,
-                etiqueta,
-                selector,
-                pedido.dataset.estado
-            );
+            return;
         }
 
 
-        // ==========================================
-        // CAMBIAR ESTADO
-        // ==========================================
+        sinPedidos.classList.add("d-none");
+
+
+        cuerpoTabla.innerHTML = pedidos.map(function (pedido) {
+
+            return `
+                <tr data-estado="${pedido.estado}">
+
+                    <td><strong>#${pedido.numero}</strong></td>
+
+                    <td>${pedido.cliente}</td>
+
+                    <td>${pedido.direccion}, ${pedido.comuna}</td>
+
+                    <td>${pedido.cantidad} × ${pedido.producto}</td>
+
+                    <td>
+                        <span class="estado ${claseDeEstado(pedido.estado)}">
+                            ${textoDeEstado(pedido.estado)}
+                        </span>
+                    </td>
+
+                    <td>
+                        <select
+                            class="selector-estado"
+                            data-pedido="${pedido.numero}"
+                            aria-label="Cambiar el estado del pedido ${pedido.numero}"
+                        >
+                            <option value="pendiente">Pendiente</option>
+                            <option value="camino">En camino</option>
+                            <option value="entregado">Entregado</option>
+                        </select>
+                    </td>
+
+                </tr>
+            `;
+
+        }).join("");
+
+
+        cuerpoTabla.querySelectorAll("tr").forEach(function (fila) {
+            prepararFila(fila);
+        });
+
+
+        actualizarResumen(pedidos);
+
+    }
+
+
+    // ==========================================
+    // REGLAS DE CADA FILA
+    // ==========================================
+
+    function prepararFila(fila) {
+
+        const selector = fila.querySelector(".selector-estado");
+        const estado = fila.dataset.estado;
+
+        selector.value = estado;
+
+
+        // Una entrega terminada ya no se modifica
+        if (estado === "entregado") {
+            selector.disabled = true;
+        }
+
+
+        // Ya no puede volver a pendiente
+        if (estado === "camino") {
+            selector.querySelector('option[value="pendiente"]').disabled = true;
+        }
+
 
         selector.addEventListener("change", function () {
 
-            const nuevoEstado = selector.value;
-
-            pedido.dataset.estado = nuevoEstado;
-
             localStorage.setItem(
-                clavePedido,
-                nuevoEstado
+                CLAVE_ESTADO_PEDIDO + selector.dataset.pedido,
+                selector.value
             );
 
-            pintarEstado(
-                pedido,
-                etiqueta,
-                selector,
-                nuevoEstado
-            );
+            dibujarRuta();
 
-            actualizarResumen();
         });
-
-    });
-
-
-    actualizarResumen();
-
-
-    // ==========================================
-    // PINTAR ESTADO
-    // ==========================================
-
-    function pintarEstado(
-        pedido,
-        etiqueta,
-        selector,
-        estado
-    ) {
-
-        etiqueta.className = "estado";
-
-
-        if (estado === "pendiente") {
-
-            etiqueta.textContent = "Pendiente";
-
-            etiqueta.classList.add(
-                "estado-pendiente"
-            );
-
-            selector.disabled = false;
-
-        }
-
-
-        else if (estado === "camino") {
-
-            etiqueta.textContent = "En camino";
-
-            etiqueta.classList.add(
-                "estado-camino"
-            );
-
-            selector.disabled = false;
-
-            // Ya no puede volver a pendiente
-            const opcionPendiente =
-                selector.querySelector(
-                    'option[value="pendiente"]'
-                );
-
-            if (opcionPendiente) {
-                opcionPendiente.disabled = true;
-            }
-
-        }
-
-
-        else if (estado === "entregado") {
-
-            etiqueta.textContent = "Entregado";
-
-            etiqueta.classList.add(
-                "estado-entregado"
-            );
-
-            // Una entrega terminada ya no se modifica
-            selector.disabled = true;
-
-        }
 
     }
 
@@ -160,7 +128,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // ACTUALIZAR CONTADORES
     // ==========================================
 
-    function actualizarResumen() {
+    function actualizarResumen(pedidos) {
 
         let pendientes = 0;
         let camino = 0;
@@ -169,38 +137,30 @@ document.addEventListener("DOMContentLoaded", function () {
 
         pedidos.forEach(function (pedido) {
 
-            const estado = pedido.dataset.estado;
-
-
-            if (estado === "pendiente") {
+            if (pedido.estado === "pendiente") {
                 pendientes++;
             }
 
-            else if (estado === "camino") {
+            else if (pedido.estado === "camino") {
                 camino++;
             }
 
-            else if (estado === "entregado") {
+            else if (pedido.estado === "entregado") {
                 entregados++;
             }
 
         });
 
 
-        document.getElementById(
-            "totalPendientes"
-        ).textContent = pendientes;
+        document.getElementById("totalPendientes").textContent = pendientes;
 
+        document.getElementById("totalCamino").textContent = camino;
 
-        document.getElementById(
-            "totalCamino"
-        ).textContent = camino;
-
-
-        document.getElementById(
-            "totalEntregados"
-        ).textContent = entregados;
+        document.getElementById("totalEntregados").textContent = entregados;
 
     }
+
+
+    dibujarRuta();
 
 });

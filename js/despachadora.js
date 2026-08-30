@@ -55,28 +55,7 @@ const sinPedidos =
 // dirección y zona.
 //
 
-const DATOS_PEDIDOS_DESPACHO = [
-
-    {
-        cliente: "Camila Rojas",
-        direccion: "Av. O'Higgins 850, Chillán",
-        zona: "Zona Centro"
-    },
-
-    {
-        cliente: "Felipe González",
-        direccion:
-            "Av. Bernardo O'Higgins 1240, Chillán Viejo",
-        zona: "Zona Oriente"
-    },
-
-    {
-        cliente: "María Soto",
-        direccion: "Camino a Las Trancas 620, Pinto",
-        zona: "Zona Rural"
-    }
-
-];
+// Los pedidos vienen de js/pedidos.js
 
 
 // ==========================================
@@ -195,115 +174,25 @@ function obtenerRepartidores() {
 
 function obtenerPedidosDespacho() {
 
-    const clavesPedidos = [];
+    return obtenerPedidosSistema().map(function (pedido) {
 
+        return {
 
-    for (
-        let i = 0;
-        i < localStorage.length;
-        i++
-    ) {
+            numero: pedido.numero,
 
-        const clave =
-            localStorage.key(i);
+            cliente: pedido.cliente,
 
+            direccion: pedido.direccion,
 
-        if (
-            clave &&
-            clave.startsWith("estadoPedido_")
-        ) {
+            zona: pedido.comuna,
 
-            clavesPedidos.push(clave);
+            estado: pedido.estado,
 
-        }
+            repartidor: pedido.repartidor
 
-    }
+        };
 
-
-    // Ordenamos según el número de pedido.
-
-    clavesPedidos.sort(
-        function (a, b) {
-
-            const numeroA =
-                Number(
-                    a.replace(
-                        "estadoPedido_",
-                        ""
-                    )
-                );
-
-
-            const numeroB =
-                Number(
-                    b.replace(
-                        "estadoPedido_",
-                        ""
-                    )
-                );
-
-
-            return numeroA - numeroB;
-
-        }
-    );
-
-
-    return clavesPedidos.map(
-        function (clave, indice) {
-
-            const numero =
-                clave.replace(
-                    "estadoPedido_",
-                    ""
-                );
-
-
-            const datos =
-                DATOS_PEDIDOS_DESPACHO[indice] ||
-                {
-
-                    cliente:
-                        "Cliente registrado",
-
-                    direccion:
-                        "Dirección registrada",
-
-                    zona:
-                        "Zona de cobertura"
-
-                };
-
-
-            return {
-
-                numero:
-                    numero,
-
-                cliente:
-                    datos.cliente,
-
-                direccion:
-                    datos.direccion,
-
-                zona:
-                    datos.zona,
-
-                estado:
-                    localStorage.getItem(
-                        clave
-                    ) || "pendiente",
-
-                repartidor:
-                    localStorage.getItem(
-                        "repartidorPedido_" +
-                        numero
-                    ) || ""
-
-            };
-
-        }
-    );
+    });
 
 }
 
@@ -653,8 +542,9 @@ function agregarEventosRepartidores() {
                         correoRepartidor === ""
                     ) {
 
-                        localStorage.removeItem(
-                            clave
+                        localStorage.setItem(
+                            clave,
+                            ""
                         );
 
                     }

@@ -142,7 +142,7 @@ function mostrarProductosPublicos() {
 
                     <a
                         class="btn btn-producto"
-                        href="#"
+                        href="detalle-producto.html?codigo=${producto.codigo}"
                     >
                         Ver producto
                     </a>

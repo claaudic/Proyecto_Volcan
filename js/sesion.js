@@ -97,8 +97,41 @@ function primerNombre(nombreCompleto) {
     return nombreCompleto.split(" ")[0];
 }
 
-function pintarNavCuenta() {
+function iniciales(nombreCompleto) {
+    const partes = String(nombreCompleto).trim().split(/\s+/);
 
+    if (partes.length === 1) {
+        return partes[0].slice(0, 2).toUpperCase();
+    }
+
+    return (partes[0][0] + partes[1][0]).toUpperCase();
+}
+
+function destinoDeCuenta(rol) {
+    if (rol === "ADMINISTRADOR") {
+        return "admin/index.html";
+    }
+
+    if (rol === "DESPACHADORA") {
+        return "despachadora.html";
+    }
+
+    if (rol === "REPARTIDOR") {
+        return "repartidor.html";
+    }
+
+    return "perfil.html";
+}
+
+function tituloDeCuenta(rol) {
+    if (rol === "CLIENTE") {
+        return "Ir a mi perfil";
+    }
+
+    return "Ir a mi panel";
+}
+
+function pintarNavCuenta() {
     const contenedor = document.getElementById("navCuenta");
 
     if (!contenedor) {
@@ -107,83 +140,54 @@ function pintarNavCuenta() {
 
     const usuario = obtenerSesion();
 
-    // Si no hay sesión iniciada
     if (!usuario) {
-        contenedor.innerHTML =
-            '<a class="btn btn-cuenta" href="login.html">Ingresar</a>';
-
+        contenedor.innerHTML = '<a class="btn btn-cuenta" href="login.html">Ingresar</a>';
         return;
     }
 
-    // ==========================================
-    // PANEL SEGÚN ROL
-    // ==========================================
-
-    let enlacePanel = "";
-
-    if (usuario.rol === "ADMINISTRADOR") {
-        enlacePanel = "admin/index.html";
-    }
-
-    else if (usuario.rol === "DESPACHADORA") {
-        enlacePanel = "despachadora.html";
-    }
-
-    else if (usuario.rol === "REPARTIDOR") {
-        enlacePanel = "repartidor.html";
-    }
-
-
-    // ==========================================
-    // BOTÓN PANEL
-    // ==========================================
-
-    let botonPanel = "";
-
-    if (enlacePanel !== "") {
-
-        botonPanel =
-            '<a class="btn btn-cuenta" href="' +
-            enlacePanel +
-            '">Panel</a>';
-
-    }
-
-
-    // ==========================================
-    // MOSTRAR CUENTA
-    // ==========================================
-
     contenedor.innerHTML =
         '<div class="cuenta-activa">' +
+        '<a class="avatar-cuenta" href="' + destinoDeCuenta(usuario.rol) + '" title="' + tituloDeCuenta(usuario.rol) + '">' +
+        '<span aria-hidden="true">' + iniciales(usuario.nombre) + "</span>" +
+        '<span class="visually-hidden">' + tituloDeCuenta(usuario.rol) + "</span>" +
+        "</a>" +
+        '<span class="cuenta-saludo">Hola, ' + primerNombre(usuario.nombre) + "</span>" +
+        '<button type="button" class="btn btn-cuenta" id="botonCerrarSesion">Salir</button>' +
+        "</div>";
 
-            '<span class="cuenta-saludo">' +
-                'Hola, ' +
-                primerNombre(usuario.nombre) +
-            '</span>' +
-
-            botonPanel +
-
-            '<button type="button" ' +
-                'class="btn btn-cuenta" ' +
-                'id="botonCerrarSesion">' +
-                'Salir' +
-            '</button>' +
-
-        '</div>';
-
-
-    // ==========================================
-    // CERRAR SESIÓN
-    // ==========================================
-
-    document
-        .getElementById("botonCerrarSesion")
-        .addEventListener("click", function () {
-
-            cerrarSesion();
-            window.location.reload();
-
-        });
+    document.getElementById("botonCerrarSesion").addEventListener("click", function () {
+        cerrarSesion();
+        window.location.reload();
+    });
 }
+
 document.addEventListener("DOMContentLoaded", pintarNavCuenta);
+
+const CLAVE_PEDIDOS = "pedidosVolcan";
+
+function obtenerPedidos() {
+    const guardado = localStorage.getItem(CLAVE_PEDIDOS);
+
+    if (!guardado) {
+        return [];
+    }
+
+    try {
+        const lista = JSON.parse(guardado);
+        return Array.isArray(lista) ? lista : [];
+    } catch (error) {
+        return [];
+    }
+}
+
+function guardarPedido(pedido) {
+    const pedidos = obtenerPedidos();
+    pedidos.unshift(pedido);
+    localStorage.setItem(CLAVE_PEDIDOS, JSON.stringify(pedidos));
+}
+
+function pedidosDe(correo) {
+    return obtenerPedidos().filter(function (pedido) {
+        return String(pedido.correo).toLowerCase() === String(correo).toLowerCase();
+    });
+}

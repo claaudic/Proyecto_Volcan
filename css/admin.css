@@ -239,3 +239,75 @@
         padding: 2rem 1.25rem 3rem;
     }
 }
+
+.admin-tarjeta {
+    padding: 1.5rem;
+    background-color: var(--blanco);
+    border: 1px solid var(--gris-borde);
+    border-top: 3px solid var(--verde);
+    border-radius: var(--radio);
+    box-shadow: var(--sombra);
+}
+
+.admin-tarjeta p {
+    margin: 0;
+    color: var(--texto-suave);
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.admin-tarjeta h2 {
+    margin: 0.35rem 0 0;
+    color: var(--tinta);
+    font-size: 2.2rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+}
+
+.tabla-admin td,
+.tabla-admin th,
+.table-responsive td,
+.table-responsive th {
+    padding: 0.65rem 0.75rem;
+    font-size: 0.9375rem;
+    vertical-align: middle;
+}
+
+.table-responsive td small.text-muted {
+    display: -webkit-box;
+    overflow: hidden;
+    max-width: 46ch;
+    margin-top: 0.1rem;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    font-size: 0.8125rem;
+    line-height: 1.4;
+}
+
+.table-responsive tbody tr:hover {
+    background-color: var(--gris-azulado);
+}
+
+.table-responsive td:nth-child(3),
+.table-responsive td:nth-child(4),
+.table-responsive td:nth-child(5),
+.table-responsive td:nth-child(6),
+.table-responsive td:nth-child(7),
+.table-responsive th:nth-child(3),
+.table-responsive th:nth-child(4),
+.table-responsive th:nth-child(5),
+.table-responsive th:nth-child(6),
+.table-responsive th:nth-child(7) {
+    white-space: nowrap;
+}
+
+.table-responsive td:last-child {
+    white-space: nowrap;
+}
+
+.table-responsive td:last-child .btn {
+    margin-bottom: 0 !important;
+    padding: 0.28rem 0.7rem;
+    font-size: 0.8125rem;
+}

@@ -22,8 +22,17 @@ const OPCIONES_MENU = [
 ];
 
 
-const TEXTO_ADMIN =
-    "Tienes acceso total al sistema. Puedes crear, editar y desactivar usuarios, asignar roles y revisar todos los reportes y datos del sistema.";
+const TEXTOS_PAGINA = {
+    "index.html": "Tienes acceso total al sistema. Desde aquí puedes gestionar el catálogo, las cuentas de usuario y las órdenes.",
+    "productos.html": "Administra el catálogo: crea productos, edita precios y stock, y desactiva los que dejes de vender.",
+    "usuarios.html": "Administra las cuentas del sistema: crea usuarios, asigna roles y desactiva accesos.",
+    "ordenes.html": "Revisa las órdenes registradas y su estado de despacho.",
+    "reportes.html": "Consulta la información consolidada del catálogo y las ventas."
+};
+
+const paginaActualAdmin = window.location.pathname.split("/").pop() || "index.html";
+
+const TEXTO_ADMIN = TEXTOS_PAGINA[paginaActualAdmin] || TEXTOS_PAGINA["index.html"];
 
 
 // ==========================================

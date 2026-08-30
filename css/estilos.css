@@ -2452,16 +2452,20 @@ a:focus-visible,
     font-weight: 800;
 }
 
-.tarjeta-dato-icono.pendiente {
+.tarjeta-dato-icono.tono-rosa {
     background-color: var(--accion);
 }
 
-.tarjeta-dato-icono.camino {
+.tarjeta-dato-icono.tono-celeste {
     background-color: var(--celeste);
 }
 
-.tarjeta-dato-icono.entregado {
+.tarjeta-dato-icono.tono-verde {
     background-color: var(--verde);
+}
+
+.tarjeta-dato-icono.tono-tinta {
+    background-color: var(--tinta-clara);
 }
 
 .tarjeta-dato-texto {
@@ -2526,7 +2530,8 @@ a:focus-visible,
     background-color: var(--gris-azulado);
 }
 
-.estado {
+.estado,
+.estado-pedido {
     display: inline-block;
     padding: 0.35rem 0.7rem;
     border-radius: 999px;
@@ -2550,7 +2555,9 @@ a:focus-visible,
     background-color: var(--entregado-fondo);
 }
 
-.selector-estado {
+.selector-estado,
+.selector-repartidor,
+.selector-estado-despacho {
     min-width: 140px;
     padding: 0.5rem 0.7rem;
     color: var(--tinta);
@@ -2564,16 +2571,22 @@ a:focus-visible,
     outline: none;
 }
 
-.selector-estado:hover {
+.selector-estado:hover,
+.selector-repartidor:hover,
+.selector-estado-despacho:hover {
     border-color: var(--celeste);
 }
 
-.selector-estado:focus {
+.selector-estado:focus,
+.selector-repartidor:focus,
+.selector-estado-despacho:focus {
     border-color: var(--verde);
     box-shadow: 0 0 0 3px rgba(14, 159, 110, 0.15);
 }
 
-.selector-estado:disabled {
+.selector-estado:disabled,
+.selector-repartidor:disabled,
+.selector-estado-despacho:disabled {
     color: var(--texto-suave);
     background-color: var(--gris-azulado);
     cursor: not-allowed;
@@ -2610,4 +2623,69 @@ a:focus-visible,
     margin-bottom: 1.5rem;
     color: var(--texto-suave);
     font-size: 0.9375rem;
+}
+
+.panel-aviso {
+    max-width: 62ch;
+    padding: 1.5rem 1.75rem;
+    background-color: var(--gris-azulado);
+    border: 1px solid var(--gris-borde);
+    border-left: 4px solid var(--verde);
+    border-radius: var(--radio);
+}
+
+.panel-aviso h2 {
+    margin-bottom: 0.5rem;
+    color: var(--tinta);
+    font-size: 1.125rem;
+    font-weight: 700;
+}
+
+.panel-aviso p {
+    margin: 0;
+    color: var(--texto-suave);
+    font-size: 0.9375rem;
+}
+
+.panel-vacio {
+    margin-top: 1.5rem;
+    padding: 3rem 1.5rem;
+    text-align: center;
+    background-color: var(--blanco);
+    border: 1px dashed var(--gris-borde);
+    border-radius: var(--radio);
+}
+
+.panel-vacio h3 {
+    margin-bottom: 0.35rem;
+    color: var(--tinta);
+    font-size: 1.125rem;
+    font-weight: 700;
+}
+
+.panel-vacio p {
+    margin: 0;
+    color: var(--texto-suave);
+    font-size: 0.9375rem;
+}
+
+.encabezado-accion {
+    margin-top: 1.5rem;
+    margin-bottom: 0;
+}
+
+.tabla-marco.table-responsive {
+    overflow-x: auto;
+}
+
+.rol-insignia {
+    padding: 0.3rem 0.65rem;
+    color: var(--blanco);
+    background-color: rgba(255, 255, 255, 0.14);
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
 }

@@ -3,177 +3,91 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <title>Productos | Gas El Volcán</title>
 
-    <title>
-        Productos | Gas El Volcán
-    </title>
-
-
-    
-    <link
-        rel="preconnect"
-        href="https://fonts.googleapis.com"
-    >
-
-    <link
-        rel="preconnect"
-        href="https://fonts.gstatic.com"
-        crossorigin
-    >
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
     <link
         href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap"
         rel="stylesheet"
     >
 
-
-   
     <link
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
         rel="stylesheet"
     >
 
-
-   
-    <link
-        rel="stylesheet"
-        href="../css/estilos.css"
-    >
-
-    <link
-        rel="stylesheet"
-        href="../css/admin.css"
-    >
-
+    <link rel="stylesheet" href="../css/estilos.css">
+    <link rel="stylesheet" href="../css/efectos.css">
+    <link rel="stylesheet" href="../css/admin.css">
 </head>
 
+<body>
 
-<body class="cuerpo-admin">
+    <a class="salto-contenido" href="#contenidoAdmin">Saltar al contenido</a>
 
-
-    <a
-        class="salto-contenido"
-        href="#contenidoAdmin"
-    >
-        Saltar al contenido
-    </a>
-
-
-    <div class="admin-layout">
-
-
-
-        <aside class="admin-menu">
-
-
-            <a
-                class="admin-marca"
-                href="../index.html"
-            >
-
-                <img
-                    src="../img/logo.svg"
-                    alt="Logo de Gas El Volcán"
-                >
-
-                <span>
-                    Gas El Volcán
-                </span>
-
-            </a>
-
-
-            <nav aria-label="Menú del administrador">
-
-                <ul
-                    class="admin-lista"
-                    id="menuAdmin"
-                ></ul>
-
-            </nav>
-
-
-            <div class="admin-usuario">
-
-                <p
-                    class="admin-usuario-nombre"
-                    id="usuarioNombre"
-                ></p>
-
-                <p
-                    class="admin-usuario-rol"
-                    id="usuarioRol"
-                ></p>
-
+    <header>
+        <nav class="navbar navbar-expand-lg" data-bs-theme="dark" aria-label="Navegación del panel">
+            <div class="container">
+                <a class="navbar-brand" href="../index.html">
+                    <img class="marca-logo" src="../img/logo.svg" alt="Logo de Gas El Volcán">
+                    <span>Gas El Volcán</span>
+                </a>
 
                 <button
+                    class="navbar-toggler"
                     type="button"
-                    class="btn btn-salir"
-                    id="botonSalir"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#menuPanel"
+                    aria-controls="menuPanel"
+                    aria-expanded="false"
+                    aria-label="Abrir menú"
                 >
-                    Cerrar sesión
+                    <span class="navbar-toggler-icon"></span>
                 </button>
 
+                <div class="collapse navbar-collapse" id="menuPanel">
+                    <ul class="navbar-nav ms-auto align-items-lg-center" id="menuAdmin"></ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+
+    <main id="contenidoAdmin">
+
+        <section class="pagina-encabezado" aria-labelledby="titulo-pagina">
+            <div class="encabezado-fondo" aria-hidden="true">
+                <span class="luz luz-encabezado-verde"></span>
+                <span class="luz luz-encabezado-celeste"></span>
+                <span class="encabezado-arco"></span>
             </div>
 
+            <div class="container">
+                <p class="panel-etiqueta">Administración</p>
+                <h1 id="titulo-pagina">Gestión de productos</h1>
+                <p class="pagina-bajada">Administra el catálogo e inventario de Gas El Volcán.</p>
 
-        </aside>
+                <p class="encabezado-accion"><button type="button" class="btn btn-principal" id="btnNuevoProducto">+ Crear producto</button></p>
+            </div>
 
+            <svg class="encabezado-monte" viewBox="0 0 1440 60" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+                <path d="M0 60 L0 38 L110 22 L214 40 L318 16 L430 36 L536 20 L648 38 L764 18 L876 36 L992 22 L1104 40 L1216 20 L1330 34 L1440 22 L1440 60 Z"/>
+            </svg>
+        </section>
 
+        <div class="panel-cuerpo">
+            <div class="container">
 
-       
-
-        <main
-            class="admin-contenido"
-            id="contenidoAdmin"
-        >
-
-
-            
-
-            <header class="admin-encabezado">
-
-                <div>
-
-                    <p class="admin-etiqueta">
-                        Administración
-                    </p>
-
-
-                    <h1 id="saludoAdmin">
-                        Gestión de productos
-                    </h1>
-
-
-                    <p>
-                        Administra el catálogo e inventario
-                        de Gas El Volcán.
-                    </p>
-
-                </div>
-
-
-                <button
-                    type="button"
-                    class="btn btn-principal"
-                    id="btnNuevoProducto"
-                >
-                    + Crear producto
-                </button>
-
-
-            </header>
 
 
 
            
 
-            <section class="admin-aviso">
+            <section class="panel-aviso">
 
                 <h2>
                     Inventario
@@ -197,16 +111,11 @@
 
                 <div class="col-12 col-md-4">
 
-                    <article class="admin-tarjeta h-100">
-
-                        <p>
-                            Productos
-                        </p>
-
-                        <h2 id="totalProductos">
-                            0
-                        </h2>
-
+                    <article class="tarjeta-dato">
+                        <div>
+                            <p class="tarjeta-dato-texto">Productos</p>
+                            <p class="tarjeta-dato-numero" id="totalProductos">0</p>
+                        </div>
                     </article>
 
                 </div>
@@ -217,16 +126,11 @@
 
                 <div class="col-12 col-md-4">
 
-                    <article class="admin-tarjeta h-100">
-
-                        <p>
-                            Productos activos
-                        </p>
-
-                        <h2 id="productosActivos">
-                            0
-                        </h2>
-
+                    <article class="tarjeta-dato">
+                        <div>
+                            <p class="tarjeta-dato-texto">Productos activos</p>
+                            <p class="tarjeta-dato-numero" id="productosActivos">0</p>
+                        </div>
                     </article>
 
                 </div>
@@ -237,16 +141,11 @@
 
                 <div class="col-12 col-md-4">
 
-                    <article class="admin-tarjeta h-100">
-
-                        <p>
-                            Stock crítico
-                        </p>
-
-                        <h2 id="productosStockCritico">
-                            0
-                        </h2>
-
+                    <article class="tarjeta-dato">
+                        <div>
+                            <p class="tarjeta-dato-texto">Stock crítico</p>
+                            <p class="tarjeta-dato-numero" id="productosStockCritico">0</p>
+                        </div>
                     </article>
 
                 </div>
@@ -263,7 +162,7 @@
 
                 <div class="mb-3">
 
-                    <p class="admin-etiqueta mb-1">
+                    <p class="panel-etiqueta mb-1">
                         Inventario
                     </p>
 
@@ -275,10 +174,10 @@
 
 
 
-                <div class="table-responsive">
+                <div class="tabla-marco table-responsive">
 
 
-                    <table class="table align-middle">
+                    <table class="tabla-panel">
 
 
                         <thead>
@@ -341,11 +240,83 @@
 
             </section>
 
+            </div>
+        </div>
 
-        </main>
+    </main>
 
 
-    </div>
+    <footer>
+        <div class="container pie-grid">
+            <div class="pie-marca">
+                <div class="pie-logo">
+                    <img src="../img/logo.svg" alt="">
+                    <span>Gas El Volcán</span>
+                </div>
+                <p>Distribuidora familiar de gas licuado en Chillán, Región de Ñuble. En operación desde 1998.</p>
+            </div>
+
+            <div>
+                <h2>Navegación</h2>
+                <ul class="footer-enlaces">
+                    <li><a href="../index.html">Inicio</a></li>
+                    <li><a href="../productos.html">Productos</a></li>
+                    <li><a href="../nosotros.html">Nosotros</a></li>
+                    <li><a href="../blogs.html">Blogs</a></li>
+                    <li><a href="../contacto.html">Contacto</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h2>Productos</h2>
+                <ul class="footer-enlaces">
+                    <li><a href="../productos.html">Cilindros de Gas</a></li>
+                    <li><a href="../productos.html">Reguladores</a></li>
+                    <li><a href="../productos.html">Mangueras y Conexiones</a></li>
+                    <li><a href="../productos.html">Accesorios</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h2>Contacto</h2>
+                <ul class="pie-contacto">
+                    <li>
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M12 21s7-5.5 7-11a7 7 0 10-14 0c0 5.5 7 11 7 11z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                            <circle cx="12" cy="10" r="2.5" fill="none" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                        <span>Chillán, Región de Ñuble</span>
+                    </li>
+                    <li>
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M5 4h4l2 5-2.5 1.5a12 12 0 005 5L15 13l5 2v4a1 1 0 01-1 1A16 16 0 014 5a1 1 0 011-1z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                        </svg>
+                        <a href="tel:+56973214560">+56 9 7321 4560</a>
+                    </li>
+                    <li>
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>
+                            <path d="M3 7l9 6 9-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                        </svg>
+                        <a href="mailto:contacto@gaselvolcan.cl">contacto@gaselvolcan.cl</a>
+                    </li>
+                    <li>
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/>
+                            <path d="M12 7v5l3.5 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        <span>Lunes a sábado, 08:00 a 20:00</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="container">
+            <p class="copyright">© 2026 Gas El Volcán. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+
 
 
 
@@ -826,22 +797,10 @@
 
     </div>
 
-
-
-    
-    <script
-        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
-    ></script>
-
-
-    
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../js/sesion.js"></script>
-
     <script src="../js/admin.js"></script>
-
     <script src="../js/productos-admin.js"></script>
-
 
 </body>
 

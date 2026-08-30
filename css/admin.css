@@ -1,6 +1,7 @@
-.cuerpo-admin {
-    background-color: var(--gris-azulado);
-}
+/* ==================================================
+   PANEL DE ADMINISTRACION
+   Lo comun con los demas paneles vive en estilos.css
+================================================== */
 
 .salto-contenido {
     position: absolute;
@@ -12,269 +13,12 @@
 }
 
 .salto-contenido:focus {
-    left: 1rem;
     top: 1rem;
+    left: 1rem;
     z-index: 10;
 }
 
-.admin-layout {
-    display: grid;
-    min-height: 100vh;
-    grid-template-columns: 260px minmax(0, 1fr);
-}
-
-.admin-menu {
-    display: flex;
-    flex-direction: column;
-    padding: 1.75rem 1.25rem;
-    background: linear-gradient(160deg, var(--tinta) 0%, var(--tinta-clara) 100%);
-}
-
-.admin-marca {
-    display: flex;
-    align-items: center;
-    gap: 0.7rem;
-    margin-bottom: 2.25rem;
-    color: var(--blanco);
-    font-size: 1.0625rem;
-    font-weight: 700;
-    text-decoration: none;
-}
-
-.admin-marca img {
-    width: 34px;
-    height: 34px;
-}
-
-.admin-marca:hover {
-    opacity: 0.85;
-}
-
-.admin-lista {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-}
-
-.admin-enlace {
-    display: block;
-    padding: 0.7rem 0.9rem;
-    color: rgba(255, 255, 255, 0.82);
-    border-radius: var(--radio);
-    font-size: 0.9375rem;
-    font-weight: 600;
-    text-decoration: none;
-}
-
-.admin-enlace:hover {
-    color: var(--blanco);
-    background-color: rgba(255, 255, 255, 0.08);
-}
-
-.admin-enlace-activo {
-    color: var(--blanco);
-    background-color: rgba(255, 255, 255, 0.14);
-}
-
-.admin-usuario {
-    margin-top: auto;
-    padding-top: 1.25rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.14);
-}
-
-.admin-usuario-nombre {
-    margin: 0;
-    color: var(--blanco);
-    font-size: 0.9375rem;
-    font-weight: 700;
-}
-
-.admin-usuario-rol {
-    margin: 0 0 0.9rem;
-    color: rgba(255, 255, 255, 0.65);
-    font-size: 0.8125rem;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-}
-
-.btn-salir {
-    width: 100%;
-    padding: 0.55rem;
-    color: var(--blanco);
-    background-color: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    border-radius: var(--radio);
-    font-size: 0.875rem;
-    font-weight: 600;
-}
-
-.btn-salir:hover {
-    color: var(--accion-texto);
-    background-color: var(--accion);
-    border-color: var(--accion);
-}
-
-.admin-contenido {
-    padding: 2.5rem 2.5rem 4rem;
-}
-
-.admin-encabezado {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 2.5rem;
-}
-
-.admin-etiqueta {
-    margin-bottom: 0.35rem;
-    color: var(--verde);
-    font-size: 0.8125rem;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-}
-
-.admin-encabezado h1 {
-    margin: 0;
-    color: var(--tinta);
-    font-size: 2.1rem;
-    font-weight: 800;
-    letter-spacing: -0.025em;
-}
-
-.admin-tarjetas {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1.25rem;
-    margin: 0 0 2.5rem;
-    padding: 0;
-}
-
-.admin-dato {
-    padding: 1.5rem;
-    background-color: var(--blanco);
-    border: 1px solid var(--gris-borde);
-    border-radius: var(--radio);
-    box-shadow: var(--sombra);
-}
-
-.admin-dato-numero {
-    margin: 0;
-    color: var(--tinta);
-    font-size: 2.4rem;
-    font-weight: 800;
-    letter-spacing: -0.03em;
-    line-height: 1;
-}
-
-.admin-dato-texto {
-    margin: 0.4rem 0 0;
-    color: var(--texto-suave);
-    font-size: 0.9375rem;
-}
-
-.admin-aviso {
-    max-width: 62ch;
-    padding: 1.75rem;
-    background-color: var(--blanco);
-    border: 1px solid var(--gris-borde);
-    border-left: 4px solid var(--verde);
-    border-radius: var(--radio);
-}
-
-.admin-aviso h2 {
-    margin: 0 0 0.5rem;
-    color: var(--tinta);
-    font-size: 1.1rem;
-    font-weight: 700;
-}
-
-.admin-aviso p {
-    margin: 0;
-    color: var(--texto);
-}
-
-@media (max-width: 860px) {
-    .admin-layout {
-        grid-template-columns: 1fr;
-    }
-
-    .admin-menu {
-        padding: 1.25rem;
-    }
-
-    .admin-marca {
-        margin-bottom: 1.25rem;
-    }
-
-    .admin-lista {
-        flex-direction: row;
-        flex-wrap: wrap;
-    }
-
-    .admin-usuario {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 0.75rem 1rem;
-        margin-top: 1.25rem;
-    }
-
-    .admin-usuario-rol {
-        margin-bottom: 0;
-    }
-
-    .btn-salir {
-        width: auto;
-        margin-left: auto;
-        padding: 0.5rem 1.1rem;
-    }
-
-    .admin-contenido {
-        padding: 2rem 1.25rem 3rem;
-    }
-}
-
-.admin-tarjeta {
-    padding: 1.5rem;
-    background-color: var(--blanco);
-    border: 1px solid var(--gris-borde);
-    border-top: 3px solid var(--verde);
-    border-radius: var(--radio);
-    box-shadow: var(--sombra);
-}
-
-.admin-tarjeta p {
-    margin: 0;
-    color: var(--texto-suave);
-    font-size: 0.875rem;
-    font-weight: 600;
-}
-
-.admin-tarjeta h2 {
-    margin: 0.35rem 0 0;
-    color: var(--tinta);
-    font-size: 2.2rem;
-    font-weight: 800;
-    letter-spacing: -0.03em;
-    line-height: 1;
-}
-
-.tabla-admin td,
-.tabla-admin th,
-.table-responsive td,
-.table-responsive th {
-    padding: 0.65rem 0.75rem;
-    font-size: 0.9375rem;
-    vertical-align: middle;
-}
-
-.table-responsive td small.text-muted {
+.tabla-panel td small.text-muted {
     display: -webkit-box;
     overflow: hidden;
     max-width: 46ch;
@@ -285,29 +29,19 @@
     line-height: 1.4;
 }
 
-.table-responsive tbody tr:hover {
-    background-color: var(--gris-azulado);
-}
-
-.table-responsive td:nth-child(3),
-.table-responsive td:nth-child(4),
-.table-responsive td:nth-child(5),
-.table-responsive td:nth-child(6),
-.table-responsive td:nth-child(7),
-.table-responsive th:nth-child(3),
-.table-responsive th:nth-child(4),
-.table-responsive th:nth-child(5),
-.table-responsive th:nth-child(6),
-.table-responsive th:nth-child(7) {
+.tabla-panel td:nth-child(n + 3),
+.tabla-panel th:nth-child(n + 3) {
     white-space: nowrap;
 }
 
-.table-responsive td:last-child {
-    white-space: nowrap;
-}
-
-.table-responsive td:last-child .btn {
+.tabla-panel td:last-child .btn {
     margin-bottom: 0 !important;
     padding: 0.28rem 0.7rem;
     font-size: 0.8125rem;
+}
+
+@media (max-width: 768px) {
+    .tabla-panel {
+        min-width: 900px;
+    }
 }

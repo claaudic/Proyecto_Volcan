@@ -34,13 +34,14 @@
 
                 <div class="collapse navbar-collapse" id="menuPrincipal">
                     <ul class="navbar-nav ms-auto align-items-lg-center">
-                        <li class="nav-item"><a class="nav-link" href="index.html">Inicio</a></li>
-                        <li class="nav-item"><a class="nav-link" href="productos.html">Productos</a></li>
-                        <li class="nav-item"><a class="nav-link" href="nosotros.html">Nosotros</a></li>
-                        <li class="nav-item"><a class="nav-link" href="blogs.html">Blogs</a></li>
-                        <li class="nav-item"><a class="nav-link" href="contacto.html">Contacto</a></li>
+                        <li class="nav-item solo-cliente"><a class="nav-link" href="index.html">Inicio</a></li>
+                        <li class="nav-item solo-cliente"><a class="nav-link" href="productos.html">Productos</a></li>
+                        <li class="nav-item solo-cliente"><a class="nav-link" href="nosotros.html">Nosotros</a></li>
+                        <li class="nav-item solo-cliente"><a class="nav-link" href="blogs.html">Blogs</a></li>
+                        <li class="nav-item solo-cliente"><a class="nav-link" href="contacto.html">Contacto</a></li>
+                        <li class="nav-item d-none" id="navVolverPanel"><a class="nav-link" href="#">Volver a mi panel</a></li>
                         <li class="nav-item nav-cuenta" id="navCuenta"></li>
-                        <li class="nav-item">
+                        <li class="nav-item solo-cliente">
                             <button type="button" class="btn btn-carrito ms-lg-2" data-bs-toggle="offcanvas" data-bs-target="#panelCarrito" aria-controls="panelCarrito">
                                 Carrito (<span class="carrito-total">0</span>)
                             </button>
@@ -238,7 +239,7 @@
     <script src="js/zonas.js"></script>
     <script src="js/perfil.js"></script>
     <a
-        class="boton-whatsapp"
+        class="boton-whatsapp solo-cliente"
         href="https://wa.me/56973214560?text=Hola%2C%20quiero%20hacer%20un%20pedido%20de%20gas."
         target="_blank"
         rel="noopener"

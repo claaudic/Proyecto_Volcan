@@ -30,6 +30,7 @@ const TEXTOS_PAGINA = {
     "reportes.html": "Consulta la información consolidada del catálogo y las ventas."
 };
 
+
 const paginaActualAdmin = window.location.pathname.split("/").pop() || "index.html";
 
 const TEXTO_ADMIN = TEXTOS_PAGINA[paginaActualAdmin] || TEXTOS_PAGINA["index.html"];
@@ -49,74 +50,134 @@ if (!sesion || sesion.rol !== "ADMINISTRADOR") {
 
 } else {
 
-    dibujarPanel(sesion);
+    dibujarPanel();
 
 }
 
 
-function dibujarPanel(usuario) {
+function dibujarPanel() {
 
     const menu = document.getElementById("menuAdmin");
 
-    const paginaActual =
-        window.location.pathname.split("/").pop() || "index.html";
+
+    if (menu) {
+
+        menu.innerHTML = OPCIONES_MENU.map(function (opcion) {
+
+            const activo =
+                opcion.enlace === paginaActualAdmin
+                    ? " active"
+                    : "";
+
+            return `
+                <li class="nav-item">
+                    <a
+                        class="nav-link${activo}"
+                        href="${opcion.enlace}"
+                    >
+                        ${opcion.texto}
+                    </a>
+                </li>
+            `;
+
+        }).join("") + '<li class="nav-item nav-cuenta" id="navCuenta"></li>';
 
 
-    
-    menu.innerHTML = OPCIONES_MENU.map(function (opcion) {
+        pintarNavCuenta();
 
-        const activo =
-            opcion.enlace === paginaActual
-                ? " admin-enlace-activo"
-                : "";
-
-        return `
-            <li>
-                <a
-                    class="admin-enlace${activo}"
-                    href="${opcion.enlace}"
-                >
-                    ${opcion.texto}
-                </a>
-            </li>
-        `;
-
-    }).join("");
+    }
 
 
-const saludo = document.getElementById("saludoAdmin");
-const nombreUsuario = document.getElementById("usuarioNombre");
-const rolUsuario = document.getElementById("usuarioRol");
-const aviso = document.getElementById("textoAviso");
+    const aviso = document.getElementById("textoAviso");
 
-if (saludo) {
-    saludo.textContent = "Hola, " + usuario.nombre;
+    if (aviso) {
+        aviso.textContent = TEXTO_ADMIN;
+    }
+
+
+    mostrarResumenAdmin();
+
 }
 
-if (nombreUsuario) {
-    nombreUsuario.textContent = usuario.nombre;
-}
 
-if (rolUsuario) {
-    rolUsuario.textContent = "Administrador";
-}
+// ==========================================
+// CIFRAS DEL PANEL DE INICIO
+// ==========================================
 
-if (aviso) {
-    aviso.textContent = TEXTO_ADMIN;
-}
+function mostrarResumenAdmin() {
 
-    
-const botonSalir = document.getElementById("botonSalir");
+    const casillaProductos = document.getElementById("totalProductos");
 
-if (botonSalir) {
+    if (!casillaProductos) {
+        return;
+    }
 
-    botonSalir.addEventListener("click", function () {
 
-        cerrarSesion();
+    const productos =
+        typeof obtenerCatalogo === "function"
+            ? obtenerCatalogo()
+            : [];
 
-        window.location.href = "../login.html";
+
+    const categorias = [];
+
+    productos.forEach(function (producto) {
+
+        if (categorias.indexOf(producto.categoria) === -1) {
+            categorias.push(producto.categoria);
+        }
 
     });
 
+
+    casillaProductos.textContent = productos.length;
+
+    document.getElementById("totalCategorias").textContent =
+        categorias.length;
+
+    document.getElementById("totalUsuarios").textContent =
+        contarUsuarios();
+
 }
+
+
+function contarUsuarios() {
+
+    const guardados = localStorage.getItem("usuariosSistema");
+
+    let correos = [];
+
+
+    if (guardados) {
+
+        try {
+
+            const lista = JSON.parse(guardados);
+
+            if (Array.isArray(lista)) {
+
+                correos = lista.map(function (usuario) {
+                    return String(usuario.correo).toLowerCase();
+                });
+
+            }
+
+        } catch (error) {
+            correos = [];
+        }
+
+    }
+
+
+    USUARIOS.forEach(function (base) {
+
+        if (correos.indexOf(base.correo.toLowerCase()) === -1) {
+            correos.push(base.correo.toLowerCase());
+        }
+
+    });
+
+
+    return correos.length;
+
 }

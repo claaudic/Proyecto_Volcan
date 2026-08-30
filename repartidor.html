@@ -88,7 +88,7 @@
 
                     <article class="tarjeta-dato">
 
-                        <div class="tarjeta-dato-icono pendiente">
+                        <div class="tarjeta-dato-icono tono-rosa">
                             P
                         </div>
 
@@ -106,7 +106,7 @@
 
                     <article class="tarjeta-dato">
 
-                        <div class="tarjeta-dato-icono camino">
+                        <div class="tarjeta-dato-icono tono-celeste">
                             C
                         </div>
 
@@ -124,7 +124,7 @@
 
                     <article class="tarjeta-dato">
 
-                        <div class="tarjeta-dato-icono entregado">
+                        <div class="tarjeta-dato-icono tono-verde">
                             E
                         </div>
 
@@ -186,154 +186,17 @@
                         </thead>
 
 
-                        <tbody id="tablaPedidos">
-
-                            <tr data-estado="pendiente">
-
-                                <td>
-                                    <strong>#1001</strong>
-                                </td>
-
-                                <td>
-                                    Carlos Pérez
-                                </td>
-
-                                <td>
-                                    Av. Ecuador 1250, Chillán
-                                </td>
-
-                                <td>
-                                    Cilindro GLP 15 kg
-                                </td>
-
-                                <td>
-                                    <span class="estado estado-pendiente">
-                                        Pendiente
-                                    </span>
-                                </td>
-
-                                <td>
-
-                                    <select class="selector-estado">
-
-                                        <option value="pendiente" selected>
-                                            Pendiente
-                                        </option>
-
-                                        <option value="camino">
-                                            En camino
-                                        </option>
-
-                                        <option value="entregado">
-                                            Entregado
-                                        </option>
-
-                                    </select>
-
-                                </td>
-
-                            </tr>
-
-
-                            <tr data-estado="pendiente">
-
-                                <td>
-                                    <strong>#1002</strong>
-                                </td>
-
-                                <td>
-                                    María González
-                                </td>
-
-                                <td>
-                                    Los Puelches 430, Chillán
-                                </td>
-
-                                <td>
-                                    Cilindro GLP 11 kg
-                                </td>
-
-                                <td>
-                                    <span class="estado estado-pendiente">
-                                        Pendiente
-                                    </span>
-                                </td>
-
-                                <td>
-
-                                    <select class="selector-estado">
-
-                                        <option value="pendiente" selected>
-                                            Pendiente
-                                        </option>
-
-                                        <option value="camino">
-                                            En camino
-                                        </option>
-
-                                        <option value="entregado">
-                                            Entregado
-                                        </option>
-
-                                    </select>
-
-                                </td>
-
-                            </tr>
-
-
-                            <tr data-estado="camino">
-
-                                <td>
-                                    <strong>#1003</strong>
-                                </td>
-
-                                <td>
-                                    Daniela Soto
-                                </td>
-
-                                <td>
-                                    Las Rosas 321, Chillán Viejo
-                                </td>
-
-                                <td>
-                                    Cilindro GLP 5 kg
-                                </td>
-
-                                <td>
-                                    <span class="estado estado-camino">
-                                        En camino
-                                    </span>
-                                </td>
-
-                                <td>
-
-                                    <select class="selector-estado">
-
-                                        <option value="pendiente">
-                                            Pendiente
-                                        </option>
-
-                                        <option value="camino" selected>
-                                            En camino
-                                        </option>
-
-                                        <option value="entregado">
-                                            Entregado
-                                        </option>
-
-                                    </select>
-
-                                </td>
-
-                            </tr>
-
-                        </tbody>
+                        <tbody id="tablaPedidos"></tbody>
 
                     </table>
 
                 </div>
 
+            </div>
+
+            <div class="panel-vacio d-none" id="sinRuta">
+                <h3>No tienes pedidos asignados</h3>
+                <p>Cuando la despachadora te asigne una ruta, aparecerá aquí.</p>
             </div>
 
         </section>
@@ -419,6 +282,7 @@
     ></script>
 
     <script src="js/sesion.js"></script>
+    <script src="js/pedidos.js"></script>
     <script src="js/repartidor.js"></script>
 
 </body>

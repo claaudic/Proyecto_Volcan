@@ -1,27 +1,32 @@
 const CLAVE_SESION = "usuarioActivo";
 
 const USUARIOS = [
-    
     {
-        nombre: "Claudia Administradora",
+        nombre: "Sofía Pérez",
         correo: "admin@gaselvolcan.cl",
         contrasena: "Admin1234",
         rol: "ADMINISTRADOR"
     },
-     {
-        nombre: "Daniela Despachadora",
+    {
+        nombre: "Daniela Fuentes",
         correo: "despachadora@gaselvolcan.cl",
         contrasena: "Desp123",
         rol: "DESPACHADORA"
     },
     {
-        nombre: "Repartidor El Volcán",
+        nombre: "Matías Vera",
         correo: "repartidor@gaselvolcan.cl",
         contrasena: "Repart123",
         rol: "REPARTIDOR"
     },
     {
-        nombre: "Cliente de Prueba",
+        nombre: "Rodrigo Peña",
+        correo: "repartidor2@gaselvolcan.cl",
+        contrasena: "Repart123",
+        rol: "REPARTIDOR"
+    },
+    {
+        nombre: "Camila Rojas",
         correo: "cliente@gmail.com",
         contrasena: "Clien1234",
         rol: "CLIENTE"
@@ -107,7 +112,15 @@ function iniciales(nombreCompleto) {
     return (partes[0][0] + partes[1][0]).toUpperCase();
 }
 
-function destinoDeCuenta(rol) {
+function rutaBase() {
+    if (window.location.pathname.indexOf("/admin/") !== -1) {
+        return "../";
+    }
+
+    return "";
+}
+
+function panelDeRol(rol) {
     if (rol === "ADMINISTRADOR") {
         return "admin/index.html";
     }
@@ -120,15 +133,23 @@ function destinoDeCuenta(rol) {
         return "repartidor.html";
     }
 
-    return "perfil.html";
+    return "";
 }
 
-function tituloDeCuenta(rol) {
-    if (rol === "CLIENTE") {
-        return "Ir a mi perfil";
+function nombreDeRol(rol) {
+    if (rol === "ADMINISTRADOR") {
+        return "Administrador";
     }
 
-    return "Ir a mi panel";
+    if (rol === "DESPACHADORA") {
+        return "Despachadora";
+    }
+
+    if (rol === "REPARTIDOR") {
+        return "Repartidor";
+    }
+
+    return "Cliente";
 }
 
 function pintarNavCuenta() {
@@ -141,17 +162,24 @@ function pintarNavCuenta() {
     const usuario = obtenerSesion();
 
     if (!usuario) {
-        contenedor.innerHTML = '<a class="btn btn-cuenta" href="login.html">Ingresar</a>';
+        contenedor.innerHTML =
+            '<a class="btn btn-cuenta" href="' + rutaBase() + 'login.html">Ingresar</a>';
         return;
     }
 
+    const rotulo = usuario.nombre + " (" + nombreDeRol(usuario.rol) + ")";
+
+    const insignia = usuario.rol === "CLIENTE"
+        ? ""
+        : '<span class="rol-insignia">' + nombreDeRol(usuario.rol) + "</span>";
+
     contenedor.innerHTML =
         '<div class="cuenta-activa">' +
-        '<a class="avatar-cuenta" href="' + destinoDeCuenta(usuario.rol) + '" title="' + tituloDeCuenta(usuario.rol) + '">' +
+        '<a class="avatar-cuenta" href="' + rutaBase() + 'perfil.html" title="' + rotulo + ' — ir a mi perfil">' +
         '<span aria-hidden="true">' + iniciales(usuario.nombre) + "</span>" +
-        '<span class="visually-hidden">' + tituloDeCuenta(usuario.rol) + "</span>" +
+        '<span class="visually-hidden">Mi perfil: ' + rotulo + "</span>" +
         "</a>" +
-        '<span class="cuenta-saludo">Hola, ' + primerNombre(usuario.nombre) + "</span>" +
+        insignia +
         '<button type="button" class="btn btn-cuenta" id="botonCerrarSesion">Salir</button>' +
         "</div>";
 

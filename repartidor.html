@@ -28,81 +28,73 @@
 <body>
 
     <header>
-        <nav
-            class="navbar navbar-expand-lg"
-            data-bs-theme="dark"
-            aria-label="Navegación del repartidor"
-        >
+        <nav class="navbar navbar-expand-lg" data-bs-theme="dark" aria-label="Navegación del repartidor">
             <div class="container">
-
-                <a class="navbar-brand" href="repartidor.html">
-                    <img
-                        class="marca-logo"
-                        src="img/logo.svg"
-                        alt="Logo de Gas El Volcán"
-                    >
+                <a class="navbar-brand" href="index.html">
+                    <img class="marca-logo" src="img/logo.svg" alt="Logo de Gas El Volcán">
                     <span>Gas El Volcán</span>
                 </a>
 
-                <div class="ms-auto d-flex align-items-center gap-3">
+                <button
+                    class="navbar-toggler"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#menuRepartidor"
+                    aria-controls="menuRepartidor"
+                    aria-expanded="false"
+                    aria-label="Abrir menú"
+                >
+                    <span class="navbar-toggler-icon"></span>
+                </button>
 
-                    <span class="panel-rol">
-                        Panel Repartidor
-                    </span>
-
-                    <div
-                        class="nav-cuenta"
-                        id="navCuenta"
-                    ></div>
-
+                <div class="collapse navbar-collapse" id="menuRepartidor">
+                    <ul class="navbar-nav ms-auto align-items-lg-center">
+                        <li class="nav-item"><a class="nav-link active" href="repartidor.html">Mis pedidos</a></li>
+                        <li class="nav-item nav-cuenta" id="navCuenta"></li>
+                    </ul>
                 </div>
-
             </div>
         </nav>
     </header>
 
 
-    <main class="panel-repartidor">
+    <main>
 
-        <!-- ENCABEZADO -->
-        <section class="repartidor-portada">
-
-            <div class="container">
-
-                <p class="repartidor-etiqueta">
-                    Área de despacho
-                </p>
-
-                <h1>
-                    Mis pedidos asignados
-                </h1>
-
-                <p class="repartidor-descripcion">
-                    Revisa los pedidos de tu ruta y actualiza
-                    el estado de cada entrega.
-                </p>
-
+        <section class="pagina-encabezado" aria-labelledby="titulo-repartidor">
+            <div class="encabezado-fondo" aria-hidden="true">
+                <span class="luz luz-encabezado-verde"></span>
+                <span class="luz luz-encabezado-celeste"></span>
+                <span class="encabezado-arco"></span>
             </div>
 
+            <div class="container">
+                <p class="panel-etiqueta">Área de despacho</p>
+                <h1 id="titulo-repartidor">Mis pedidos asignados</h1>
+                <p class="pagina-bajada">Revisa los pedidos de tu ruta y actualiza el estado de cada entrega.</p>
+            </div>
+
+            <svg class="encabezado-monte" viewBox="0 0 1440 60" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+                <path d="M0 60 L0 38 L110 22 L214 40 L318 16 L430 36 L536 20 L648 38 L764 18 L876 36 L992 22 L1104 40 L1216 20 L1330 34 L1440 22 L1440 60 Z"/>
+            </svg>
         </section>
 
+        <div class="panel-cuerpo">
 
-        <!-- RESUMEN -->
-        <section class="container resumen-repartidor">
+        <section class="container panel-seccion">
 
             <div class="row g-4">
 
                 <div class="col-12 col-md-4">
 
-                    <article class="tarjeta-resumen">
+                    <article class="tarjeta-dato">
 
-                        <div class="icono-resumen pendiente">
+                        <div class="tarjeta-dato-icono tono-rosa">
                             P
                         </div>
 
                         <div>
-                            <p>Pendientes</p>
-                            <h2 id="totalPendientes">2</h2>
+                            <p class="tarjeta-dato-texto">Pendientes</p>
+                            <p class="tarjeta-dato-numero" id="totalPendientes">2</p>
                         </div>
 
                     </article>
@@ -112,15 +104,15 @@
 
                 <div class="col-12 col-md-4">
 
-                    <article class="tarjeta-resumen">
+                    <article class="tarjeta-dato">
 
-                        <div class="icono-resumen camino">
+                        <div class="tarjeta-dato-icono tono-celeste">
                             C
                         </div>
 
                         <div>
-                            <p>En camino</p>
-                            <h2 id="totalCamino">1</h2>
+                            <p class="tarjeta-dato-texto">En camino</p>
+                            <p class="tarjeta-dato-numero" id="totalCamino">1</p>
                         </div>
 
                     </article>
@@ -130,15 +122,15 @@
 
                 <div class="col-12 col-md-4">
 
-                    <article class="tarjeta-resumen">
+                    <article class="tarjeta-dato">
 
-                        <div class="icono-resumen entregado">
+                        <div class="tarjeta-dato-icono tono-verde">
                             E
                         </div>
 
                         <div>
-                            <p>Entregados</p>
-                            <h2 id="totalEntregados">0</h2>
+                            <p class="tarjeta-dato-texto">Entregados</p>
+                            <p class="tarjeta-dato-numero" id="totalEntregados">0</p>
                         </div>
 
                     </article>
@@ -151,13 +143,13 @@
 
 
         <!-- PEDIDOS -->
-        <section class="container seccion-pedidos">
+        <section class="container panel-seccion">
 
-            <div class="titulo-pedidos">
+            <div class="panel-titulo">
 
                 <div>
 
-                    <p>
+                    <p class="panel-etiqueta">
                         Ruta actual
                     </p>
 
@@ -167,18 +159,18 @@
 
                 </div>
 
-                <span>
+                <p class="panel-titulo-nota">
                     Solo puedes ver tus pedidos.
-                </span>
+                </p>
 
             </div>
 
 
-            <div class="tabla-contenedor">
+            <div class="tabla-marco">
 
                 <div class="table-responsive">
 
-                    <table class="tabla-repartidor">
+                    <table class="tabla-panel">
 
                         <thead>
 
@@ -194,149 +186,7 @@
                         </thead>
 
 
-                        <tbody id="tablaPedidos">
-
-                            <tr data-estado="pendiente">
-
-                                <td>
-                                    <strong>#1001</strong>
-                                </td>
-
-                                <td>
-                                    Carlos Pérez
-                                </td>
-
-                                <td>
-                                    Av. Ecuador 1250, Chillán
-                                </td>
-
-                                <td>
-                                    Cilindro GLP 15 kg
-                                </td>
-
-                                <td>
-                                    <span class="estado estado-pendiente">
-                                        Pendiente
-                                    </span>
-                                </td>
-
-                                <td>
-
-                                    <select class="selector-estado">
-
-                                        <option value="pendiente" selected>
-                                            Pendiente
-                                        </option>
-
-                                        <option value="camino">
-                                            En camino
-                                        </option>
-
-                                        <option value="entregado">
-                                            Entregado
-                                        </option>
-
-                                    </select>
-
-                                </td>
-
-                            </tr>
-
-
-                            <tr data-estado="pendiente">
-
-                                <td>
-                                    <strong>#1002</strong>
-                                </td>
-
-                                <td>
-                                    María González
-                                </td>
-
-                                <td>
-                                    Los Puelches 430, Chillán
-                                </td>
-
-                                <td>
-                                    Cilindro GLP 11 kg
-                                </td>
-
-                                <td>
-                                    <span class="estado estado-pendiente">
-                                        Pendiente
-                                    </span>
-                                </td>
-
-                                <td>
-
-                                    <select class="selector-estado">
-
-                                        <option value="pendiente" selected>
-                                            Pendiente
-                                        </option>
-
-                                        <option value="camino">
-                                            En camino
-                                        </option>
-
-                                        <option value="entregado">
-                                            Entregado
-                                        </option>
-
-                                    </select>
-
-                                </td>
-
-                            </tr>
-
-
-                            <tr data-estado="camino">
-
-                                <td>
-                                    <strong>#1003</strong>
-                                </td>
-
-                                <td>
-                                    Daniela Soto
-                                </td>
-
-                                <td>
-                                    Las Rosas 321, Chillán Viejo
-                                </td>
-
-                                <td>
-                                    Cilindro GLP 5 kg
-                                </td>
-
-                                <td>
-                                    <span class="estado estado-camino">
-                                        En camino
-                                    </span>
-                                </td>
-
-                                <td>
-
-                                    <select class="selector-estado">
-
-                                        <option value="pendiente">
-                                            Pendiente
-                                        </option>
-
-                                        <option value="camino" selected>
-                                            En camino
-                                        </option>
-
-                                        <option value="entregado">
-                                            Entregado
-                                        </option>
-
-                                    </select>
-
-                                </td>
-
-                            </tr>
-
-                        </tbody>
+                        <tbody id="tablaPedidos"></tbody>
 
                     </table>
 
@@ -344,7 +194,14 @@
 
             </div>
 
+            <div class="panel-vacio d-none" id="sinRuta">
+                <h3>No tienes pedidos asignados</h3>
+                <p>Cuando la despachadora te asigne una ruta, aparecerá aquí.</p>
+            </div>
+
         </section>
+
+        </div>
 
     </main>
 
@@ -425,6 +282,7 @@
     ></script>
 
     <script src="js/sesion.js"></script>
+    <script src="js/pedidos.js"></script>
     <script src="js/repartidor.js"></script>
 
 </body>

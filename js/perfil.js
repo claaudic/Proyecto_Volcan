@@ -198,7 +198,56 @@ function iniciarPerfil(usuario) {
     }
 
     revisarComuna();
-    mostrarPedidos(usuario);
+    mostrarSaludo(usuario);
+    mostrarColumnaDerecha(usuario);
+}
+
+function mostrarSaludo(usuario) {
+    const bajada = document.getElementById("perfilBajada");
+
+    if (!bajada) {
+        return;
+    }
+
+    if (usuario.rol === "CLIENTE") {
+        bajada.textContent = "Hola, " + primerNombre(usuario.nombre) +
+            ". Revisa tus datos y el historial de tus pedidos.";
+        return;
+    }
+
+    bajada.textContent = "Hola, " + primerNombre(usuario.nombre) +
+        ". Revisa y actualiza tus datos de contacto.";
+}
+
+function mostrarColumnaDerecha(usuario) {
+    const bloqueRol = document.getElementById("perfilBloqueRol");
+    const bloquePedidos = document.getElementById("perfilBloquePedidos");
+
+    if (usuario.rol === "CLIENTE") {
+        mostrarPedidos(usuario);
+        return;
+    }
+
+    bloquePedidos.classList.add("d-none");
+    bloqueRol.classList.remove("d-none");
+
+    document.querySelectorAll(".solo-cliente").forEach(function (elemento) {
+        elemento.classList.add("d-none");
+    });
+
+    const volver = document.getElementById("navVolverPanel");
+
+    if (volver) {
+        volver.querySelector("a").href = panelDeRol(usuario.rol);
+        volver.classList.remove("d-none");
+    }
+
+    document.getElementById("perfilNombreRol").textContent = nombreDeRol(usuario.rol);
+
+    document.getElementById("perfilRolNota").textContent =
+        "Tu correo " + usuario.correo + " tiene acceso al panel de trabajo.";
+
+    document.getElementById("perfilEnlacePanel").href = panelDeRol(usuario.rol);
 }
 
 function mostrarPedidos(usuario) {

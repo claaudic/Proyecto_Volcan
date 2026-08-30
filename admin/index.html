@@ -1,77 +1,214 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Panel de administración | Gas El Volcán</title>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
     <link rel="stylesheet" href="../css/estilos.css">
+    <link rel="stylesheet" href="../css/efectos.css">
     <link rel="stylesheet" href="../css/admin.css">
 </head>
-<body class="cuerpo-admin">
+
+<body>
 
     <a class="salto-contenido" href="#contenidoAdmin">Saltar al contenido</a>
 
-    <div class="admin-layout">
+    <header>
+        <nav class="navbar navbar-expand-lg" data-bs-theme="dark" aria-label="Navegación del panel">
+            <div class="container">
+                <a class="navbar-brand" href="../index.html">
+                    <img class="marca-logo" src="../img/logo.svg" alt="Logo de Gas El Volcán">
+                    <span>Gas El Volcán</span>
+                </a>
 
-        <aside class="admin-menu">
-            <a class="admin-marca" href="../index.html">
-                <img src="../img/logo.svg" alt="Logo de Gas El Volcán">
-                <span>Gas El Volcán</span>
-            </a>
+                <button
+                    class="navbar-toggler"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#menuPanel"
+                    aria-controls="menuPanel"
+                    aria-expanded="false"
+                    aria-label="Abrir menú"
+                >
+                    <span class="navbar-toggler-icon"></span>
+                </button>
 
-            <nav aria-label="Menú del panel">
-                <ul class="admin-lista" id="menuAdmin"></ul>
-            </nav>
-
-            <div class="admin-usuario">
-                <p class="admin-usuario-nombre" id="usuarioNombre"></p>
-                <p class="admin-usuario-rol" id="usuarioRol"></p>
-                <button type="button" class="btn btn-salir" id="botonSalir">Cerrar sesión</button>
-            </div>
-        </aside>
-
-        <main class="admin-contenido" id="contenidoAdmin">
-            <header class="admin-encabezado">
-                <div>
-                    <p class="admin-etiqueta">Panel de administración</p>
-                    <h1 id="saludoAdmin">Hola</h1>
+                <div class="collapse navbar-collapse" id="menuPanel">
+                    <ul class="navbar-nav ms-auto align-items-lg-center" id="menuAdmin"></ul>
                 </div>
-                <a class="btn btn-secundario" href="../index.html">Ver la tienda</a>
-            </header>
+            </div>
+        </nav>
+    </header>
 
-            <section class="admin-resumen" aria-labelledby="tituloResumen">
-                <h2 id="tituloResumen" class="visually-hidden">Resumen del catálogo</h2>
 
-                <ul class="admin-tarjetas list-unstyled">
-                    <li class="admin-dato">
-                        <p class="admin-dato-numero">14</p>
-                        <p class="admin-dato-texto">Productos en el catálogo</p>
+    <main id="contenidoAdmin">
+
+        <section class="pagina-encabezado" aria-labelledby="titulo-pagina">
+            <div class="encabezado-fondo" aria-hidden="true">
+                <span class="luz luz-encabezado-verde"></span>
+                <span class="luz luz-encabezado-celeste"></span>
+                <span class="encabezado-arco"></span>
+            </div>
+
+            <div class="container">
+                <p class="panel-etiqueta">Administración</p>
+                <h1 id="titulo-pagina">Panel de administración</h1>
+                <p class="pagina-bajada">Gestiona el catálogo, las cuentas de usuario y las órdenes del sistema.</p>
+
+                <p class="encabezado-accion"><a class="btn btn-secundario" href="../index.html">Ver la tienda</a></p>
+            </div>
+
+            <svg class="encabezado-monte" viewBox="0 0 1440 60" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+                <path d="M0 60 L0 38 L110 22 L214 40 L318 16 L430 36 L536 20 L648 38 L764 18 L876 36 L992 22 L1104 40 L1216 20 L1330 34 L1440 22 L1440 60 Z"/>
+            </svg>
+        </section>
+
+        <div class="panel-cuerpo">
+            <div class="container">
+
+                <section class="panel-seccion" aria-labelledby="titulo-resumen">
+                    <h2 id="titulo-resumen" class="visually-hidden">Resumen del sistema</h2>
+
+                    <div class="row g-4">
+
+                        <div class="col-12 col-md-4">
+                            <article class="tarjeta-dato">
+                                <div class="tarjeta-dato-icono tono-verde" aria-hidden="true">P</div>
+                                <div>
+                                    <p class="tarjeta-dato-texto">Productos en el catálogo</p>
+                                    <p class="tarjeta-dato-numero" id="totalProductos">0</p>
+                                </div>
+                            </article>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <article class="tarjeta-dato">
+                                <div class="tarjeta-dato-icono tono-celeste" aria-hidden="true">C</div>
+                                <div>
+                                    <p class="tarjeta-dato-texto">Categorías</p>
+                                    <p class="tarjeta-dato-numero" id="totalCategorias">0</p>
+                                </div>
+                            </article>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <article class="tarjeta-dato">
+                                <div class="tarjeta-dato-icono tono-tinta" aria-hidden="true">U</div>
+                                <div>
+                                    <p class="tarjeta-dato-texto">Usuarios registrados</p>
+                                    <p class="tarjeta-dato-numero" id="totalUsuarios">0</p>
+                                </div>
+                            </article>
+                        </div>
+
+                    </div>
+                </section>
+
+                <section class="panel-seccion" aria-labelledby="tituloAviso">
+                    <div class="panel-aviso">
+                        <h2 id="tituloAviso">Qué puedes hacer aquí</h2>
+                        <p id="textoAviso"></p>
+                    </div>
+                </section>
+
+            </div>
+        </div>
+
+    </main>
+
+
+    <footer>
+        <div class="container pie-grid">
+            <div class="pie-marca">
+                <div class="pie-logo">
+                    <img src="../img/logo.svg" alt="">
+                    <span>Gas El Volcán</span>
+                </div>
+                <p>Distribuidora familiar de gas licuado en Chillán, Región de Ñuble. En operación desde 1998.</p>
+            </div>
+
+            <div>
+                <h2>Navegación</h2>
+                <ul class="footer-enlaces">
+                    <li><a href="../index.html">Inicio</a></li>
+                    <li><a href="../productos.html">Productos</a></li>
+                    <li><a href="../nosotros.html">Nosotros</a></li>
+                    <li><a href="../blogs.html">Blogs</a></li>
+                    <li><a href="../contacto.html">Contacto</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h2>Productos</h2>
+                <ul class="footer-enlaces">
+                    <li><a href="../productos.html">Cilindros de Gas</a></li>
+                    <li><a href="../productos.html">Reguladores</a></li>
+                    <li><a href="../productos.html">Mangueras y Conexiones</a></li>
+                    <li><a href="../productos.html">Accesorios</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h2>Contacto</h2>
+                <ul class="pie-contacto">
+                    <li>
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M12 21s7-5.5 7-11a7 7 0 10-14 0c0 5.5 7 11 7 11z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                            <circle cx="12" cy="10" r="2.5" fill="none" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                        <span>Chillán, Región de Ñuble</span>
                     </li>
-                    <li class="admin-dato">
-                        <p class="admin-dato-numero">4</p>
-                        <p class="admin-dato-texto">Categorías</p>
+                    <li>
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M5 4h4l2 5-2.5 1.5a12 12 0 005 5L15 13l5 2v4a1 1 0 01-1 1A16 16 0 014 5a1 1 0 011-1z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                        </svg>
+                        <a href="tel:+56973214560">+56 9 7321 4560</a>
                     </li>
-                    <li class="admin-dato">
-                        <p class="admin-dato-numero">3</p>
-                        <p class="admin-dato-texto">Usuarios registrados</p>
+                    <li>
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>
+                            <path d="M3 7l9 6 9-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                        </svg>
+                        <a href="mailto:contacto@gaselvolcan.cl">contacto@gaselvolcan.cl</a>
+                    </li>
+                    <li>
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/>
+                            <path d="M12 7v5l3.5 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        <span>Lunes a sábado, 08:00 a 20:00</span>
                     </li>
                 </ul>
-            </section>
+            </div>
+        </div>
 
-            <section class="admin-aviso" aria-labelledby="tituloAviso">
-                <h2 id="tituloAviso">Qué puedes hacer aquí</h2>
-                <p id="textoAviso"></p>
-            </section>
-        </main>
+        <div class="container">
+            <p class="copyright">© 2026 Gas El Volcán. Todos los derechos reservados.</p>
+        </div>
+    </footer>
 
-    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/catalogo.js"></script>
     <script src="../js/sesion.js"></script>
     <script src="../js/admin.js"></script>
+
 </body>
+
 </html>

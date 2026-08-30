@@ -107,7 +107,7 @@ function iniciales(nombreCompleto) {
     return (partes[0][0] + partes[1][0]).toUpperCase();
 }
 
-function destinoDeCuenta(rol) {
+function panelDeRol(rol) {
     if (rol === "ADMINISTRADOR") {
         return "admin/index.html";
     }
@@ -120,15 +120,23 @@ function destinoDeCuenta(rol) {
         return "repartidor.html";
     }
 
-    return "perfil.html";
+    return "";
 }
 
-function tituloDeCuenta(rol) {
-    if (rol === "CLIENTE") {
-        return "Ir a mi perfil";
+function nombreDeRol(rol) {
+    if (rol === "ADMINISTRADOR") {
+        return "Administrador";
     }
 
-    return "Ir a mi panel";
+    if (rol === "DESPACHADORA") {
+        return "Despachadora";
+    }
+
+    if (rol === "REPARTIDOR") {
+        return "Repartidor";
+    }
+
+    return "Cliente";
 }
 
 function pintarNavCuenta() {
@@ -145,13 +153,14 @@ function pintarNavCuenta() {
         return;
     }
 
+    const rotulo = usuario.nombre + " (" + nombreDeRol(usuario.rol) + ")";
+
     contenedor.innerHTML =
         '<div class="cuenta-activa">' +
-        '<a class="avatar-cuenta" href="' + destinoDeCuenta(usuario.rol) + '" title="' + tituloDeCuenta(usuario.rol) + '">' +
+        '<a class="avatar-cuenta" href="perfil.html" title="' + rotulo + ' — ir a mi perfil">' +
         '<span aria-hidden="true">' + iniciales(usuario.nombre) + "</span>" +
-        '<span class="visually-hidden">' + tituloDeCuenta(usuario.rol) + "</span>" +
+        '<span class="visually-hidden">Mi perfil: ' + rotulo + "</span>" +
         "</a>" +
-        '<span class="cuenta-saludo">Hola, ' + primerNombre(usuario.nombre) + "</span>" +
         '<button type="button" class="btn btn-cuenta" id="botonCerrarSesion">Salir</button>' +
         "</div>";
 

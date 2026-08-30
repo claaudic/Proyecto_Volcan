@@ -15,6 +15,13 @@
     --gris-borde: #d9e5e7;
     --blanco: #ffffff;
 
+    --pendiente-texto: #8a5a00;
+    --pendiente-fondo: #fff4d6;
+    --camino-texto: #075985;
+    --camino-fondo: #e0f2fe;
+    --entregado-texto: #047857;
+    --entregado-fondo: #d1fae5;
+
     --fuente: "Figtree", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     --radio: 10px;
     --sombra: 0 1px 3px rgba(22, 50, 60, 0.08);
@@ -880,13 +887,6 @@ a:focus-visible,
     gap: 0.65rem;
 }
 
-.cuenta-saludo {
-    color: var(--blanco);
-    font-size: 0.9375rem;
-    font-weight: 600;
-    white-space: nowrap;
-}
-
 .btn-cuenta {
     padding: 0.5rem 1.05rem;
     color: var(--blanco);
@@ -911,10 +911,6 @@ a:focus-visible,
 
     .cuenta-activa {
         width: 100%;
-    }
-
-    .cuenta-saludo {
-        margin-right: auto;
     }
 }
 
@@ -2385,4 +2381,233 @@ a:focus-visible,
     .perfil-grid {
         grid-template-columns: 1fr;
     }
+}
+
+.panel-etiqueta {
+    margin-bottom: 0.5rem;
+    color: var(--verde);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.panel-cuerpo {
+    padding: 3rem 0 5rem;
+    background-color: var(--blanco);
+}
+
+.panel-seccion {
+    margin-bottom: 3rem;
+}
+
+.panel-seccion:last-child {
+    margin-bottom: 0;
+}
+
+.panel-titulo {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.panel-titulo h2 {
+    margin: 0;
+    color: var(--tinta);
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.panel-titulo-nota {
+    margin: 0;
+    color: var(--texto-suave);
+    font-size: 0.9375rem;
+}
+
+.tarjeta-dato {
+    display: flex;
+    align-items: center;
+    gap: 1.1rem;
+    height: 100%;
+    padding: 1.5rem;
+    background-color: var(--blanco);
+    border: 1px solid var(--gris-borde);
+    border-radius: var(--radio);
+    box-shadow: var(--sombra);
+}
+
+.tarjeta-dato-icono {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    color: var(--blanco);
+    border-radius: 50%;
+    font-size: 0.9375rem;
+    font-weight: 800;
+}
+
+.tarjeta-dato-icono.pendiente {
+    background-color: var(--accion);
+}
+
+.tarjeta-dato-icono.camino {
+    background-color: var(--celeste);
+}
+
+.tarjeta-dato-icono.entregado {
+    background-color: var(--verde);
+}
+
+.tarjeta-dato-texto {
+    margin: 0 0 0.2rem;
+    color: var(--texto-suave);
+    font-size: 0.9375rem;
+    font-weight: 600;
+}
+
+.tarjeta-dato-numero {
+    margin: 0;
+    color: var(--tinta);
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+}
+
+.tabla-marco {
+    overflow: hidden;
+    background-color: var(--blanco);
+    border: 1px solid var(--gris-borde);
+    border-radius: var(--radio);
+    box-shadow: var(--sombra);
+}
+
+.tabla-panel {
+    width: 100%;
+    margin: 0;
+    border-collapse: collapse;
+}
+
+.tabla-panel thead {
+    background-color: var(--gris-azulado);
+}
+
+.tabla-panel th {
+    padding: 0.9rem 1.1rem;
+    color: var(--tinta);
+    border-bottom: 1px solid var(--gris-borde);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-align: left;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.tabla-panel td {
+    padding: 1rem 1.1rem;
+    color: var(--texto);
+    border-bottom: 1px solid var(--gris-borde);
+    font-size: 0.9375rem;
+    vertical-align: middle;
+}
+
+.tabla-panel tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.tabla-panel tbody tr:hover {
+    background-color: var(--gris-azulado);
+}
+
+.estado {
+    display: inline-block;
+    padding: 0.35rem 0.7rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.estado-pendiente {
+    color: var(--pendiente-texto);
+    background-color: var(--pendiente-fondo);
+}
+
+.estado-camino {
+    color: var(--camino-texto);
+    background-color: var(--camino-fondo);
+}
+
+.estado-entregado {
+    color: var(--entregado-texto);
+    background-color: var(--entregado-fondo);
+}
+
+.selector-estado {
+    min-width: 140px;
+    padding: 0.5rem 0.7rem;
+    color: var(--tinta);
+    background-color: var(--blanco);
+    border: 1px solid var(--gris-borde);
+    border-radius: var(--radio);
+    font-family: var(--fuente);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    outline: none;
+}
+
+.selector-estado:hover {
+    border-color: var(--celeste);
+}
+
+.selector-estado:focus {
+    border-color: var(--verde);
+    box-shadow: 0 0 0 3px rgba(14, 159, 110, 0.15);
+}
+
+.selector-estado:disabled {
+    color: var(--texto-suave);
+    background-color: var(--gris-azulado);
+    cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+    .panel-cuerpo {
+        padding: 2rem 0 3.5rem;
+    }
+
+    .panel-seccion {
+        margin-bottom: 2.25rem;
+    }
+
+    .panel-titulo {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .tabla-panel {
+        min-width: 860px;
+    }
+}
+
+.perfil-rol {
+    margin-bottom: 0.35rem;
+    color: var(--tinta);
+    font-size: 1.375rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.perfil-rol-nota {
+    margin-bottom: 1.5rem;
+    color: var(--texto-suave);
+    font-size: 0.9375rem;
 }

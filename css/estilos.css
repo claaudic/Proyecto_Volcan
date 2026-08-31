@@ -2689,3 +2689,7 @@ a:focus-visible,
     text-transform: uppercase;
     white-space: nowrap;
 }
+
+.producto-enlace {
+    display: block;
+}

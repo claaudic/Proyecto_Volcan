@@ -132,7 +132,7 @@ function obtenerUsuariosSistema() {
             });
 
 
-        if (!existe) {
+        if (!existe && !cuentaEliminada(correoBase)) {
 
             usuariosSistema.push({
 
@@ -617,6 +617,8 @@ function eliminarUsuario(id) {
 
         });
 
+
+    marcarCuentaEliminada(usuario.correo);
 
     guardarUsuariosSistema(
         usuariosActualizados

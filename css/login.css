@@ -277,3 +277,30 @@
         padding: 2rem 1.25rem;
     }
 }
+
+.registro-par {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 1rem;
+}
+
+@media (max-width: 560px) {
+    .registro-par {
+        grid-template-columns: 1fr;
+    }
+}
+
+.registro-grid {
+    align-items: start;
+}
+
+.registro-grid .login-presentacion {
+    position: sticky;
+    top: 2.5rem;
+}
+
+@media (max-width: 900px) {
+    .registro-grid .login-presentacion {
+        position: static;
+    }
+}

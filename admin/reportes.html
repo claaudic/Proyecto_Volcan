@@ -70,6 +70,14 @@
                 <p class="panel-etiqueta">Administración</p>
                 <h1 id="titulo-pagina">Reportes del sistema</h1>
                 <p class="pagina-bajada">Revisa información general de usuarios, pedidos y actividad del sistema.</p>
+
+                <p class="encabezado-accion">
+                    <button type="button" class="btn btn-principal" id="btnDescargarReporte">
+                        Descargar reporte
+                    </button>
+                </p>
+
+                <p class="mensaje-descarga d-none" id="avisoDescarga" role="status"></p>
             </div>
 
             <svg class="encabezado-monte" viewBox="0 0 1440 60" preserveAspectRatio="none" aria-hidden="true" focusable="false">
@@ -194,6 +202,16 @@
                                 </td>
 
                                 <td id="cantidadAdministradores">
+                                    0
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    Despachadoras
+                                </td>
+
+                                <td id="cantidadDespachadoras">
                                     0
                                 </td>
                             </tr>
@@ -376,6 +394,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../js/sesion.js"></script>
+    <script src="../js/pedidos.js"></script>
     <script src="../js/admin.js"></script>
     <script src="../js/reportes.js"></script>
 

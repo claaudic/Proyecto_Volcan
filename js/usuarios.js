@@ -132,7 +132,7 @@ function obtenerUsuariosSistema() {
             });
 
 
-        if (!existe) {
+        if (!existe && !cuentaEliminada(correoBase)) {
 
             usuariosSistema.push({
 
@@ -618,6 +618,8 @@ function eliminarUsuario(id) {
         });
 
 
+    marcarCuentaEliminada(usuario.correo);
+
     guardarUsuariosSistema(
         usuariosActualizados
     );
@@ -635,6 +637,10 @@ function obtenerNombreRol(rol) {
 
     if (rol === "ADMINISTRADOR") {
         return "Administrador";
+    }
+
+    if (rol === "DESPACHADORA") {
+        return "Despachadora";
     }
 
     if (rol === "REPARTIDOR") {

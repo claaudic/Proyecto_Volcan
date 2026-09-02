@@ -155,7 +155,7 @@ function obtenerUsuariosDisponibles() {
             return String(usuario.correo).toLowerCase() === base.correo.toLowerCase();
         });
 
-        if (!yaExiste) {
+        if (!yaExiste && !cuentaEliminada(base.correo)) {
             usuarios.push(base);
         }
     });

@@ -219,3 +219,44 @@ function pedidosDe(correo) {
         return String(pedido.correo).toLowerCase() === String(correo).toLowerCase();
     });
 }
+
+const CLAVE_CUENTAS_ELIMINADAS = "cuentasEliminadas";
+
+function correosEliminados() {
+    const guardado = localStorage.getItem(CLAVE_CUENTAS_ELIMINADAS);
+
+    if (!guardado) {
+        return [];
+    }
+
+    try {
+        const lista = JSON.parse(guardado);
+        return Array.isArray(lista) ? lista : [];
+    } catch (error) {
+        return [];
+    }
+}
+
+function cuentaEliminada(correo) {
+    return correosEliminados().indexOf(String(correo).trim().toLowerCase()) !== -1;
+}
+
+function marcarCuentaEliminada(correo) {
+    const limpio = String(correo).trim().toLowerCase();
+    const lista = correosEliminados();
+
+    if (lista.indexOf(limpio) === -1) {
+        lista.push(limpio);
+        localStorage.setItem(CLAVE_CUENTAS_ELIMINADAS, JSON.stringify(lista));
+    }
+}
+
+function permitirCuentaDeNuevo(correo) {
+    const limpio = String(correo).trim().toLowerCase();
+
+    const lista = correosEliminados().filter(function (guardado) {
+        return guardado !== limpio;
+    });
+
+    localStorage.setItem(CLAVE_CUENTAS_ELIMINADAS, JSON.stringify(lista));
+}

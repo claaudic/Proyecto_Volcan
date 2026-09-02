@@ -107,13 +107,13 @@
                             <small class="mensaje-error-campo" id="errorPerfilTelefono" role="status"></small>
                         </div>
 
-                        <div class="campo">
+                        <div class="campo solo-cliente">
                             <label for="perfilDireccion">Dirección de despacho <abbr title="obligatorio">*</abbr></label>
                             <input type="text" id="perfilDireccion" autocomplete="street-address" maxlength="300" required>
                             <small class="mensaje-error-campo" id="errorPerfilDireccion" role="status"></small>
                         </div>
 
-                        <div class="campo">
+                        <div class="campo solo-cliente">
                             <label for="perfilComuna">Comuna</label>
                             <input type="text" id="perfilComuna" list="comunasPerfil" maxlength="60" placeholder="Escribe tu comuna">
                             <datalist id="comunasPerfil">
@@ -132,6 +132,17 @@
 
                         <button type="submit" class="btn btn-principal">Guardar cambios</button>
                     </form>
+
+                    <div class="zona-baja d-none" id="zonaBaja">
+                        <h3>Eliminar mi cuenta</h3>
+                        <p>
+                            Se borran tu cuenta, tus datos de contacto y el historial de tus
+                            compras. No se puede deshacer.
+                        </p>
+                        <button type="button" class="btn btn-peligro" id="botonEliminarCuenta">
+                            Eliminar mi cuenta
+                        </button>
+                    </div>
                 </div>
 
                 <div class="perfil-pedidos">
@@ -232,6 +243,32 @@
             <p class="copyright">© 2026 Gas El Volcán. Todos los derechos reservados.</p>
         </div>
     </footer>
+
+    <div class="modal fade" id="modalEliminarCuenta" tabindex="-1" aria-labelledby="tituloEliminarCuenta" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="tituloEliminarCuenta">¿Eliminar tu cuenta?</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+
+                <div class="modal-body">
+                    <p>
+                        Vas a eliminar la cuenta de <strong id="correoAEliminar"></strong>.
+                    </p>
+                    <p class="mb-0">
+                        Se borran tus datos de contacto y el historial de tus compras.
+                        Esta acción no se puede deshacer.
+                    </p>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secundario" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-peligro" id="confirmarEliminarCuenta">Sí, eliminar mi cuenta</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/catalogo.js"></script>

@@ -2693,3 +2693,46 @@ a:focus-visible,
 .producto-enlace {
     display: block;
 }
+
+.zona-baja {
+    margin-top: 2rem;
+    padding-top: 1.75rem;
+    border-top: 1px solid var(--gris-borde);
+}
+
+.zona-baja h3 {
+    margin-bottom: 0.4rem;
+    color: var(--tinta);
+    font-size: 1.0625rem;
+    font-weight: 700;
+}
+
+.zona-baja p {
+    margin-bottom: 1.1rem;
+    color: var(--texto-suave);
+    font-size: 0.9375rem;
+}
+
+.btn-peligro {
+    padding: 0.65rem 1.35rem;
+    color: var(--accion-texto);
+    background-color: var(--accion);
+    border: 1px solid var(--accion);
+    border-radius: var(--radio);
+    font-size: 0.9375rem;
+    font-weight: 600;
+}
+
+.btn-peligro:hover {
+    color: var(--accion-texto);
+    background-color: var(--accion-oscuro);
+    border-color: var(--accion-oscuro);
+}
+
+.mensaje-descarga {
+    margin-top: 0.75rem;
+    margin-bottom: 0;
+    color: var(--verde);
+    font-size: 0.9375rem;
+    font-weight: 600;
+}

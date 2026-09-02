@@ -154,7 +154,9 @@ function iniciarPerfil(usuario) {
             nombre: validarTexto(campos.nombre.value, 1, 50, "tu nombre"),
             apellidos: validarTexto(campos.apellidos.value, 1, 100, "tus apellidos"),
             telefono: validarTelefono(campos.telefono.value),
-            direccion: validarTexto(campos.direccion.value, 1, 300, "tu dirección")
+            direccion: usuario.rol === "CLIENTE"
+                ? validarTexto(campos.direccion.value, 1, 300, "tu dirección")
+                : ""
         };
 
         pintar(campos.nombre, errores.nombre, fallas.nombre);
@@ -200,6 +202,68 @@ function iniciarPerfil(usuario) {
     revisarComuna();
     mostrarSaludo(usuario);
     mostrarColumnaDerecha(usuario);
+    prepararBaja(usuario);
+}
+
+function prepararBaja(usuario) {
+    const zona = document.getElementById("zonaBaja");
+    const boton = document.getElementById("botonEliminarCuenta");
+
+    if (!zona || usuario.rol !== "CLIENTE") {
+        return;
+    }
+
+    zona.classList.remove("d-none");
+
+    const ventana = new bootstrap.Modal(
+        document.getElementById("modalEliminarCuenta")
+    );
+
+    boton.addEventListener("click", function () {
+        document.getElementById("correoAEliminar").textContent = usuario.correo;
+        ventana.show();
+    });
+
+    document.getElementById("confirmarEliminarCuenta")
+        .addEventListener("click", function () {
+            eliminarCuenta(usuario.correo);
+        });
+}
+
+function eliminarCuenta(correo) {
+    const limpio = String(correo).trim().toLowerCase();
+
+    const guardados = localStorage.getItem("usuariosSistema");
+
+    if (guardados) {
+        try {
+            const lista = JSON.parse(guardados);
+
+            if (Array.isArray(lista)) {
+                const quedan = lista.filter(function (registro) {
+                    return String(registro.correo).trim().toLowerCase() !== limpio;
+                });
+
+                localStorage.setItem("usuariosSistema", JSON.stringify(quedan));
+            }
+        } catch (error) {
+            localStorage.removeItem("usuariosSistema");
+        }
+    }
+
+    marcarCuentaEliminada(limpio);
+
+    localStorage.removeItem(claveDatosPerfil(limpio));
+
+    const pedidosAjenos = obtenerPedidos().filter(function (pedido) {
+        return String(pedido.correo).trim().toLowerCase() !== limpio;
+    });
+
+    localStorage.setItem(CLAVE_PEDIDOS, JSON.stringify(pedidosAjenos));
+
+    cerrarSesion();
+
+    window.location.href = "index.html";
 }
 
 function mostrarSaludo(usuario) {

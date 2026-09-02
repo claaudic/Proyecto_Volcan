@@ -2728,3 +2728,11 @@ a:focus-visible,
     background-color: var(--accion-oscuro);
     border-color: var(--accion-oscuro);
 }
+
+.mensaje-descarga {
+    margin-top: 0.75rem;
+    margin-bottom: 0;
+    color: var(--verde);
+    font-size: 0.9375rem;
+    font-weight: 600;
+}

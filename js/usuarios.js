@@ -639,6 +639,10 @@ function obtenerNombreRol(rol) {
         return "Administrador";
     }
 
+    if (rol === "DESPACHADORA") {
+        return "Despachadora";
+    }
+
     if (rol === "REPARTIDOR") {
         return "Repartidor";
     }

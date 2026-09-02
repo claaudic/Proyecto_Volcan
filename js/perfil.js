@@ -154,7 +154,9 @@ function iniciarPerfil(usuario) {
             nombre: validarTexto(campos.nombre.value, 1, 50, "tu nombre"),
             apellidos: validarTexto(campos.apellidos.value, 1, 100, "tus apellidos"),
             telefono: validarTelefono(campos.telefono.value),
-            direccion: validarTexto(campos.direccion.value, 1, 300, "tu dirección")
+            direccion: usuario.rol === "CLIENTE"
+                ? validarTexto(campos.direccion.value, 1, 300, "tu dirección")
+                : ""
         };
 
         pintar(campos.nombre, errores.nombre, fallas.nombre);

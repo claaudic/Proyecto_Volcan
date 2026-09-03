@@ -687,3 +687,314 @@ function actualizarResumen(pedidos) {
 // ==========================================
 
 mostrarPedidosDespacho();
+
+// ==========================================
+// CREAR ORDEN POR TELEFONO
+// ==========================================
+
+const formOrden = document.getElementById("formOrden");
+
+if (formOrden) {
+
+    const ventanaOrden = new bootstrap.Modal(
+        document.getElementById("modalOrden")
+    );
+
+    const campoCliente = document.getElementById("ordenCliente");
+    const campoDireccion = document.getElementById("ordenDireccion");
+    const campoComuna = document.getElementById("ordenComuna");
+    const campoProducto = document.getElementById("ordenProducto");
+    const campoTipoPrecio = document.getElementById("ordenTipoPrecio");
+    const campoCantidad = document.getElementById("ordenCantidad");
+    const campoRepartidor = document.getElementById("ordenRepartidor");
+
+    const casillaTotal = document.getElementById("ordenTotal");
+    const ayudaStock = document.getElementById("ayudaStock");
+    const avisoComunaOrden = document.getElementById("avisoOrdenComuna");
+
+
+    // ======================================
+    // LLENAR LOS DESPLEGABLES
+    // ======================================
+
+    function catalogoDisponible() {
+
+        if (typeof obtenerCatalogoActivo !== "function") {
+            return [];
+        }
+
+        return obtenerCatalogoActivo().filter(function (producto) {
+            return Number(producto.stock) > 0;
+        });
+
+    }
+
+
+    function llenarProductos() {
+
+        campoProducto.innerHTML = catalogoDisponible().map(function (producto) {
+
+            return '<option value="' + producto.codigo + '">' +
+                producto.nombre + " — " + producto.categoria +
+                "</option>";
+
+        }).join("");
+
+    }
+
+
+    function llenarRepartidores() {
+
+        const opciones = obtenerRepartidores().map(function (usuario) {
+
+            return '<option value="' + usuario.correo + '">' +
+                usuario.nombre +
+                "</option>";
+
+        }).join("");
+
+        campoRepartidor.innerHTML =
+            '<option value="">Sin asignar</option>' + opciones;
+
+    }
+
+
+    function productoElegido() {
+
+        return catalogoDisponible().find(function (producto) {
+            return producto.codigo === campoProducto.value;
+        });
+
+    }
+
+
+    function precioElegido(producto) {
+
+        if (!producto) {
+            return 0;
+        }
+
+        return campoTipoPrecio.value === "comercial"
+            ? Number(producto.precioComercial)
+            : Number(producto.precioResidencial);
+
+    }
+
+
+    // ======================================
+    // TOTAL EN VIVO
+    // ======================================
+
+    function actualizarTotal() {
+
+        const producto = productoElegido();
+        const cantidad = Number(campoCantidad.value) || 0;
+
+        casillaTotal.textContent =
+            formatearPesos(precioElegido(producto) * cantidad);
+
+
+        if (producto) {
+
+            ayudaStock.textContent =
+                "Quedan " + producto.stock + " unidades. " +
+                "Precio unitario: " + formatearPesos(precioElegido(producto)) + ".";
+
+        } else {
+            ayudaStock.textContent = "";
+        }
+
+    }
+
+
+    function revisarComunaOrden() {
+
+        const valor = campoComuna.value.trim();
+
+        if (valor === "" || typeof buscarZona !== "function") {
+            avisoComunaOrden.textContent = "";
+            avisoComunaOrden.className = "mensaje-ayuda";
+            return;
+        }
+
+
+        const zona = buscarZona(valor);
+
+        if (zona) {
+
+            avisoComunaOrden.textContent =
+                "Dentro de cobertura: " + zona.zona + ".";
+
+            avisoComunaOrden.className = "mensaje-ayuda aviso-cobertura-ok";
+
+        } else {
+
+            avisoComunaOrden.textContent =
+                "Esa comuna está fuera del reparto.";
+
+            avisoComunaOrden.className = "mensaje-ayuda aviso-cobertura-no";
+
+        }
+
+    }
+
+
+    // ======================================
+    // VALIDACIONES
+    // ======================================
+
+    function pintarOrden(campo, contenedor, mensaje) {
+
+        contenedor.textContent = mensaje;
+
+        campo.classList.toggle("campo-invalido", mensaje !== "");
+        campo.classList.toggle("campo-valido", mensaje === "" && campo.value.trim() !== "");
+
+    }
+
+
+    function validarCantidadOrden() {
+
+        const producto = productoElegido();
+        const cantidad = Number(campoCantidad.value);
+
+
+        if (!campoCantidad.value.trim()) {
+            return "Indica la cantidad.";
+        }
+
+        if (!Number.isInteger(cantidad) || cantidad < 1) {
+            return "La cantidad debe ser un número entero mayor que cero.";
+        }
+
+        if (producto && cantidad > Number(producto.stock)) {
+            return "Solo quedan " + producto.stock + " unidades de ese producto.";
+        }
+
+        return "";
+
+    }
+
+
+    // ======================================
+    // EVENTOS
+    // ======================================
+
+    document.getElementById("btnCrearOrden")
+        .addEventListener("click", function () {
+
+            formOrden.reset();
+            llenarProductos();
+            llenarRepartidores();
+
+            [campoCliente, campoDireccion, campoComuna, campoCantidad].forEach(
+                function (campo) {
+                    campo.classList.remove("campo-valido", "campo-invalido");
+                }
+            );
+
+            ["errorOrdenCliente", "errorOrdenDireccion", "errorOrdenComuna",
+             "errorOrdenProducto", "errorOrdenCantidad"].forEach(function (id) {
+                document.getElementById(id).textContent = "";
+            });
+
+            avisoComunaOrden.textContent = "";
+            campoCantidad.value = 1;
+
+            actualizarTotal();
+            ventanaOrden.show();
+
+        });
+
+
+    campoProducto.addEventListener("change", actualizarTotal);
+    campoTipoPrecio.addEventListener("change", actualizarTotal);
+
+    campoCantidad.addEventListener("input", function () {
+        actualizarTotal();
+        pintarOrden(campoCantidad,
+            document.getElementById("errorOrdenCantidad"),
+            validarCantidadOrden());
+    });
+
+    campoComuna.addEventListener("input", revisarComunaOrden);
+
+
+    // ======================================
+    // GUARDAR
+    // ======================================
+
+    formOrden.addEventListener("submit", function (evento) {
+
+        evento.preventDefault();
+
+
+        const fallas = {
+            ordenCliente: campoCliente.value.trim() === ""
+                ? "Ingresa el nombre del cliente." : "",
+
+            ordenDireccion: campoDireccion.value.trim() === ""
+                ? "Ingresa la dirección de despacho." : "",
+
+            ordenComuna: campoComuna.value.trim() === ""
+                ? "Ingresa la comuna." : "",
+
+            ordenProducto: campoProducto.value === ""
+                ? "Elige un producto." : "",
+
+            ordenCantidad: validarCantidadOrden()
+        };
+
+
+        pintarOrden(campoCliente, document.getElementById("errorOrdenCliente"), fallas.ordenCliente);
+        pintarOrden(campoDireccion, document.getElementById("errorOrdenDireccion"), fallas.ordenDireccion);
+        pintarOrden(campoComuna, document.getElementById("errorOrdenComuna"), fallas.ordenComuna);
+        pintarOrden(campoProducto, document.getElementById("errorOrdenProducto"), fallas.ordenProducto);
+        pintarOrden(campoCantidad, document.getElementById("errorOrdenCantidad"), fallas.ordenCantidad);
+
+
+        const campos = {
+            ordenCliente: campoCliente,
+            ordenDireccion: campoDireccion,
+            ordenComuna: campoComuna,
+            ordenProducto: campoProducto,
+            ordenCantidad: campoCantidad
+        };
+
+
+        const primerError = Object.keys(fallas).find(function (clave) {
+            return fallas[clave] !== "";
+        });
+
+
+        if (primerError) {
+            campos[primerError].focus();
+            return;
+        }
+
+
+        const producto = productoElegido();
+        const cantidad = Number(campoCantidad.value);
+
+
+        guardarPedidoManual({
+            numero: siguienteNumeroPedido(),
+            cliente: campoCliente.value.trim(),
+            correo: "",
+            direccion: campoDireccion.value.trim(),
+            comuna: campoComuna.value.trim(),
+            producto: producto.nombre,
+            cantidad: cantidad,
+            total: precioElegido(producto) * cantidad,
+            estado: "pendiente",
+            repartidor: campoRepartidor.value
+        });
+
+
+        ventanaOrden.hide();
+
+        mostrarPedidosDespacho();
+
+    });
+
+}

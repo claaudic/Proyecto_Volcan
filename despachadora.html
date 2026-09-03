@@ -71,6 +71,12 @@
                 <p class="panel-etiqueta">Operadora / Despachadora</p>
                 <h1 id="titulo-despacho">Gestión de pedidos del día</h1>
                 <p class="pagina-bajada">Revisa los pedidos registrados, asigna un repartidor y actualiza su estado.</p>
+
+                <p class="encabezado-accion">
+                    <button type="button" class="btn btn-principal" id="btnCrearOrden">
+                        + Crear orden
+                    </button>
+                </p>
             </div>
 
             <svg class="encabezado-monte" viewBox="0 0 1440 60" preserveAspectRatio="none" aria-hidden="true" focusable="false">
@@ -251,7 +257,95 @@
     </footer>
 
 
+    <div class="modal fade" id="modalOrden" tabindex="-1" aria-labelledby="tituloModalOrden" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="tituloModalOrden">Crear orden por teléfono</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+
+                <form id="formOrden" novalidate>
+                    <div class="modal-body">
+
+                        <div class="campo">
+                            <label for="ordenCliente">Nombre del cliente <abbr title="obligatorio">*</abbr></label>
+                            <input type="text" id="ordenCliente" maxlength="80" required>
+                            <small class="mensaje-error-campo" id="errorOrdenCliente" role="status"></small>
+                        </div>
+
+                        <div class="campo">
+                            <label for="ordenDireccion">Dirección de despacho <abbr title="obligatorio">*</abbr></label>
+                            <input type="text" id="ordenDireccion" maxlength="200" required>
+                            <small class="mensaje-error-campo" id="errorOrdenDireccion" role="status"></small>
+                        </div>
+
+                        <div class="campo-par">
+                            <div class="campo">
+                                <label for="ordenComuna">Comuna <abbr title="obligatorio">*</abbr></label>
+                                <input type="text" id="ordenComuna" list="comunasOrden" maxlength="60" required>
+                                <datalist id="comunasOrden">
+                                    <option value="Chillán"></option>
+                                    <option value="Chillán Viejo"></option>
+                                    <option value="El Carmen"></option>
+                                    <option value="Pinto"></option>
+                                    <option value="San Ignacio"></option>
+                                    <option value="Bulnes"></option>
+                                    <option value="Quillón"></option>
+                                </datalist>
+                                <small class="mensaje-ayuda" id="avisoOrdenComuna"></small>
+                                <small class="mensaje-error-campo" id="errorOrdenComuna" role="status"></small>
+                            </div>
+
+                            <div class="campo">
+                                <label for="ordenRepartidor">Repartidor</label>
+                                <select id="ordenRepartidor"></select>
+                                <small class="mensaje-ayuda">Puedes dejarlo sin asignar.</small>
+                            </div>
+                        </div>
+
+                        <div class="campo">
+                            <label for="ordenProducto">Producto <abbr title="obligatorio">*</abbr></label>
+                            <select id="ordenProducto" required></select>
+                            <small class="mensaje-error-campo" id="errorOrdenProducto" role="status"></small>
+                        </div>
+
+                        <div class="campo-par">
+                            <div class="campo">
+                                <label for="ordenTipoPrecio">Tipo de precio</label>
+                                <select id="ordenTipoPrecio">
+                                    <option value="residencial">Residencial</option>
+                                    <option value="comercial">Comercial</option>
+                                </select>
+                            </div>
+
+                            <div class="campo">
+                                <label for="ordenCantidad">Cantidad <abbr title="obligatorio">*</abbr></label>
+                                <input type="number" id="ordenCantidad" min="1" step="1" value="1" required>
+                                <small class="mensaje-error-campo" id="errorOrdenCantidad" role="status"></small>
+                            </div>
+                        </div>
+
+                        <p class="mensaje-ayuda" id="ayudaStock"></p>
+
+                        <p class="orden-total">Total: <strong id="ordenTotal">$0</strong></p>
+
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secundario" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-principal">Guardar orden</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/catalogo.js"></script>
+    <script src="js/zonas.js"></script>
     <script src="js/sesion.js"></script>
     <script src="js/pedidos.js"></script>
     <script src="js/efectos.js"></script>

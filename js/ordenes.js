@@ -164,7 +164,7 @@ function mostrarOrdenes() {
             <tr>
 
                 <td
-                    colspan="6"
+                    colspan="7"
                     class="text-center py-4"
                 >
                     No hay órdenes registradas.
@@ -233,6 +233,25 @@ function mostrarOrdenes() {
                 ${crearEstado(orden.estado)}
             </td>
 
+
+            <td>
+                <button
+                    type="button"
+                    class="btn btn-sm btn-outline-primary"
+                    data-editar="${orden.numero}"
+                >
+                    Editar
+                </button>
+
+                <button
+                    type="button"
+                    class="btn btn-sm btn-outline-danger"
+                    data-borrar="${orden.numero}"
+                >
+                    Eliminar
+                </button>
+            </td>
+
         `;
 
 
@@ -252,60 +271,9 @@ function mostrarOrdenes() {
 
 function crearEstado(estado) {
 
-    if (estado === "pendiente") {
-
-        return `
-
-            <span
-                class="badge bg-warning text-dark"
-            >
-                Pendiente
-            </span>
-
-        `;
-
-    }
-
-
-    if (estado === "camino") {
-
-        return `
-
-            <span
-                class="badge bg-primary"
-            >
-                En camino
-            </span>
-
-        `;
-
-    }
-
-
-    if (estado === "entregado") {
-
-        return `
-
-            <span
-                class="badge bg-success"
-            >
-                Entregado
-            </span>
-
-        `;
-
-    }
-
-
-    return `
-
-        <span
-            class="badge bg-secondary"
-        >
-            ${estado}
-        </span>
-
-    `;
+    return '<span class="estado ' + claseDeEstado(estado) + '">' +
+        textoDeEstado(estado) +
+        "</span>";
 
 }
 
@@ -368,3 +336,306 @@ function formatearPrecio(precio) {
 
 
 mostrarOrdenes();
+
+// ==========================================
+// CREAR, EDITAR Y ELIMINAR ORDENES
+// ==========================================
+
+const formOrdenAdmin = document.getElementById("formOrdenAdmin");
+
+if (formOrdenAdmin) {
+
+    const ventanaOrden = new bootstrap.Modal(
+        document.getElementById("modalOrdenAdmin")
+    );
+
+    const ventanaBorrar = new bootstrap.Modal(
+        document.getElementById("modalBorrarOrden")
+    );
+
+    const tituloModal = document.getElementById("tituloModalOrdenAdmin");
+    const campoNumero = document.getElementById("ordenNumero");
+
+    const campos = {
+        cliente: document.getElementById("admCliente"),
+        direccion: document.getElementById("admDireccion"),
+        comuna: document.getElementById("admComuna"),
+        producto: document.getElementById("admProducto"),
+        tipoPrecio: document.getElementById("admTipoPrecio"),
+        cantidad: document.getElementById("admCantidad"),
+        repartidor: document.getElementById("admRepartidor"),
+        estado: document.getElementById("admEstado")
+    };
+
+    const errores = {
+        cliente: document.getElementById("errorAdmCliente"),
+        direccion: document.getElementById("errorAdmDireccion"),
+        comuna: document.getElementById("errorAdmComuna"),
+        producto: document.getElementById("errorAdmProducto"),
+        cantidad: document.getElementById("errorAdmCantidad")
+    };
+
+    const casillaTotal = document.getElementById("admTotal");
+    const ayudaStock = document.getElementById("admAyudaStock");
+
+    let numeroABorrar = "";
+
+
+    // ======================================
+    // TOTAL Y AYUDA EN VIVO
+    // ======================================
+
+    function productoElegido() {
+        return productosDisponibles().find(function (producto) {
+            return producto.codigo === campos.producto.value;
+        });
+    }
+
+
+    function precioActual() {
+        return precioDeProducto(productoElegido(), campos.tipoPrecio.value);
+    }
+
+
+    function actualizarTotal() {
+        const cantidad = Number(campos.cantidad.value) || 0;
+
+        casillaTotal.textContent = formatearPesos(precioActual() * cantidad);
+
+        const producto = productoElegido();
+
+        ayudaStock.textContent = producto
+            ? "Quedan " + producto.stock + " unidades. Precio unitario: " +
+              formatearPesos(precioActual()) + "."
+            : "";
+    }
+
+
+    // ======================================
+    // VALIDACION
+    // ======================================
+
+    function pintar(campo, contenedor, mensaje) {
+        if (contenedor) {
+            contenedor.textContent = mensaje;
+        }
+
+        campo.classList.toggle("campo-invalido", mensaje !== "");
+        campo.classList.toggle("campo-valido", mensaje === "" && campo.value.trim() !== "");
+    }
+
+
+    function validarCantidad() {
+        const producto = productoElegido();
+        const cantidad = Number(campos.cantidad.value);
+
+        if (!campos.cantidad.value.trim()) {
+            return "Indica la cantidad.";
+        }
+
+        if (!Number.isInteger(cantidad) || cantidad < 1) {
+            return "Debe ser un número entero mayor que cero.";
+        }
+
+        if (producto && cantidad > Number(producto.stock)) {
+            return "Solo quedan " + producto.stock + " unidades.";
+        }
+
+        return "";
+    }
+
+
+    function limpiarMarcas() {
+        Object.keys(errores).forEach(function (clave) {
+            errores[clave].textContent = "";
+        });
+
+        Object.keys(campos).forEach(function (clave) {
+            campos[clave].classList.remove("campo-valido", "campo-invalido");
+        });
+    }
+
+
+    // ======================================
+    // ABRIR EL FORMULARIO
+    // ======================================
+
+    function abrirFormulario(orden) {
+
+        limpiarMarcas();
+
+        const esNueva = !orden;
+
+        tituloModal.textContent = esNueva
+            ? "Crear orden"
+            : "Editar la orden #" + orden.numero;
+
+        campoNumero.value = esNueva ? "" : orden.numero;
+
+        campos.cliente.value = esNueva ? "" : orden.cliente;
+        campos.direccion.value = esNueva ? "" : orden.direccionSola;
+        campos.comuna.value = esNueva ? "" : orden.comuna;
+        campos.cantidad.value = esNueva ? 1 : orden.cantidad;
+        campos.tipoPrecio.value = "residencial";
+
+        campos.producto.innerHTML = opcionesDeProducto(esNueva ? "" : orden.codigo);
+        campos.repartidor.innerHTML = opcionesDeRepartidor(esNueva ? "" : orden.correoRepartidor);
+        campos.estado.innerHTML = opcionesDeEstado(esNueva ? "pendiente" : orden.estado);
+
+        actualizarTotal();
+        ventanaOrden.show();
+    }
+
+
+    // ======================================
+    // EVENTOS DEL FORMULARIO
+    // ======================================
+
+    campos.producto.addEventListener("change", actualizarTotal);
+    campos.tipoPrecio.addEventListener("change", actualizarTotal);
+
+    campos.cantidad.addEventListener("input", function () {
+        actualizarTotal();
+        pintar(campos.cantidad, errores.cantidad, validarCantidad());
+    });
+
+
+    document.getElementById("btnNuevaOrden")
+        .addEventListener("click", function () {
+            abrirFormulario(null);
+        });
+
+
+    formOrdenAdmin.addEventListener("submit", function (evento) {
+
+        evento.preventDefault();
+
+        const fallas = {
+            cliente: campos.cliente.value.trim() === "" ? "Ingresa el nombre del cliente." : "",
+            direccion: campos.direccion.value.trim() === "" ? "Ingresa la dirección." : "",
+            comuna: campos.comuna.value.trim() === "" ? "Ingresa la comuna." : "",
+            producto: campos.producto.value === "" ? "Elige un producto." : "",
+            cantidad: validarCantidad()
+        };
+
+        Object.keys(fallas).forEach(function (clave) {
+            pintar(campos[clave], errores[clave], fallas[clave]);
+        });
+
+        const primerError = Object.keys(fallas).find(function (clave) {
+            return fallas[clave] !== "";
+        });
+
+        if (primerError) {
+            campos[primerError].focus();
+            return;
+        }
+
+
+        const producto = productoElegido();
+        const cantidad = Number(campos.cantidad.value);
+
+        const datos = {
+            cliente: campos.cliente.value.trim(),
+            direccion: campos.direccion.value.trim(),
+            comuna: campos.comuna.value.trim(),
+            producto: producto.nombre,
+            cantidad: cantidad,
+            total: precioActual() * cantidad
+        };
+
+
+        const numero = campoNumero.value;
+
+        if (numero === "") {
+
+            const nuevo = siguienteNumeroPedido();
+
+            guardarPedidoManual(Object.assign({
+                numero: nuevo,
+                correo: "",
+                estado: "pendiente",
+                repartidor: ""
+            }, datos));
+
+            cambiarEstadoPedido(nuevo, campos.estado.value);
+            asignarRepartidor(nuevo, campos.repartidor.value);
+
+        } else {
+
+            editarPedido(numero, datos);
+            cambiarEstadoPedido(numero, campos.estado.value);
+            asignarRepartidor(numero, campos.repartidor.value);
+
+        }
+
+
+        ventanaOrden.hide();
+        mostrarOrdenes();
+    });
+
+
+    // ======================================
+    // BOTONES DE CADA FILA
+    // ======================================
+
+    tablaOrdenes.addEventListener("click", function (evento) {
+
+        const editar = evento.target.closest("[data-editar]");
+        const borrar = evento.target.closest("[data-borrar]");
+
+
+        if (editar) {
+
+            const numero = editar.dataset.editar;
+
+            const pedido = obtenerPedidosSistema().find(function (uno) {
+                return String(uno.numero) === numero;
+            });
+
+            if (!pedido) {
+                return;
+            }
+
+            const enCatalogo = productosDisponibles().find(function (producto) {
+                return producto.nombre === pedido.producto;
+            });
+
+            abrirFormulario({
+                numero: pedido.numero,
+                cliente: pedido.cliente,
+                direccionSola: pedido.direccion,
+                comuna: pedido.comuna,
+                cantidad: pedido.cantidad,
+                estado: pedido.estado,
+                correoRepartidor: pedido.repartidor,
+                codigo: enCatalogo ? enCatalogo.codigo : ""
+            });
+
+        }
+
+
+        if (borrar) {
+
+            numeroABorrar = borrar.dataset.borrar;
+
+            document.getElementById("ordenABorrar").textContent = "#" + numeroABorrar;
+
+            ventanaBorrar.show();
+
+        }
+
+    });
+
+
+    document.getElementById("confirmarBorrarOrden")
+        .addEventListener("click", function () {
+
+            eliminarPedido(numeroABorrar);
+
+            ventanaBorrar.hide();
+            mostrarOrdenes();
+
+        });
+
+}

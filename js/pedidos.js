@@ -283,32 +283,50 @@ function datosDelCliente(correo) {
 
 
 function obtenerPedidosSistema() {
+
+    const borrados = numerosEliminados();
+    const cambios = cambiosDePedidos();
+
     const base = PEDIDOS_INICIALES
         .concat(pedidosDelCarrito())
         .concat(obtenerPedidosManuales());
 
-    return base.map(function (pedido) {
+    return base.filter(function (pedido) {
+
+        return borrados.indexOf(String(pedido.numero)) === -1;
+
+    }).map(function (pedido) {
+
+        const cambio = cambios[String(pedido.numero)] || {};
+
+        const tomar = function (campo) {
+            return cambio[campo] !== undefined ? cambio[campo] : pedido[campo];
+        };
+
         return {
             numero: pedido.numero,
-            cliente: pedido.cliente,
+            cliente: tomar("cliente"),
             correo: pedido.correo,
-            direccion: pedido.direccion,
-            comuna: pedido.comuna,
-            producto: pedido.producto,
-            cantidad: pedido.cantidad,
-            total: pedido.total,
+            direccion: tomar("direccion"),
+            comuna: tomar("comuna"),
+            producto: tomar("producto"),
+            cantidad: tomar("cantidad"),
+            total: tomar("total"),
             estado: estadoGuardado(pedido.numero, pedido.estado),
             repartidor: repartidorGuardado(pedido.numero, pedido.repartidor)
         };
+
     }).sort(function (a, b) {
         return Number(b.numero) - Number(a.numero);
     });
+
 }
 
 
 function pedidosDelRepartidor(correo) {
     return obtenerPedidosSistema().filter(function (pedido) {
-        return String(pedido.repartidor).toLowerCase() === String(correo).toLowerCase();
+        return String(pedido.repartidor).toLowerCase() === String(correo).toLowerCase() &&
+            pedido.estado !== "cancelado";
     });
 }
 
@@ -322,6 +340,10 @@ function textoDeEstado(estado) {
         return "Entregado";
     }
 
+    if (estado === "cancelado") {
+        return "Cancelado";
+    }
+
     return "Pendiente";
 }
 
@@ -333,6 +355,10 @@ function claseDeEstado(estado) {
 
     if (estado === "entregado") {
         return "estado-entregado";
+    }
+
+    if (estado === "cancelado") {
+        return "estado-cancelado";
     }
 
     return "estado-pendiente";
@@ -420,4 +446,176 @@ function guardarPedidoManual(pedido) {
     lista.push(pedido);
 
     localStorage.setItem(CLAVE_PEDIDOS_MANUALES, JSON.stringify(lista));
+}
+
+
+// ==========================================
+// CAMBIOS Y BORRADOS SOBRE LOS PEDIDOS
+// Los pedidos de la semilla viven en el
+// codigo, asi que las modificaciones se
+// guardan aparte y se aplican al leerlos.
+// ==========================================
+
+const CLAVE_PEDIDOS_EDITADOS = "pedidosEditados";
+const CLAVE_PEDIDOS_ELIMINADOS = "pedidosEliminados";
+
+
+function cambiosDePedidos() {
+    const guardado = localStorage.getItem(CLAVE_PEDIDOS_EDITADOS);
+
+    if (!guardado) {
+        return {};
+    }
+
+    try {
+        const mapa = JSON.parse(guardado);
+        return mapa && typeof mapa === "object" ? mapa : {};
+    } catch (error) {
+        return {};
+    }
+}
+
+
+function numerosEliminados() {
+    const guardado = localStorage.getItem(CLAVE_PEDIDOS_ELIMINADOS);
+
+    if (!guardado) {
+        return [];
+    }
+
+    try {
+        const lista = JSON.parse(guardado);
+        return Array.isArray(lista) ? lista.map(String) : [];
+    } catch (error) {
+        return [];
+    }
+}
+
+
+function editarPedido(numero, datos) {
+    const cambios = cambiosDePedidos();
+    const clave = String(numero);
+
+    cambios[clave] = Object.assign({}, cambios[clave], datos);
+
+    localStorage.setItem(CLAVE_PEDIDOS_EDITADOS, JSON.stringify(cambios));
+}
+
+
+function eliminarPedido(numero) {
+    const lista = numerosEliminados();
+    const clave = String(numero);
+
+    if (lista.indexOf(clave) === -1) {
+        lista.push(clave);
+        localStorage.setItem(CLAVE_PEDIDOS_ELIMINADOS, JSON.stringify(lista));
+    }
+}
+
+
+function cambiarEstadoPedido(numero, estado) {
+    localStorage.setItem(CLAVE_ESTADO_PEDIDO + numero, estado);
+}
+
+
+function asignarRepartidor(numero, correo) {
+    localStorage.setItem(CLAVE_REPARTIDOR_PEDIDO + numero, correo);
+}
+
+
+// ==========================================
+// PIEZAS QUE COMPARTEN LOS FORMULARIOS
+// DE DESPACHO Y ADMINISTRACION
+// ==========================================
+
+function productosDisponibles() {
+    if (typeof obtenerCatalogoActivo !== "function") {
+        return [];
+    }
+
+    return obtenerCatalogoActivo().filter(function (producto) {
+        return Number(producto.stock) > 0;
+    });
+}
+
+
+function precioDeProducto(producto, tipo) {
+    if (!producto) {
+        return 0;
+    }
+
+    return tipo === "comercial"
+        ? Number(producto.precioComercial)
+        : Number(producto.precioResidencial);
+}
+
+
+function repartidoresActivos() {
+    const guardados = localStorage.getItem("usuariosSistema");
+
+    let usuarios = [];
+
+    if (guardados) {
+        try {
+            const lista = JSON.parse(guardados);
+
+            if (Array.isArray(lista)) {
+                usuarios = lista;
+            }
+        } catch (error) {
+            usuarios = [];
+        }
+    }
+
+    if (usuarios.length === 0) {
+        usuarios = USUARIOS;
+    }
+
+    return usuarios.filter(function (usuario) {
+        return usuario.rol === "REPARTIDOR" && usuario.activo !== false;
+    });
+}
+
+
+function opcionesDeProducto(codigoElegido) {
+    return productosDisponibles().map(function (producto) {
+
+        const marca = producto.codigo === codigoElegido ? " selected" : "";
+
+        return '<option value="' + producto.codigo + '"' + marca + ">" +
+            producto.nombre + " — " + producto.categoria +
+            "</option>";
+
+    }).join("");
+}
+
+
+function opcionesDeRepartidor(correoElegido) {
+    const sinAsignar = !correoElegido ? " selected" : "";
+
+    return '<option value=""' + sinAsignar + ">Sin asignar</option>" +
+        repartidoresActivos().map(function (usuario) {
+
+            const marca = usuario.correo === correoElegido ? " selected" : "";
+
+            return '<option value="' + usuario.correo + '"' + marca + ">" +
+                usuario.nombre +
+                "</option>";
+
+        }).join("");
+}
+
+
+function opcionesDeEstado(estadoElegido) {
+    const estados = ["pendiente", "camino", "entregado", "cancelado"];
+
+    return estados.map(function (estado) {
+
+        const marca = estado === estadoElegido ? " selected" : "";
+
+        return '<option value="' + estado + '"' + marca + ">" +
+            textoDeEstado(estado) +
+            "</option>";
+
+    }).join("");
 }

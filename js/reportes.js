@@ -122,6 +122,14 @@ function cargarReportes() {
         }).length;
 
 
+    const cancelados =
+        pedidos.filter(function (estado) {
+
+            return estado === "cancelado";
+
+        }).length;
+
+
     // ======================================
     // MOSTRAR DATOS
     // ======================================
@@ -160,6 +168,13 @@ function cargarReportes() {
 
     document.getElementById("pedidosEnCamino").textContent =
         enCamino;
+
+    const casillaCancelados =
+        document.getElementById("pedidosCancelados");
+
+    if (casillaCancelados) {
+        casillaCancelados.textContent = cancelados;
+    }
 
     document.getElementById("pedidosEntregadosTabla").textContent =
         entregados;
@@ -260,6 +275,7 @@ function armarReporte() {
     lineas.push(filaCsv(["Pendientes", porEstado("pendiente")]));
     lineas.push(filaCsv(["En camino", porEstado("camino")]));
     lineas.push(filaCsv(["Entregados", porEstado("entregado")]));
+    lineas.push(filaCsv(["Cancelados", porEstado("cancelado")]));
     lineas.push("");
 
     lineas.push(filaCsv(["DETALLE DE PEDIDOS"]));

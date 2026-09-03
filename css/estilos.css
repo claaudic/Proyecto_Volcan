@@ -21,6 +21,8 @@
     --camino-fondo: #e0f2fe;
     --entregado-texto: #047857;
     --entregado-fondo: #d1fae5;
+    --cancelado-texto: #9f1239;
+    --cancelado-fondo: #ffe4e6;
 
     --fuente: "Figtree", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     --radio: 10px;
@@ -2557,6 +2559,11 @@ a:focus-visible,
 .estado-entregado {
     color: var(--entregado-texto);
     background-color: var(--entregado-fondo);
+}
+
+.estado-cancelado {
+    color: var(--cancelado-texto);
+    background-color: var(--cancelado-fondo);
 }
 
 .selector-estado,

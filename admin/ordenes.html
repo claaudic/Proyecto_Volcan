@@ -70,6 +70,12 @@
                 <p class="panel-etiqueta">Administración</p>
                 <h1 id="titulo-pagina">Gestión de órdenes</h1>
                 <p class="pagina-bajada">Revisa todos los pedidos registrados en el sistema.</p>
+
+                <p class="encabezado-accion">
+                    <button type="button" class="btn btn-principal" id="btnNuevaOrden">
+                        + Crear orden
+                    </button>
+                </p>
             </div>
 
             <svg class="encabezado-monte" viewBox="0 0 1440 60" preserveAspectRatio="none" aria-hidden="true" focusable="false">
@@ -167,6 +173,7 @@
                                 <th>Repartidor</th>
                                 <th>Total</th>
                                 <th>Estado</th>
+                                <th>Acciones</th>
                             </tr>
 
                         </thead>
@@ -261,7 +268,123 @@
 
 
 
+    <div class="modal fade" id="modalOrdenAdmin" tabindex="-1" aria-labelledby="tituloModalOrdenAdmin" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="tituloModalOrdenAdmin">Crear orden</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+
+                <form id="formOrdenAdmin" novalidate>
+                    <div class="modal-body">
+
+                        <input type="hidden" id="ordenNumero">
+
+                        <div class="campo">
+                            <label for="admCliente">Nombre del cliente <abbr title="obligatorio">*</abbr></label>
+                            <input type="text" id="admCliente" maxlength="80" required>
+                            <small class="mensaje-error-campo" id="errorAdmCliente" role="status"></small>
+                        </div>
+
+                        <div class="campo">
+                            <label for="admDireccion">Dirección de despacho <abbr title="obligatorio">*</abbr></label>
+                            <input type="text" id="admDireccion" maxlength="200" required>
+                            <small class="mensaje-error-campo" id="errorAdmDireccion" role="status"></small>
+                        </div>
+
+                        <div class="campo-par">
+                            <div class="campo">
+                                <label for="admComuna">Comuna <abbr title="obligatorio">*</abbr></label>
+                                <input type="text" id="admComuna" list="comunasAdmin" maxlength="60" required>
+                                <datalist id="comunasAdmin">
+                                    <option value="Chillán"></option>
+                                    <option value="Chillán Viejo"></option>
+                                    <option value="El Carmen"></option>
+                                    <option value="Pinto"></option>
+                                    <option value="San Ignacio"></option>
+                                    <option value="Bulnes"></option>
+                                    <option value="Quillón"></option>
+                                </datalist>
+                                <small class="mensaje-error-campo" id="errorAdmComuna" role="status"></small>
+                            </div>
+
+                            <div class="campo">
+                                <label for="admRepartidor">Repartidor</label>
+                                <select id="admRepartidor"></select>
+                            </div>
+                        </div>
+
+                        <div class="campo">
+                            <label for="admProducto">Producto <abbr title="obligatorio">*</abbr></label>
+                            <select id="admProducto" required></select>
+                            <small class="mensaje-error-campo" id="errorAdmProducto" role="status"></small>
+                        </div>
+
+                        <div class="campo-par">
+                            <div class="campo">
+                                <label for="admTipoPrecio">Tipo de precio</label>
+                                <select id="admTipoPrecio">
+                                    <option value="residencial">Residencial</option>
+                                    <option value="comercial">Comercial</option>
+                                </select>
+                            </div>
+
+                            <div class="campo">
+                                <label for="admCantidad">Cantidad <abbr title="obligatorio">*</abbr></label>
+                                <input type="number" id="admCantidad" min="1" step="1" value="1" required>
+                                <small class="mensaje-error-campo" id="errorAdmCantidad" role="status"></small>
+                            </div>
+                        </div>
+
+                        <div class="campo">
+                            <label for="admEstado">Estado</label>
+                            <select id="admEstado"></select>
+                        </div>
+
+                        <p class="mensaje-ayuda" id="admAyudaStock"></p>
+
+                        <p class="orden-total">Total: <strong id="admTotal">$0</strong></p>
+
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secundario" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-principal" id="btnGuardarOrden">Guardar orden</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="modalBorrarOrden" tabindex="-1" aria-labelledby="tituloBorrarOrden" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="tituloBorrarOrden">¿Eliminar la orden?</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+
+                <div class="modal-body">
+                    <p class="mb-0">
+                        Vas a eliminar la orden <strong id="ordenABorrar"></strong>.
+                        No se puede deshacer.
+                    </p>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secundario" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-peligro" id="confirmarBorrarOrden">Sí, eliminar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../js/catalogo.js"></script>
     <script src="../js/sesion.js"></script>
     <script src="../js/pedidos.js"></script>
     <script src="../js/admin.js"></script>

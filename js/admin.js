@@ -141,7 +141,13 @@ function mostrarResumenAdmin() {
 
 
     const total = pedidos.reduce(function (suma, pedido) {
+
+        if (pedido.estado === "cancelado") {
+            return suma;
+        }
+
         return suma + Number(pedido.total || 0);
+
     }, 0);
 
 

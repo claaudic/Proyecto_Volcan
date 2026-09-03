@@ -325,6 +325,19 @@ function crearSelectorEstado(pedido) {
                     Entregado
                 </option>
 
+
+                <option
+                    value="cancelado"
+                    ${
+                        pedido.estado ===
+                        "cancelado"
+                            ? "selected"
+                            : ""
+                    }
+                >
+                    Cancelado
+                </option>
+
             </select>
 
         </div>
@@ -340,19 +353,7 @@ function crearSelectorEstado(pedido) {
 
 function obtenerTextoEstado(estado) {
 
-    if (estado === "pendiente") {
-        return "Pendiente";
-    }
-
-    if (estado === "camino") {
-        return "En camino";
-    }
-
-    if (estado === "entregado") {
-        return "Entregado";
-    }
-
-    return estado;
+    return textoDeEstado(estado);
 
 }
 
@@ -363,19 +364,7 @@ function obtenerTextoEstado(estado) {
 
 function obtenerClaseEstado(estado) {
 
-    if (estado === "pendiente") {
-        return "estado-pendiente";
-    }
-
-    if (estado === "camino") {
-        return "estado-camino";
-    }
-
-    if (estado === "entregado") {
-        return "estado-entregado";
-    }
-
-    return "";
+    return claseDeEstado(estado);
 
 }
 

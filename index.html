@@ -100,7 +100,39 @@
 
                 <div class="hero-imagen">
                     <span class="hero-piso" aria-hidden="true"></span>
-                    <img src="img/hero-camion.jpg" alt="Camión de reparto cargado con cilindros de gas licuado">
+
+                    <div id="carruselHero" class="carousel slide carousel-fade hero-carrusel" data-bs-ride="carousel" data-bs-interval="6500" data-bs-pause="hover">
+
+                        <div class="carousel-indicators">
+                            <button type="button" data-bs-target="#carruselHero" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Foto 1 de 3"></button>
+                            <button type="button" data-bs-target="#carruselHero" data-bs-slide-to="1" aria-label="Foto 2 de 3"></button>
+                            <button type="button" data-bs-target="#carruselHero" data-bs-slide-to="2" aria-label="Foto 3 de 3"></button>
+                        </div>
+
+                        <div class="carousel-inner">
+                            <div class="carousel-item active">
+                                <img src="img/hero-entrega.jpg" alt="Repartidor entregando un cilindro de 15 kg a una clienta en la puerta de su casa">
+                            </div>
+                            <div class="carousel-item">
+                                <img src="img/hero-calle.jpg" loading="lazy" alt="Camión de Gas El Volcán recorriendo una calle de Chillán con cilindros cargados">
+                            </div>
+                            <div class="carousel-item">
+                                <img src="img/hero-carga.jpg" loading="lazy" alt="Dos trabajadores cargando cilindros en el camión de reparto">
+                            </div>
+                        </div>
+
+                        <button class="carousel-control-prev" type="button" data-bs-target="#carruselHero" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Foto anterior</span>
+                        </button>
+
+                        <button class="carousel-control-next" type="button" data-bs-target="#carruselHero" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Foto siguiente</span>
+                        </button>
+
+                    </div>
+
                     <div class="hero-insignia" data-profundidad="-10">
                         <p class="hero-insignia-numero">1–3 h</p>
                         <p class="hero-insignia-texto">Entrega en Chillán centro</p>

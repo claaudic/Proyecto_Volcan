@@ -179,7 +179,9 @@ function datosDelCliente(correo) {
 
 
 function obtenerPedidosSistema() {
-    const base = PEDIDOS_INICIALES.concat(pedidosDelCarrito());
+    const base = PEDIDOS_INICIALES
+        .concat(pedidosDelCarrito())
+        .concat(obtenerPedidosManuales());
 
     return base.map(function (pedido) {
         return {
@@ -271,4 +273,47 @@ function nombreDeRepartidor(correo) {
     });
 
     return cuenta ? cuenta.nombre : correo;
+}
+
+
+const CLAVE_PEDIDOS_MANUALES = "pedidosManuales";
+
+
+function obtenerPedidosManuales() {
+    const guardado = localStorage.getItem(CLAVE_PEDIDOS_MANUALES);
+
+    if (!guardado) {
+        return [];
+    }
+
+    try {
+        const lista = JSON.parse(guardado);
+        return Array.isArray(lista) ? lista : [];
+    } catch (error) {
+        return [];
+    }
+}
+
+
+function siguienteNumeroPedido() {
+    let mayor = 0;
+
+    obtenerPedidosSistema().forEach(function (pedido) {
+        const numero = Number(pedido.numero) || 0;
+
+        if (numero > mayor) {
+            mayor = numero;
+        }
+    });
+
+    return String(mayor + 1);
+}
+
+
+function guardarPedidoManual(pedido) {
+    const lista = obtenerPedidosManuales();
+
+    lista.push(pedido);
+
+    localStorage.setItem(CLAVE_PEDIDOS_MANUALES, JSON.stringify(lista));
 }

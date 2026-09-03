@@ -177,3 +177,16 @@ document.addEventListener("DOMContentLoaded", function () {
     iniciarParallaxScroll();
     iniciarInclinacion();
 });
+
+
+// ==========================================
+// CARRUSEL DE LA PORTADA
+// Si el sistema pide menos movimiento,
+// no avanza solo: solo con las flechas.
+// ==========================================
+
+const carruselPortada = document.getElementById("carruselHero");
+
+if (carruselPortada && menosMovimiento.matches && typeof bootstrap !== "undefined") {
+    bootstrap.Carousel.getOrCreateInstance(carruselPortada).pause();
+}

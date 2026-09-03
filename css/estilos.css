@@ -112,9 +112,9 @@ body {
 
 .hero-contenido {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1.15fr;
     align-items: center;
-    gap: 4rem;
+    gap: 3.5rem;
 }
 
 .hero-etiqueta {
@@ -150,7 +150,7 @@ body {
     margin-top: 2.25rem;
 }
 
-.hero-imagen img {
+.hero-imagen > img {
     width: 100%;
     height: 460px;
     object-fit: cover;
@@ -2784,4 +2784,65 @@ a:focus-visible,
     flex-direction: column;
     min-height: 0;
     overflow: hidden;
+}
+
+.hero-carrusel {
+    overflow: hidden;
+    border-radius: var(--radio);
+    box-shadow: var(--sombra-alta);
+}
+
+.hero-carrusel .carousel-item img {
+    width: 100%;
+    height: 460px;
+    object-fit: cover;
+    object-position: center;
+}
+
+.hero-carrusel .carousel-control-prev,
+.hero-carrusel .carousel-control-next {
+    width: 14%;
+    opacity: 0.45;
+    transition: opacity 0.25s ease;
+}
+
+.hero-carrusel:hover .carousel-control-prev,
+.hero-carrusel:hover .carousel-control-next,
+.hero-carrusel .carousel-control-prev:focus-visible,
+.hero-carrusel .carousel-control-next:focus-visible {
+    opacity: 1;
+}
+
+.hero-carrusel .carousel-indicators {
+    margin-bottom: 0.9rem;
+}
+
+.hero-carrusel .carousel-indicators [data-bs-target] {
+    width: 9px;
+    height: 9px;
+    margin: 0 4px;
+    border: none;
+    border-radius: 50%;
+    opacity: 0.55;
+}
+
+.hero-carrusel .carousel-indicators .active {
+    opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hero-carrusel .carousel-item {
+        transition: none;
+    }
+}
+
+.hero-carrusel .carousel-inner::after {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 110px;
+    background: linear-gradient(to top, rgba(18, 48, 58, 0.45), transparent);
+    content: "";
+    pointer-events: none;
 }

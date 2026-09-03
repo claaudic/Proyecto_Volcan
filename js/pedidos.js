@@ -92,46 +92,150 @@ function repartidorGuardado(numero, porDefecto) {
     return guardado;
 }
 
-
 function pedidosDelCarrito() {
+
     if (typeof obtenerPedidos !== "function") {
         return [];
     }
 
-    return obtenerPedidos().map(function (pedido) {
-        const primera = pedido.lineas && pedido.lineas.length > 0
-            ? pedido.lineas[0]
-            : null;
 
-        const otras = pedido.lineas ? pedido.lineas.length - 1 : 0;
+    return obtenerPedidos().map(function (pedido) {
+
+        const primera =
+            pedido.lineas && pedido.lineas.length > 0
+                ? pedido.lineas[0]
+                : null;
+
+
+        const otras =
+            pedido.lineas
+                ? pedido.lineas.length - 1
+                : 0;
+
 
         let producto = "Pedido del sitio";
 
+
         if (primera) {
+
             producto = primera.nombre;
 
             if (otras > 0) {
-                producto = producto + " y " + otras + " producto" + (otras > 1 ? "s" : "") + " más";
+
+                producto =
+                    producto +
+                    " y " +
+                    otras +
+                    " producto" +
+                    (otras > 1 ? "s" : "") +
+                    " más";
             }
         }
 
-        const datos = datosDelCliente(pedido.correo);
+
+        // ==========================================
+        // COMPRA COMO INVITADO
+        // ==========================================
+
+        if (
+            pedido.tipoCliente === "INVITADO" &&
+            pedido.clienteInvitado
+        ) {
+
+            return {
+
+                numero:
+                    String(pedido.numero),
+
+                cliente:
+                    pedido.clienteInvitado.nombre +
+                    " (Invitado)",
+
+                correo:
+                    pedido.clienteInvitado.correo || "",
+
+                direccion:
+                    pedido.clienteInvitado.direccion ||
+                    "Sin dirección registrada",
+
+                comuna:
+                    pedido.clienteInvitado.comuna ||
+                    "Sin comuna",
+
+                producto:
+                    producto,
+
+                cantidad:
+                    primera
+                        ? primera.cantidad
+                        : 1,
+
+                total:
+                    pedido.total,
+
+                estado:
+                    "pendiente",
+
+                repartidor:
+                    "",
+
+                tipoCliente:
+                    "INVITADO"
+            };
+
+        }
+
+
+        // ==========================================
+        // CLIENTE REGISTRADO
+        // ==========================================
+
+        const datos =
+            datosDelCliente(
+                pedido.correo
+            );
+
 
         return {
-            numero: String(pedido.numero),
-            cliente: datos.nombre,
-            correo: pedido.correo,
-            direccion: datos.direccion,
-            comuna: datos.comuna,
-            producto: producto,
-            cantidad: primera ? primera.cantidad : 1,
-            total: pedido.total,
-            estado: "pendiente",
-            repartidor: ""
+
+            numero:
+                String(pedido.numero),
+
+            cliente:
+                datos.nombre,
+
+            correo:
+                pedido.correo,
+
+            direccion:
+                datos.direccion,
+
+            comuna:
+                datos.comuna,
+
+            producto:
+                producto,
+
+            cantidad:
+                primera
+                    ? primera.cantidad
+                    : 1,
+
+            total:
+                pedido.total,
+
+            estado:
+                "pendiente",
+
+            repartidor:
+                "",
+
+            tipoCliente:
+                "REGISTRADO"
         };
+
     });
 }
-
 
 function datosDelCliente(correo) {
     const vacio = {

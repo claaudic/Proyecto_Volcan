@@ -101,83 +101,133 @@ function dibujarPanel() {
 
 
 // ==========================================
-// CIFRAS DEL PANEL DE INICIO
+// TABLERO DE INICIO
 // ==========================================
 
 function mostrarResumenAdmin() {
 
-    const casillaProductos = document.getElementById("totalProductos");
+    const casilla = document.getElementById("totalPendientes");
 
-    if (!casillaProductos) {
+    if (!casilla || typeof obtenerPedidosSistema !== "function") {
         return;
     }
 
 
+    const pedidos = obtenerPedidosSistema();
+
     const productos =
-        typeof obtenerCatalogo === "function"
-            ? obtenerCatalogo()
+        typeof obtenerCatalogoActivo === "function"
+            ? obtenerCatalogoActivo()
             : [];
 
 
-    const categorias = [];
+    // ======================================
+    // LAS CUATRO CIFRAS
+    // ======================================
 
-    productos.forEach(function (producto) {
+    const pendientes = pedidos.filter(function (pedido) {
+        return pedido.estado === "pendiente";
+    }).length;
 
-        if (categorias.indexOf(producto.categoria) === -1) {
-            categorias.push(producto.categoria);
-        }
 
+    const sinRepartidor = pedidos.filter(function (pedido) {
+        return !pedido.repartidor;
+    }).length;
+
+
+    const porStock = productos.slice().sort(function (uno, otro) {
+        return Number(uno.stock) - Number(otro.stock);
     });
 
 
-    casillaProductos.textContent = productos.length;
+    const total = pedidos.reduce(function (suma, pedido) {
+        return suma + Number(pedido.total || 0);
+    }, 0);
 
-    document.getElementById("totalCategorias").textContent =
-        categorias.length;
 
-    document.getElementById("totalUsuarios").textContent =
-        contarUsuarios();
+    casilla.textContent = pendientes;
+
+    document.getElementById("totalSinRepartidor").textContent = sinRepartidor;
+
+    document.getElementById("stockMasBajo").textContent =
+        porStock.length > 0 ? porStock[0].stock : 0;
+
+    document.getElementById("totalVendido").textContent = formatearPesos(total);
+
+
+    mostrarUltimosPedidos(pedidos);
+    mostrarStockBajo(porStock);
 
 }
 
 
-function contarUsuarios() {
+function mostrarUltimosPedidos(pedidos) {
 
-    const guardados = localStorage.getItem("usuariosSistema");
+    const cuerpo = document.getElementById("tablaUltimosPedidos");
 
-    let correos = [];
-
-
-    if (guardados) {
-
-        try {
-
-            const lista = JSON.parse(guardados);
-
-            if (Array.isArray(lista)) {
-
-                correos = lista.map(function (usuario) {
-                    return String(usuario.correo).toLowerCase();
-                });
-
-            }
-
-        } catch (error) {
-            correos = [];
-        }
-
+    if (!cuerpo) {
+        return;
     }
 
 
-    USUARIOS.forEach(function (base) {
+    if (pedidos.length === 0) {
 
-        if (correos.indexOf(base.correo.toLowerCase()) === -1) {
-            correos.push(base.correo.toLowerCase());
-        }
+        cuerpo.innerHTML =
+            '<tr><td colspan="5">Todavía no hay pedidos registrados.</td></tr>';
 
-    });
+        return;
+    }
 
 
-    return correos.length;
+    cuerpo.innerHTML = pedidos.slice(0, 5).map(function (pedido) {
+
+        return `
+            <tr>
+                <td><strong>#${pedido.numero}</strong></td>
+                <td>${pedido.cliente}</td>
+                <td>${pedido.comuna}</td>
+                <td>
+                    <span class="estado ${claseDeEstado(pedido.estado)}">
+                        ${textoDeEstado(pedido.estado)}
+                    </span>
+                </td>
+                <td>${formatearPesos(pedido.total)}</td>
+            </tr>
+        `;
+
+    }).join("");
+
+}
+
+
+function mostrarStockBajo(productosOrdenados) {
+
+    const cuerpo = document.getElementById("tablaStockBajo");
+
+    if (!cuerpo) {
+        return;
+    }
+
+
+    if (productosOrdenados.length === 0) {
+
+        cuerpo.innerHTML =
+            '<tr><td colspan="3">No hay productos en el catálogo.</td></tr>';
+
+        return;
+    }
+
+
+    cuerpo.innerHTML = productosOrdenados.slice(0, 5).map(function (producto) {
+
+        return `
+            <tr>
+                <td>${producto.nombre}</td>
+                <td>${producto.categoria}</td>
+                <td><strong>${producto.stock}</strong></td>
+            </tr>
+        `;
+
+    }).join("");
 
 }

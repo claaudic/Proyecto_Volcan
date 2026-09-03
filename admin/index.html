@@ -83,36 +83,46 @@
             <div class="container">
 
                 <section class="panel-seccion" aria-labelledby="titulo-resumen">
-                    <h2 id="titulo-resumen" class="visually-hidden">Resumen del sistema</h2>
+                    <h2 id="titulo-resumen" class="visually-hidden">Resumen del día</h2>
 
                     <div class="row g-4">
 
-                        <div class="col-12 col-md-4">
+                        <div class="col-12 col-sm-6 col-lg-3">
                             <article class="tarjeta-dato">
-                                <div class="tarjeta-dato-icono tono-verde" aria-hidden="true">P</div>
+                                <div class="tarjeta-dato-icono tono-rosa" aria-hidden="true">P</div>
                                 <div>
-                                    <p class="tarjeta-dato-texto">Productos en el catálogo</p>
-                                    <p class="tarjeta-dato-numero" id="totalProductos">0</p>
+                                    <p class="tarjeta-dato-texto">Pedidos pendientes</p>
+                                    <p class="tarjeta-dato-numero" id="totalPendientes">0</p>
                                 </div>
                             </article>
                         </div>
 
-                        <div class="col-12 col-md-4">
+                        <div class="col-12 col-sm-6 col-lg-3">
                             <article class="tarjeta-dato">
-                                <div class="tarjeta-dato-icono tono-celeste" aria-hidden="true">C</div>
+                                <div class="tarjeta-dato-icono tono-celeste" aria-hidden="true">R</div>
                                 <div>
-                                    <p class="tarjeta-dato-texto">Categorías</p>
-                                    <p class="tarjeta-dato-numero" id="totalCategorias">0</p>
+                                    <p class="tarjeta-dato-texto">Sin repartidor asignado</p>
+                                    <p class="tarjeta-dato-numero" id="totalSinRepartidor">0</p>
                                 </div>
                             </article>
                         </div>
 
-                        <div class="col-12 col-md-4">
+                        <div class="col-12 col-sm-6 col-lg-3">
                             <article class="tarjeta-dato">
-                                <div class="tarjeta-dato-icono tono-tinta" aria-hidden="true">U</div>
+                                <div class="tarjeta-dato-icono tono-tinta" aria-hidden="true">S</div>
                                 <div>
-                                    <p class="tarjeta-dato-texto">Usuarios registrados</p>
-                                    <p class="tarjeta-dato-numero" id="totalUsuarios">0</p>
+                                    <p class="tarjeta-dato-texto">Stock más bajo</p>
+                                    <p class="tarjeta-dato-numero" id="stockMasBajo">0</p>
+                                </div>
+                            </article>
+                        </div>
+
+                        <div class="col-12 col-sm-6 col-lg-3">
+                            <article class="tarjeta-dato">
+                                <div class="tarjeta-dato-icono tono-verde" aria-hidden="true">$</div>
+                                <div>
+                                    <p class="tarjeta-dato-texto">Total registrado</p>
+                                    <p class="tarjeta-dato-numero" id="totalVendido">0</p>
                                 </div>
                             </article>
                         </div>
@@ -120,10 +130,55 @@
                     </div>
                 </section>
 
-                <section class="panel-seccion" aria-labelledby="tituloAviso">
-                    <div class="panel-aviso">
-                        <h2 id="tituloAviso">Qué puedes hacer aquí</h2>
-                        <p id="textoAviso"></p>
+                <section class="panel-seccion" aria-labelledby="titulo-ultimos">
+                    <div class="panel-titulo">
+                        <div>
+                            <p class="panel-etiqueta">Actividad</p>
+                            <h2 id="titulo-ultimos">Últimos pedidos</h2>
+                        </div>
+
+                        <p class="panel-titulo-nota"><a href="ordenes.html">Ver todas las órdenes</a></p>
+                    </div>
+
+                    <div class="tabla-marco table-responsive">
+                        <table class="tabla-panel">
+                            <thead>
+                                <tr>
+                                    <th>N° Pedido</th>
+                                    <th>Cliente</th>
+                                    <th>Comuna</th>
+                                    <th>Estado</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="tablaUltimosPedidos"></tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section class="panel-seccion" aria-labelledby="titulo-stock">
+                    <div class="panel-titulo">
+                        <div>
+                            <p class="panel-etiqueta">Inventario</p>
+                            <h2 id="titulo-stock">Productos con menos stock</h2>
+                        </div>
+
+                        <p class="panel-titulo-nota"><a href="productos.html">Ir al catálogo</a></p>
+                    </div>
+
+                    <div class="tabla-marco table-responsive">
+                        <table class="tabla-panel">
+                            <thead>
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>Categoría</th>
+                                    <th>Stock</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="tablaStockBajo"></tbody>
+                        </table>
                     </div>
                 </section>
 
@@ -207,6 +262,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../js/catalogo.js"></script>
     <script src="../js/sesion.js"></script>
+    <script src="../js/pedidos.js"></script>
     <script src="../js/admin.js"></script>
 
 </body>

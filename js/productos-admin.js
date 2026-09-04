@@ -58,6 +58,10 @@ const imagenProducto =
 const errorCodigoProducto =
     document.getElementById("errorCodigoProducto");
 
+
+const errorDescripcionProducto =
+    document.getElementById("errorDescripcionProducto");
+
 const errorNombreProducto =
     document.getElementById("errorNombreProducto");
 
@@ -655,6 +659,15 @@ formProducto.addEventListener(
 
         }
 
+        else if (codigo.length < 3) {
+
+            errorCodigoProducto.textContent =
+                "El código debe tener al menos 3 caracteres.";
+
+            formularioValido = false;
+
+        }
+
 
 
         if (nombre === "") {
@@ -674,6 +687,17 @@ formProducto.addEventListener(
             formularioValido = false;
 
         }
+
+
+        if (descripcion.length > 500) {
+
+            errorDescripcionProducto.textContent =
+                "La descripción no puede superar los 500 caracteres.";
+
+            formularioValido = false;
+
+        }
+
 
 
         if (categoria === "") {
@@ -1060,6 +1084,8 @@ function limpiarFormularioProducto() {
 function limpiarErroresProducto() {
 
     errorCodigoProducto.textContent = "";
+
+    errorDescripcionProducto.textContent = "";
 
     errorNombreProducto.textContent = "";
 

@@ -2360,6 +2360,13 @@ a:focus-visible,
     margin-bottom: 0.75rem;
 }
 
+.pedido-cierre {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.4rem;
+}
+
 .pedido-numero {
     margin: 0;
     color: var(--tinta);

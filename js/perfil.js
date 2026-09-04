@@ -318,7 +318,13 @@ function mostrarPedidos(usuario) {
     const lista = document.getElementById("listaPedidos");
     const vacio = document.getElementById("perfilSinPedidos");
     const resumen = document.getElementById("perfilResumenPedidos");
-    const pedidos = pedidosDe(usuario.correo);
+    const borrados = typeof numerosEliminados === "function"
+        ? numerosEliminados()
+        : [];
+
+    const pedidos = pedidosDe(usuario.correo).filter(function (pedido) {
+        return borrados.indexOf(String(pedido.numero)) === -1;
+    });
 
     if (pedidos.length === 0) {
         vacio.classList.remove("d-none");
@@ -337,6 +343,10 @@ function mostrarPedidos(usuario) {
             year: "numeric"
         });
 
+        const estado = typeof estadoGuardado === "function"
+            ? estadoGuardado(pedido.numero, "pendiente")
+            : "pendiente";
+
         const detalle = pedido.lineas.map(function (linea) {
             return "<li>" + linea.cantidad + " × " + linea.nombre +
                 "<span>" + formatearMonto(linea.subtotal) + "</span></li>";
@@ -348,7 +358,11 @@ function mostrarPedidos(usuario) {
             '<p class="pedido-numero">Pedido N° ' + pedido.numero + "</p>" +
             '<p class="pedido-fecha">' + fecha + "</p>" +
             "</div>" +
+            '<div class="pedido-cierre">' +
+            '<span class="estado-pedido ' + claseDeEstado(estado) + '">' +
+            textoDeEstado(estado) + "</span>" +
             '<strong class="pedido-total">' + formatearMonto(pedido.total) + "</strong>" +
+            "</div>" +
             "</div>" +
             '<ul class="pedido-lineas list-unstyled">' + detalle + "</ul>" +
             "</li>";

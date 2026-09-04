@@ -797,6 +797,34 @@
 
     </div>
 
+    <div class="modal fade" id="modalBorrarProducto" tabindex="-1" aria-labelledby="tituloBorrarProducto" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="tituloBorrarProducto">¿Eliminar el producto?</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+
+                <div class="modal-body">
+                    <p>
+                        Vas a eliminar <strong id="productoABorrar"></strong> del catálogo.
+                    </p>
+                    <p class="mb-0">
+                        Dejará de aparecer en la tienda y no se puede deshacer.
+                        Si solo quieres dejar de venderlo por un tiempo, usa Desactivar.
+                    </p>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secundario" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-peligro" id="confirmarBorrarProducto">Sí, eliminar</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../js/sesion.js"></script>
     <script src="../js/admin.js"></script>

@@ -505,6 +505,15 @@ function mostrarProductos() {
 
                 </button>
 
+
+                <button
+                    type="button"
+                    class="btn btn-sm btn-outline-danger mb-1"
+                    onclick="pedirBorrarProducto(${producto.id})"
+                >
+                    Eliminar
+                </button>
+
             </td>
 
         `;
@@ -1068,3 +1077,68 @@ function limpiarErroresProducto() {
 
 
 mostrarProductos();
+
+
+// ==========================================
+// ELIMINAR UN PRODUCTO
+// ==========================================
+
+let productoABorrar = null;
+
+
+function pedirBorrarProducto(id) {
+
+    const productos = obtenerProductosSistema();
+
+    const producto = productos.find(function (uno) {
+        return uno.id === id;
+    });
+
+
+    if (!producto) {
+        return;
+    }
+
+
+    productoABorrar = id;
+
+    document.getElementById("productoABorrar").textContent =
+        producto.nombre;
+
+    ventanaBorrarProducto.show();
+
+}
+
+
+function eliminarProducto(id) {
+
+    const productos = obtenerProductosSistema();
+
+    const quedan = productos.filter(function (producto) {
+        return producto.id !== id;
+    });
+
+    guardarProductosSistema(quedan);
+
+    mostrarProductos();
+
+}
+
+
+const ventanaBorrarProducto = new bootstrap.Modal(
+    document.getElementById("modalBorrarProducto")
+);
+
+
+document.getElementById("confirmarBorrarProducto")
+    .addEventListener("click", function () {
+
+        if (productoABorrar !== null) {
+            eliminarProducto(productoABorrar);
+        }
+
+        productoABorrar = null;
+
+        ventanaBorrarProducto.hide();
+
+    });

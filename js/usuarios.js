@@ -11,6 +11,18 @@ const correoUsuario = document.getElementById("correoUsuario");
 const contrasenaUsuario = document.getElementById("contrasenaUsuario");
 const rolUsuarioForm = document.getElementById("rolUsuarioForm");
 
+const runUsuario = document.getElementById("runUsuario");
+const apellidosUsuario = document.getElementById("apellidosUsuario");
+const nacimientoUsuario = document.getElementById("nacimientoUsuario");
+const regionUsuario = document.getElementById("regionUsuario");
+const comunaUsuario = document.getElementById("comunaUsuario");
+const direccionUsuario = document.getElementById("direccionUsuario");
+
+const errorRun = document.getElementById("errorRun");
+const errorApellidos = document.getElementById("errorApellidos");
+const errorDireccion = document.getElementById("errorDireccion");
+const avisoCoberturaUsuario = document.getElementById("avisoCoberturaUsuario");
+
 const errorNombre = document.getElementById("errorNombre");
 const errorCorreo = document.getElementById("errorCorreo");
 const errorContrasena = document.getElementById("errorContrasena");
@@ -26,6 +38,107 @@ const modalUsuario = new bootstrap.Modal(
 // ==========================================
 // CARGAR USUARIOS
 // ==========================================
+
+function runValido(valor) {
+    const run = String(valor).trim().toUpperCase();
+
+    if (!/^[0-9]{6,8}[0-9K]$/.test(run)) {
+        return false;
+    }
+
+    const cuerpo = run.slice(0, -1);
+    const verificador = run.slice(-1);
+
+    let suma = 0;
+    let factor = 2;
+
+    for (let i = cuerpo.length - 1; i >= 0; i = i - 1) {
+        suma = suma + Number(cuerpo[i]) * factor;
+        factor = factor === 7 ? 2 : factor + 1;
+    }
+
+    const resto = 11 - (suma % 11);
+
+    const esperado =
+        resto === 11
+            ? "0"
+            : resto === 10
+                ? "K"
+                : String(resto);
+
+    return verificador === esperado;
+}
+
+
+function llenarRegiones() {
+    if (!regionUsuario || typeof nombresDeRegiones !== "function") {
+        return;
+    }
+
+    regionUsuario.innerHTML =
+        '<option value="">Selecciona una región</option>' +
+        nombresDeRegiones().map(function (nombre) {
+            return '<option value="' + nombre + '">' + nombre + "</option>";
+        }).join("");
+}
+
+
+function llenarComunas(nombreRegion, comunaElegida) {
+    if (!comunaUsuario) {
+        return;
+    }
+
+    const comunas =
+        typeof comunasDeRegion === "function"
+            ? comunasDeRegion(nombreRegion)
+            : [];
+
+    if (comunas.length === 0) {
+        comunaUsuario.innerHTML =
+            '<option value="">Elige primero una región</option>';
+        comunaUsuario.disabled = true;
+        return;
+    }
+
+    comunaUsuario.innerHTML =
+        '<option value="">Selecciona una comuna</option>' +
+        comunas.map(function (comuna) {
+            const marca = comuna === comunaElegida ? " selected" : "";
+            return '<option value="' + comuna + '"' + marca + ">" + comuna + "</option>";
+        }).join("");
+
+    comunaUsuario.disabled = false;
+}
+
+
+function revisarCoberturaUsuario() {
+    if (!avisoCoberturaUsuario) {
+        return;
+    }
+
+    const comuna = comunaUsuario ? comunaUsuario.value.trim() : "";
+
+    if (comuna === "" || typeof buscarZona !== "function") {
+        avisoCoberturaUsuario.textContent = "";
+        avisoCoberturaUsuario.className = "mt-1 small";
+        return;
+    }
+
+    const zona = buscarZona(comuna);
+
+    if (zona) {
+        avisoCoberturaUsuario.textContent =
+            "Con despacho: " + zona.zona + ", " + zona.dias + ".";
+
+        avisoCoberturaUsuario.className = "mt-1 small aviso-cobertura-ok";
+    } else {
+        avisoCoberturaUsuario.textContent =
+            "Sin reparto en esa comuna. La cuenta se crea igual.";
+
+        avisoCoberturaUsuario.className = "mt-1 small aviso-cobertura-no";
+    }
+}
+
 
 function obtenerUsuariosSistema() {
 
@@ -137,7 +250,13 @@ function obtenerUsuariosSistema() {
             usuariosSistema.push({
 
                 id: siguienteId,
+                run: usuarioBase.run || "",
                 nombre: usuarioBase.nombre,
+                apellidos: usuarioBase.apellidos || "",
+                nacimiento: "",
+                region: usuarioBase.region || "",
+                comuna: usuarioBase.comuna || "",
+                direccion: usuarioBase.direccion || "",
                 correo: correoBase,
                 contrasena: usuarioBase.contrasena,
                 rol: usuarioBase.rol,
@@ -289,7 +408,13 @@ formUsuario.addEventListener("submit", function (event) {
 
     limpiarErrores();
 
+    const run = runUsuario.value.trim().toUpperCase();
     const nombre = nombreUsuario.value.trim();
+    const apellidos = apellidosUsuario.value.trim();
+    const nacimiento = nacimientoUsuario.value;
+    const region = regionUsuario.value;
+    const comuna = comunaUsuario.value;
+    const direccion = direccionUsuario.value.trim();
     const correo = correoUsuario.value.trim().toLowerCase();
     const contrasena = contrasenaUsuario.value.trim();
     const rol = rolUsuarioForm.value;
@@ -297,6 +422,36 @@ formUsuario.addEventListener("submit", function (event) {
     const id = Number(usuarioId.value);
 
     let formularioValido = true;
+
+
+    // RUN
+
+    if (run === "") {
+
+        errorRun.textContent =
+            "Ingresa el RUN.";
+
+        formularioValido = false;
+
+    }
+
+    else if (run.length < 7 || run.length > 9) {
+
+        errorRun.textContent =
+            "El RUN debe tener entre 7 y 9 caracteres, sin puntos ni guion.";
+
+        formularioValido = false;
+
+    }
+
+    else if (!runValido(run)) {
+
+        errorRun.textContent =
+            "Ese RUN no es válido. Revisa el dígito verificador.";
+
+        formularioValido = false;
+
+    }
 
 
     // NOMBRE
@@ -314,6 +469,48 @@ formUsuario.addEventListener("submit", function (event) {
 
         errorNombre.textContent =
             "El nombre no puede superar los 50 caracteres.";
+
+        formularioValido = false;
+
+    }
+
+
+    // APELLIDOS
+
+    if (apellidos === "") {
+
+        errorApellidos.textContent =
+            "Ingresa los apellidos.";
+
+        formularioValido = false;
+
+    }
+
+    else if (apellidos.length > 100) {
+
+        errorApellidos.textContent =
+            "Los apellidos no pueden superar los 100 caracteres.";
+
+        formularioValido = false;
+
+    }
+
+
+    // DIRECCION
+
+    if (direccion === "") {
+
+        errorDireccion.textContent =
+            "Ingresa la dirección.";
+
+        formularioValido = false;
+
+    }
+
+    else if (direccion.length > 300) {
+
+        errorDireccion.textContent =
+            "La dirección no puede superar los 300 caracteres.";
 
         formularioValido = false;
 
@@ -429,6 +626,13 @@ formUsuario.addEventListener("submit", function (event) {
         usuario.correo = correo;
         usuario.rol = rol;
 
+        usuario.run = run;
+        usuario.apellidos = apellidos;
+        usuario.nacimiento = nacimiento;
+        usuario.region = region;
+        usuario.comuna = comuna;
+        usuario.direccion = direccion;
+
 
         if (contrasena !== "") {
             usuario.contrasena = contrasena;
@@ -454,7 +658,13 @@ formUsuario.addEventListener("submit", function (event) {
         usuarios.push({
 
             id: nuevoId,
+            run: run,
             nombre: nombre,
+            apellidos: apellidos,
+            nacimiento: nacimiento,
+            region: region,
+            comuna: comuna,
+            direccion: direccion,
             correo: correo,
             contrasena: contrasena,
             rol: rol,
@@ -497,9 +707,17 @@ function editarUsuario(id) {
     limpiarFormulario();
 
     usuarioId.value = usuario.id;
+    runUsuario.value = usuario.run || "";
     nombreUsuario.value = usuario.nombre;
+    apellidosUsuario.value = usuario.apellidos || "";
+    nacimientoUsuario.value = usuario.nacimiento || "";
+    direccionUsuario.value = usuario.direccion || "";
     correoUsuario.value = usuario.correo;
     rolUsuarioForm.value = usuario.rol;
+
+    regionUsuario.value = usuario.region || "";
+    llenarComunas(regionUsuario.value, usuario.comuna || "");
+    revisarCoberturaUsuario();
 
     contrasenaUsuario.value = "";
     contrasenaUsuario.required = false;
@@ -670,6 +888,9 @@ function limpiarFormulario() {
 
     contrasenaUsuario.placeholder = "";
 
+    llenarComunas("", "");
+    revisarCoberturaUsuario();
+
     limpiarErrores();
 
 }
@@ -681,7 +902,10 @@ function limpiarFormulario() {
 
 function limpiarErrores() {
 
+    errorRun.textContent = "";
     errorNombre.textContent = "";
+    errorApellidos.textContent = "";
+    errorDireccion.textContent = "";
     errorCorreo.textContent = "";
     errorContrasena.textContent = "";
     errorRol.textContent = "";
@@ -694,3 +918,21 @@ function limpiarErrores() {
 // ==========================================
 
 mostrarUsuarios();
+
+
+// ==========================================
+// REGION -> COMUNA
+// ==========================================
+
+llenarRegiones();
+
+if (regionUsuario) {
+    regionUsuario.addEventListener("change", function () {
+        llenarComunas(regionUsuario.value, "");
+        revisarCoberturaUsuario();
+    });
+}
+
+if (comunaUsuario) {
+    comunaUsuario.addEventListener("change", revisarCoberturaUsuario);
+}

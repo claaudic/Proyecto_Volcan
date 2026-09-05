@@ -4,30 +4,55 @@ const USUARIOS = [
     {
         nombre: "Sofía Pérez",
         correo: "admin@gaselvolcan.cl",
+        run: "152348762",
+        apellidos: "Pérez Soto",
+        region: "Ñuble",
+        comuna: "Chillán",
+        direccion: "Av. Libertad 1240",
         contrasena: "Admin1234",
         rol: "ADMINISTRADOR"
     },
     {
         nombre: "Daniela Fuentes",
         correo: "despachadora@gaselvolcan.cl",
+        run: "178452010",
+        apellidos: "Fuentes Rivas",
+        region: "Ñuble",
+        comuna: "Chillán",
+        direccion: "Calle Arauco 455",
         contrasena: "Desp123",
         rol: "DESPACHADORA"
     },
     {
         nombre: "Matías Vera",
         correo: "repartidor@gaselvolcan.cl",
+        run: "160923342",
+        apellidos: "Vera Muñoz",
+        region: "Ñuble",
+        comuna: "Chillán Viejo",
+        direccion: "Camino Real 88",
         contrasena: "Repart123",
         rol: "REPARTIDOR"
     },
     {
         nombre: "Rodrigo Peña",
         correo: "repartidor2@gaselvolcan.cl",
+        run: "184501279",
+        apellidos: "Peña Castro",
+        region: "Ñuble",
+        comuna: "Bulnes",
+        direccion: "Los Robles 210",
         contrasena: "Repart123",
         rol: "REPARTIDOR"
     },
     {
         nombre: "Camila Rojas",
         correo: "cliente@gmail.com",
+        run: "193387454",
+        apellidos: "Rojas Herrera",
+        region: "Ñuble",
+        comuna: "Chillán",
+        direccion: "Av. O'Higgins 850",
         contrasena: "Clien1234",
         rol: "CLIENTE"
     }

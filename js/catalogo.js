@@ -249,6 +249,37 @@ function obtenerCatalogo() {
     }
 }
 
+function descontarStock(lineas) {
+    if (!Array.isArray(lineas) || lineas.length === 0) {
+        return;
+    }
+
+    const comprado = {};
+
+    lineas.forEach(function (linea) {
+        const codigo = String(linea.codigo);
+        const cantidad = Number(linea.cantidad) || 0;
+
+        comprado[codigo] = (comprado[codigo] || 0) + cantidad;
+    });
+
+    const actualizados = obtenerCatalogo().map(function (producto) {
+        const cantidad = comprado[String(producto.codigo)];
+
+        if (!cantidad) {
+            return producto;
+        }
+
+        const quedan = Number(producto.stock) - cantidad;
+
+        return Object.assign({}, producto, {
+            stock: quedan > 0 ? quedan : 0
+        });
+    });
+
+    localStorage.setItem(CLAVE_CATALOGO, JSON.stringify(actualizados));
+}
+
 function obtenerCatalogoActivo() {
     return obtenerCatalogo().filter(function (producto) {
         return producto.activo !== false;

@@ -459,6 +459,9 @@ function registrarPedidoCliente(
         generarNumeroPedido();
 
 
+    descontarStock(detalle.lineas);
+
+
     guardarPedido({
 
         numero: numero,
@@ -608,6 +611,9 @@ function registrarPedidoInvitado(
 
     const numero =
         generarNumeroPedido();
+
+
+    descontarStock(detalle.lineas);
 
 
     guardarPedido({

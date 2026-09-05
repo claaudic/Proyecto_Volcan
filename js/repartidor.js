@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const usuario = obtenerSesion();
 
     if (!usuario || usuario.rol !== "REPARTIDOR") {
-        window.location.href = "login.html";
+        window.location.replace("login.html");
         return;
     }
 

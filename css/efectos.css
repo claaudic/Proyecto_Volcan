@@ -163,8 +163,7 @@
 .btn-secundario,
 .btn-producto,
 .btn-carrito,
-.btn-cuenta,
-.btn-salir {
+.btn-cuenta {
     transition:
         transform 0.16s ease,
         background-color 0.2s ease,
@@ -177,8 +176,7 @@
 .btn-secundario:active,
 .btn-producto:active,
 .btn-carrito:active,
-.btn-cuenta:active,
-.btn-salir:active {
+.btn-cuenta:active {
     transform: translateY(1px) scale(0.985);
 }
 

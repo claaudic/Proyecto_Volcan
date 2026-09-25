@@ -10,3 +10,7 @@ img/camion.png
 img/camion2.jpeg
 img/pexels-*
 img/familia.png
+
+# Node / Vite
+node_modules/
+dist/

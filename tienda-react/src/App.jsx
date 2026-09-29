@@ -1,78 +1,27 @@
+import { Routes, Route } from 'react-router-dom'
+
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
-import TarjetaProducto from './components/TarjetaProducto'
-import { PRODUCTOS, formatearPrecio, imagenDe } from './datos/productos'
-import { useState } from 'react'
 
+import Inicio from './paginas/Inicio'
+import Productos from './paginas/Productos'
+import Nosotros from './paginas/Nosotros'
+import Blogs from './paginas/Blogs'
+import Contacto from './paginas/Contacto'
 
 function App() {
-  const [busqueda, setBusqueda] = useState("")
-  const [categoria, setCategoria] = useState("")
-
-  // Las categorias salen de los propios productos, sin repetir
-  const categorias = [...new Set(PRODUCTOS.map((p) => p.categoria))]
-
-  const filtrados = PRODUCTOS.filter((producto) => {
-    const coincideNombre = producto.nombre
-      .toLowerCase()
-      .includes(busqueda.toLowerCase())
-
-    const coincideCategoria =
-      categoria === "" || producto.categoria === categoria
-
-    return coincideNombre && coincideCategoria
-  })
-
   return (
     <>
       <Navbar />
 
-      <main className="container py-5">
-        <h1>Productos</h1>
-
-        <input
-          className="form-control mb-3"
-          placeholder="Buscar producto"
-          value={busqueda}
-          onChange={(e) => setBusqueda(e.target.value)}
-        />
-
-        <div className="mb-3">
-          <button
-            className="btn btn-secundario me-2 mb-2"
-            onClick={() => setCategoria("")}
-          >
-            Todas
-          </button>
-
-          {categorias.map((cat) => (
-            <button
-              key={cat}
-              className="btn btn-secundario me-2 mb-2"
-              onClick={() => setCategoria(cat)}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-
-        <p className="text-muted mb-4">
-          {filtrados.length} de {PRODUCTOS.length} productos
-        </p>
-
-        <ul className="row g-4 list-unstyled">
-          {filtrados.map((producto) => (
-            <li key={producto.codigo} className="col-12 col-sm-6 col-lg-3">
-              <TarjetaProducto
-                nombre={producto.nombre}
-                categoria={producto.categoria}
-                precio={formatearPrecio(producto.precioResidencial)}
-                imagen={imagenDe(producto.codigo)}
-              />
-            </li>
-          ))}
-        </ul>
-      </main>
+      {/* El mapa de direcciones: que componente se muestra en cada ruta */}
+      <Routes>
+        <Route path="/" element={<Inicio />} />
+        <Route path="/productos" element={<Productos />} />
+        <Route path="/nosotros" element={<Nosotros />} />
+        <Route path="/blogs" element={<Blogs />} />
+        <Route path="/contacto" element={<Contacto />} />
+      </Routes>
 
       <Footer />
     </>

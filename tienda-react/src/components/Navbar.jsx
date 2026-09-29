@@ -1,11 +1,13 @@
+import { Link } from 'react-router-dom'
+
 function Navbar() {
   return (
       <nav className="navbar navbar-expand-lg" data-bs-theme="dark" aria-label="Navegación principal">
             <div className="container">
-                <a className="navbar-brand" href="index.html">
+                <Link className="navbar-brand" to="/">
                     <img className="marca-logo" src="/img/logo.svg" alt="Logo de Gas El Volcán"/>
                     <span>Gas El Volcán</span>
-                </a>
+                </Link>
 
                 <button
                     className="navbar-toggler"
@@ -22,19 +24,19 @@ function Navbar() {
                 <div className="collapse navbar-collapse" id="menuPrincipal">
                     <ul className="navbar-nav ms-auto align-items-lg-center">
                         <li className="nav-item">
-                            <a className="nav-link active" aria-current="page" href="index.html">Inicio</a>
+                            <Link className="nav-link active" aria-current="page" to="/">Inicio</Link>
                         </li>
                         <li className="nav-item">
-                            <a className="nav-link" href="productos.html">Productos</a>
+                            <Link className="nav-link" to="/productos">Productos</Link>
                         </li>
                         <li className="nav-item">
-                            <a className="nav-link" href="nosotros.html">Nosotros</a>
+                            <Link className="nav-link" to="/nosotros">Nosotros</Link>
                         </li>
                         <li className="nav-item">
-                            <a className="nav-link" href="blogs.html">Blogs</a>
+                            <Link className="nav-link" to="/blogs">Blogs</Link>
                         </li>
                         <li className="nav-item">
-                            <a className="nav-link" href="contacto.html">Contacto</a>
+                            <Link className="nav-link" to="/contacto">Contacto</Link>
                         </li>
                         <li className="nav-item nav-cuenta" id="navCuenta"></li>
                         <li className="nav-item">

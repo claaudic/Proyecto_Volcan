@@ -7,10 +7,21 @@ import { useState } from 'react'
 
 function App() {
   const [busqueda, setBusqueda] = useState("")
+  const [categoria, setCategoria] = useState("")
 
-  const filtrados = PRODUCTOS.filter((producto) =>
-    producto.nombre.toLowerCase().includes(busqueda.toLowerCase())
-  )
+  // Las categorias salen de los propios productos, sin repetir
+  const categorias = [...new Set(PRODUCTOS.map((p) => p.categoria))]
+
+  const filtrados = PRODUCTOS.filter((producto) => {
+    const coincideNombre = producto.nombre
+      .toLowerCase()
+      .includes(busqueda.toLowerCase())
+
+    const coincideCategoria =
+      categoria === "" || producto.categoria === categoria
+
+    return coincideNombre && coincideCategoria
+  })
 
   return (
     <>
@@ -18,12 +29,36 @@ function App() {
 
       <main className="container py-5">
         <h1>Productos</h1>
+
         <input
-          className="form-control mb-4"
+          className="form-control mb-3"
           placeholder="Buscar producto"
           value={busqueda}
           onChange={(e) => setBusqueda(e.target.value)}
         />
+
+        <div className="mb-3">
+          <button
+            className="btn btn-secundario me-2 mb-2"
+            onClick={() => setCategoria("")}
+          >
+            Todas
+          </button>
+
+          {categorias.map((cat) => (
+            <button
+              key={cat}
+              className="btn btn-secundario me-2 mb-2"
+              onClick={() => setCategoria(cat)}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+
+        <p className="text-muted mb-4">
+          {filtrados.length} de {PRODUCTOS.length} productos
+        </p>
 
         <ul className="row g-4 list-unstyled">
           {filtrados.map((producto) => (

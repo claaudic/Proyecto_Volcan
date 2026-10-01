@@ -18,4 +18,11 @@ export default defineConfig([
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
   },
+  {
+    // En la carpeta de pruebas existen describe, it y expect, que los aporta Jasmine
+    files: ['pruebas/**/*.{js,jsx}'],
+    languageOptions: {
+      globals: { ...globals.browser, ...globals.jasmine },
+    },
+  },
 ])

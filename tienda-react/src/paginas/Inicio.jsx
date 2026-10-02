@@ -1,7 +1,16 @@
 import { Link } from 'react-router-dom'
+import TarjetaProducto from '../components/TarjetaProducto'
+import { PRODUCTOS, formatearPrecio, imagenDe } from '../datos/productos'
 
 // Migrado desde index.html del sitio en HTML.
+// Los mismos ocho productos que destacaba js/productos-publico.js
+const CODIGOS_DESTACADOS = ["CL001", "CL002", "CL003", "CL004", "RG001", "MG004", "AC001", "AC003"]
+
 function Inicio() {
+  const destacados = CODIGOS_DESTACADOS
+    .map((codigo) => PRODUCTOS.find((p) => p.codigo === codigo))
+    .filter((producto) => producto !== undefined)
+
   return (
     <main>
       <section className="hero" aria-labelledby="titulo-hero">
@@ -98,118 +107,18 @@ function Inicio() {
             <h2 id="titulo-destacados">Productos destacados</h2>
           </div>
 
-          <ul className="row g-4 list-unstyled" id="listaProductosDestacados">
-            <li className="col-12 col-sm-6 col-lg-3">
-              <article className="tarjeta-producto">
-                <img src="/img/cl001.jpg" alt="Cilindro GLP de 5 kilogramos" />
-                <div className="tarjeta-contenido">
-                  <p className="categoria">Cilindros de gas</p>
-                  <h3>Cilindro GLP 5 kg</h3>
-                  <p className="precio">$6.500</p>
-                  <a className="btn btn-producto" href="detalle-producto.html">
-                    Ver producto
-                  </a>
-                </div>
-              </article>
-            </li>
-
-            <li className="col-12 col-sm-6 col-lg-3">
-              <article className="tarjeta-producto">
-                <img src="/img/cl002.jpg" alt="Cilindro GLP de 11 kilogramos" />
-                <div className="tarjeta-contenido">
-                  <p className="categoria">Cilindros de gas</p>
-                  <h3>Cilindro GLP 11 kg</h3>
-                  <p className="precio">$12.000</p>
-                  <a className="btn btn-producto" href="detalle-producto.html">
-                    Ver producto
-                  </a>
-                </div>
-              </article>
-            </li>
-
-            <li className="col-12 col-sm-6 col-lg-3">
-              <article className="tarjeta-producto">
-                <img src="/img/cl003.jpg" alt="Cilindro GLP de 15 kilogramos" />
-                <div className="tarjeta-contenido">
-                  <p className="categoria">Cilindros de gas</p>
-                  <h3>Cilindro GLP 15 kg</h3>
-                  <p className="precio">$16.000</p>
-                  <a className="btn btn-producto" href="detalle-producto.html">
-                    Ver producto
-                  </a>
-                </div>
-              </article>
-            </li>
-
-            <li className="col-12 col-sm-6 col-lg-3">
-              <article className="tarjeta-producto">
-                <img src="/img/cl004.jpg" alt="Cilindro GLP industrial de 45 kilogramos" />
-                <div className="tarjeta-contenido">
-                  <p className="categoria">Cilindros de gas</p>
-                  <h3>Cilindro GLP 45 kg</h3>
-                  <p className="precio">$45.000</p>
-                  <a className="btn btn-producto" href="detalle-producto.html">
-                    Ver producto
-                  </a>
-                </div>
-              </article>
-            </li>
-
-            <li className="col-12 col-sm-6 col-lg-3">
-              <article className="tarjeta-producto">
-                <img src="/img/rg001.jpg" alt="Regulador doméstico estándar para cilindros de gas" />
-                <div className="tarjeta-contenido">
-                  <p className="categoria">Reguladores</p>
-                  <h3>Regulador doméstico estándar</h3>
-                  <p className="precio">$8.990</p>
-                  <a className="btn btn-producto" href="detalle-producto.html">
-                    Ver producto
-                  </a>
-                </div>
-              </article>
-            </li>
-
-            <li className="col-12 col-sm-6 col-lg-3">
-              <article className="tarjeta-producto">
-                <img src="/img/mg004.jpg" alt="Kit de conexión con regulador, manguera y abrazaderas" />
-                <div className="tarjeta-contenido">
-                  <p className="categoria">Mangueras y conexiones</p>
-                  <h3>Kit conexión completo</h3>
-                  <p className="precio">$12.990</p>
-                  <a className="btn btn-producto" href="detalle-producto.html">
-                    Ver producto
-                  </a>
-                </div>
-              </article>
-            </li>
-
-            <li className="col-12 col-sm-6 col-lg-3">
-              <article className="tarjeta-producto">
-                <img src="/img/ac001.jpg" alt="Carro metálico con ruedas para transportar cilindros" />
-                <div className="tarjeta-contenido">
-                  <p className="categoria">Accesorios</p>
-                  <h3>Carro porta cilindro 11/15 kg</h3>
-                  <p className="precio">$12.990</p>
-                  <a className="btn btn-producto" href="detalle-producto.html">
-                    Ver producto
-                  </a>
-                </div>
-              </article>
-            </li>
-
-            <li className="col-12 col-sm-6 col-lg-3">
-              <article className="tarjeta-producto">
-                <img src="/img/ac003.jpg" alt="Detector de gas a batería con alarma sonora y visual" />
-                <div className="tarjeta-contenido">
-                  <p className="categoria">Accesorios</p>
-                  <h3>Detector de gas a batería</h3>
-                  <p className="precio">$19.990</p>
-                  <a className="btn btn-producto" href="detalle-producto.html">
-                    Ver producto
-                  </a>
-                </div>
-              </article>
-            </li>
+          <ul className="row g-4 list-unstyled">
+            {destacados.map((producto) => (
+              <li key={producto.codigo} className="col-12 col-sm-6 col-lg-3">
+                <TarjetaProducto
+                  codigo={producto.codigo}
+                  nombre={producto.nombre}
+                  categoria={producto.categoria}
+                  precio={formatearPrecio(producto.precioResidencial)}
+                  imagen={imagenDe(producto.codigo)}
+                />
+              </li>
+            ))}
           </ul>
 
           <div className="text-center mt-5">

@@ -4,6 +4,7 @@
 import { createRoot } from "react-dom/client";
 import { act } from "react";
 import { MemoryRouter } from "react-router-dom";
+import ProveedorCarrito from "../src/contexto/ProveedorCarrito";
 
 // Le avisa a React que estamos en un entorno de pruebas.
 // Sin esto, act() funciona igual pero imprime una advertencia.
@@ -27,9 +28,29 @@ export function montar(elemento) {
 }
 
 // Igual que montar, pero dentro de un router de prueba.
-// Hace falta para las paginas que usan <Link>.
+// Hace falta para los componentes que usan <Link>.
 export function montarConRouter(elemento) {
     return montar(<MemoryRouter>{elemento}</MemoryRouter>);
+}
+
+// Para las paginas que usan el carrito: router + proveedor del carrito.
+// Parte con el carrito vacio y lo limpia al terminar.
+export function montarEnTienda(elemento) {
+    localStorage.removeItem("carritoVolcan");
+
+    const contenedor = montar(
+        <MemoryRouter>
+            <ProveedorCarrito>{elemento}</ProveedorCarrito>
+        </MemoryRouter>
+    );
+
+    const desmontarOriginal = contenedor.desmontar;
+    contenedor.desmontar = () => {
+        desmontarOriginal();
+        localStorage.removeItem("carritoVolcan");
+    };
+
+    return contenedor;
 }
 
 // Escribe un texto en un input o textarea, como si lo tipeara una persona.

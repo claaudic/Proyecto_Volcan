@@ -1,1 +1,6 @@
 
+/* La etiqueta de stock vive dentro de un contenedor flex en columna,
+   que estira a sus hijos a lo ancho. Esto la deja del tamaño de su texto. */
+.tarjeta-contenido .stock {
+  align-self: flex-start;
+}

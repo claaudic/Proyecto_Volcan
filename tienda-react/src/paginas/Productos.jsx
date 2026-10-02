@@ -1,10 +1,22 @@
 import { useState } from 'react'
 import TarjetaProducto from '../components/TarjetaProducto'
 import { PRODUCTOS, formatearPrecio, imagenDe } from '../datos/productos'
+import { useCarrito } from '../contexto/carritoContexto'
+import { abrirPanelCarrito } from '../utilidades/panelCarrito'
 
 function Productos() {
   const [busqueda, setBusqueda] = useState("")
   const [categoria, setCategoria] = useState("")
+  const { agregar } = useCarrito()
+
+  // Agrega una unidad y, si se pudo, abre el panel del carrito
+  function anadirAlCarrito(codigo) {
+    const resultado = agregar(codigo, 1)
+    if (resultado.ok) {
+      abrirPanelCarrito()
+    }
+    return resultado
+  }
 
   // Las categorias salen de los propios productos, sin repetir
   const categorias = [...new Set(PRODUCTOS.map((p) => p.categoria))]
@@ -58,10 +70,13 @@ function Productos() {
         {filtrados.map((producto) => (
           <li key={producto.codigo} className="col-12 col-sm-6 col-lg-3">
             <TarjetaProducto
+              codigo={producto.codigo}
               nombre={producto.nombre}
               categoria={producto.categoria}
               precio={formatearPrecio(producto.precioResidencial)}
               imagen={imagenDe(producto.codigo)}
+              stock={producto.stock}
+              alAnadir={() => anadirAlCarrito(producto.codigo)}
             />
           </li>
         ))}

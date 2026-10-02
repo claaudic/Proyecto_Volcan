@@ -1,5 +1,5 @@
 import Productos from "../src/paginas/Productos";
-import { montar, escribir, clic } from "./ayuda";
+import { montarEnTienda, escribir, clic } from "./ayuda";
 
 // Pruebas de RENDERIZADO, ESTADO y EVENTOS sobre el catalogo.
 
@@ -8,7 +8,8 @@ describe("Productos", () => {
     let pantalla;
 
     beforeEach(() => {
-        pantalla = montar(<Productos />);
+        // El catalogo usa enlaces y el carrito: va con router y proveedor
+        pantalla = montarEnTienda(<Productos />);
     });
 
     afterEach(() => {

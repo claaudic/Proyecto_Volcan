@@ -1,6 +1,9 @@
 import { Link } from 'react-router-dom'
+import { useCarrito } from '../contexto/carritoContexto'
 
 function Navbar() {
+  const { detalle } = useCarrito()
+
   return (
       <nav className="navbar navbar-expand-lg" data-bs-theme="dark" aria-label="Navegación principal">
             <div className="container">
@@ -41,7 +44,7 @@ function Navbar() {
                         <li className="nav-item nav-cuenta" id="navCuenta"></li>
                         <li className="nav-item">
                             <button type="button" className="btn btn-carrito ms-lg-2" data-bs-toggle="offcanvas" data-bs-target="#panelCarrito" aria-controls="panelCarrito">
-                                Carrito (<span className="carrito-total">0</span>)
+                                Carrito (<span className="carrito-total">{detalle.unidades}</span>)
                             </button>
                         </li>
                     </ul>

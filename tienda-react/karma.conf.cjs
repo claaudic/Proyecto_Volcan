@@ -28,6 +28,13 @@ module.exports = function (config) {
       module: {
         rules: [
           {
+            // El proyecto es "type": "module", y por eso webpack exigiria
+            // escribir la extension en cada import ("./productos.js").
+            // Vite no lo exige; esto deja a webpack comportarse igual.
+            test: /\.m?js$/,
+            resolve: { fullySpecified: false }
+          },
+          {
             test: /\.(js|jsx)$/,
             exclude: /node_modules/,
             use: {

@@ -35,6 +35,12 @@ describe("Carrito: operaciones", () => {
         expect(resultado.items).toEqual([]);
     });
 
+    it("no agrega un producto que no existe", () => {
+        const resultado = agregarItem([], "XYZ", 1);
+
+        expect(resultado.ok).toBe(false);
+    });
+
     it("no modifica la lista original, devuelve una nueva", () => {
         const original = [{ codigo: "CL002", cantidad: 1 }];
 

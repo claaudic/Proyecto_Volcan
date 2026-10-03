@@ -43,6 +43,12 @@ module.exports = function (config) {
                 presets: [
                   "@babel/preset-env",
                   ["@babel/preset-react", { runtime: "automatic" }]
+                ],
+                // Marca cada linea del codigo de src/ para poder medir
+                // cuales se ejecutaron durante las pruebas (cobertura).
+                // Las pruebas mismas no se miden.
+                plugins: [
+                  ["istanbul", { include: ["src/**"] }]
                 ]
               }
             }
@@ -55,8 +61,20 @@ module.exports = function (config) {
       stats: "errors-only"
     },
 
-    // Como se muestran los resultados en la terminal
-    reporters: ["progress"],
+    // Como se muestran los resultados en la terminal.
+    // "coverage" agrega el informe de cobertura al final.
+    reporters: ["progress", "coverage"],
+
+    // Informe de cobertura: un resumen en la terminal, una tabla por archivo,
+    // y una version HTML navegable en la carpeta cobertura/
+    coverageReporter: {
+      dir: "cobertura/",
+      reporters: [
+        { type: "text-summary" },
+        { type: "text" },
+        { type: "html", subdir: "html" }
+      ]
+    },
 
     // El navegador donde corren: Chrome sin ventana visible
     browsers: ["ChromeHeadless"],

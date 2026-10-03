@@ -14,6 +14,7 @@ import DetalleBlog1 from './paginas/DetalleBlog1'
 import DetalleBlog2 from './paginas/DetalleBlog2'
 import DetalleBlog3 from './paginas/DetalleBlog3'
 import Contacto from './paginas/Contacto'
+import Login from './paginas/Login'
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
         <Route path="/blogs/2" element={<DetalleBlog2 />} />
         <Route path="/blogs/3" element={<DetalleBlog3 />} />
         <Route path="/contacto" element={<Contacto />} />
+        <Route path="/login" element={<Login />} />
       </Routes>
 
       <Footer />

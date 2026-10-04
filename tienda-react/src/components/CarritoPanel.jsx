@@ -85,7 +85,10 @@ function CarritoPanel() {
           </p>
           <p className="panel-nota">El despacho se coordina al confirmar el pedido.</p>
 
-          {/* El boton "Pagar" se agrega cuando exista la vista de Checkout */}
+          {/* data-bs-dismiss cierra el panel al ir al checkout */}
+          <Link className="btn btn-principal boton-ancho" to="/checkout" data-bs-dismiss="offcanvas">
+            Pagar
+          </Link>
 
           <button type="button" className="enlace-vaciar" onClick={vaciar}>
             Vaciar carrito

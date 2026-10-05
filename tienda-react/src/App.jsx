@@ -16,6 +16,7 @@ import DetalleBlog3 from './paginas/DetalleBlog3'
 import Contacto from './paginas/Contacto'
 import Login from './paginas/Login'
 import Checkout from './paginas/Checkout'
+import CompraExitosa from './paginas/CompraExitosa'
 
 function App() {
   return (
@@ -36,6 +37,7 @@ function App() {
         <Route path="/contacto" element={<Contacto />} />
         <Route path="/login" element={<Login />} />
         <Route path="/checkout" element={<Checkout />} />
+          <Route path="/compra-exitosa" element={<CompraExitosa />} />
       </Routes>
 
       <Footer />

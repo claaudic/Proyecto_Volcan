@@ -2819,3 +2819,119 @@ a:focus-visible,
         width: 100%;
     }
 }
+.checkout-intro {
+    margin-bottom: 2.5rem;
+}
+
+.checkout-intro p {
+    margin-bottom: 0;
+}
+
+.checkout-resumen,
+.checkout-formulario {
+    background: #ffffff;
+    border: 1px solid var(--gris-borde);
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+}
+
+.checkout-resumen h2,
+.checkout-formulario h2 {
+    margin-bottom: 1.5rem;
+}
+
+.checkout-producto {
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--gris-borde);
+}
+
+.checkout-producto:first-of-type {
+    padding-top: 0;
+}
+
+.checkout-total {
+    padding-top: 1.5rem;
+    font-size: 1.1rem;
+}
+
+.checkout-formulario .form-control,
+.checkout-formulario .form-select {
+    min-height: 46px;
+}
+
+.checkout-formulario textarea.form-control {
+    min-height: 110px;
+}
+
+@media (max-width: 991px) {
+    .checkout-resumen,
+    .checkout-formulario {
+        padding: 1.5rem;
+    }
+}
+.compra-exitosa {
+    max-width: 900px;
+    margin: 0 auto;
+    background: #ffffff;
+    border: 1px solid var(--gris-borde);
+    border-radius: 18px;
+    padding: 2.5rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+}
+
+.compra-exitosa-icono {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.25rem;
+    background: var(--color-principal);
+    color: #ffffff;
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
+.compra-exitosa h1 {
+    margin-bottom: 0.5rem;
+}
+
+.compra-exitosa-numero {
+    margin: 2rem 0;
+    padding: 1rem 1.25rem;
+    border-radius: 12px;
+    background: var(--gris-azulado);
+}
+
+.compra-exitosa-contenido {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+.compra-exitosa-producto {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--gris-borde);
+}
+
+.compra-exitosa-total {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 1.25rem;
+    font-size: 1.1rem;
+}
+
+@media (max-width: 767px) {
+    .compra-exitosa {
+        padding: 1.5rem;
+    }
+
+    .compra-exitosa-contenido {
+        grid-template-columns: 1fr;
+    }
+}

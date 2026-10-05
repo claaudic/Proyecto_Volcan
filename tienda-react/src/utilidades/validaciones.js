@@ -49,6 +49,24 @@ export function validarCorreo(valor) {
   return "";
 }
 
+export function validarContrasena(valor) {
+  const contrasena = valor.trim();
+
+  if (contrasena === "") {
+    return "Ingresa tu contraseña.";
+  }
+
+  if (contrasena.length < 4) {
+    return "La contraseña debe tener al menos 4 caracteres.";
+  }
+
+  if (contrasena.length > 10) {
+    return "La contraseña no puede superar los 10 caracteres.";
+  }
+
+  return "";
+}
+
 export function validarComentario(valor) {
   const comentario = valor.trim();
 

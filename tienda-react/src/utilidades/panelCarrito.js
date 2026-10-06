@@ -12,3 +12,16 @@ export function abrirPanelCarrito() {
 
   Offcanvas.getOrCreateInstance(panel).show();
 }
+
+// Cierra el panel. Se usa en los enlaces del panel (como "Pagar"):
+// no se puede usar data-bs-dismiss en un <Link>, porque Bootstrap
+// cancela el clic de los enlaces y React Router no alcanza a navegar.
+export function cerrarPanelCarrito() {
+  const panel = document.getElementById("panelCarrito");
+
+  if (!panel) {
+    return;
+  }
+
+  Offcanvas.getOrCreateInstance(panel).hide();
+}

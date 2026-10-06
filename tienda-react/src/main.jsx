@@ -10,15 +10,19 @@ import './index.css'
 import App from './App.jsx'
 import ProveedorCarrito from './contexto/ProveedorCarrito'
 import ProveedorSesion from './contexto/ProveedorSesion'
+import ProveedorCatalogo from './contexto/ProveedorCatalogo'
 
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
       <ProveedorSesion>
-        <ProveedorCarrito>
-          <App />
-        </ProveedorCarrito>
+        {/* El catalogo va por fuera del carrito, porque el carrito lo usa */}
+        <ProveedorCatalogo>
+          <ProveedorCarrito>
+            <App />
+          </ProveedorCarrito>
+        </ProveedorCatalogo>
       </ProveedorSesion>
     </BrowserRouter>
   </StrictMode>,

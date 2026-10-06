@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { CarritoContexto } from "./carritoContexto";
+import { useCatalogo } from "./catalogoContexto";
 import {
   leerCarrito,
   guardarCarrito,
@@ -16,19 +17,22 @@ function ProveedorCarrito({ children }) {
   // El valor inicial sale de localStorage, para no perder el carrito al recargar
   const [items, setItems] = useState(leerCarrito);
 
+  // Precios y stock salen del catalogo vivo. Solo se venden los activos.
+  const { activos } = useCatalogo();
+
   // Cada vez que el carrito cambia, se guarda
   useEffect(() => {
     guardarCarrito(items);
   }, [items]);
 
   function agregar(codigo, cantidad) {
-    const resultado = agregarItem(items, codigo, cantidad);
+    const resultado = agregarItem(items, codigo, cantidad, activos);
     setItems(resultado.items);
     return resultado;
   }
 
   function cambiarCantidad(codigo, cantidad) {
-    setItems(cambiarCantidadItem(items, codigo, cantidad));
+    setItems(cambiarCantidadItem(items, codigo, cantidad, activos));
   }
 
   function quitar(codigo) {
@@ -41,7 +45,7 @@ function ProveedorCarrito({ children }) {
 
   const valor = {
     items,
-    detalle: detalleDelCarrito(items),
+    detalle: detalleDelCarrito(items, activos),
     agregar,
     cambiarCantidad,
     quitar,

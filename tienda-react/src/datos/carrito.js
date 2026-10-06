@@ -13,8 +13,10 @@ import { PRODUCTOS } from "./productos";
 
 export const CLAVE_CARRITO = "carritoVolcan";
 
-function buscarProducto(codigo) {
-  return PRODUCTOS.find((p) => p.codigo === codigo) || null;
+// El catalogo llega como parametro: asi el carrito usa siempre los precios
+// y el stock actuales. Si no se pasa, usa el catalogo inicial.
+function buscarProducto(codigo, catalogo = PRODUCTOS) {
+  return catalogo.find((p) => p.codigo === codigo) || null;
 }
 
 // ---------- Persistencia ----------
@@ -38,8 +40,8 @@ export function guardarCarrito(items) {
 
 // CREAR o ACTUALIZAR: agrega unidades. Si el producto ya estaba, suma.
 // Devuelve la lista nueva y un mensaje para mostrar.
-export function agregarItem(items, codigo, cantidad = 1) {
-  const producto = buscarProducto(codigo);
+export function agregarItem(items, codigo, cantidad = 1, catalogo = PRODUCTOS) {
+  const producto = buscarProducto(codigo, catalogo);
 
   if (!producto || producto.stock === 0) {
     return { items, ok: false, mensaje: "Este producto no tiene stock disponible." };
@@ -69,8 +71,8 @@ export function agregarItem(items, codigo, cantidad = 1) {
 }
 
 // ACTUALIZAR: fija la cantidad de un producto, entre 1 y su stock.
-export function cambiarCantidadItem(items, codigo, cantidad) {
-  const producto = buscarProducto(codigo);
+export function cambiarCantidadItem(items, codigo, cantidad, catalogo = PRODUCTOS) {
+  const producto = buscarProducto(codigo, catalogo);
   const nueva = Number(cantidad);
 
   if (!producto || nueva < 1 || nueva > producto.stock) {
@@ -91,13 +93,13 @@ export function quitarItem(items, codigo) {
 
 // Cruza el carrito con el catalogo: arma cada linea con su subtotal,
 // y calcula el total y la cantidad de unidades.
-export function detalleDelCarrito(items) {
+export function detalleDelCarrito(items, catalogo = PRODUCTOS) {
   const lineas = [];
   let total = 0;
   let unidades = 0;
 
   items.forEach((item) => {
-    const producto = buscarProducto(item.codigo);
+    const producto = buscarProducto(item.codigo, catalogo);
 
     if (!producto) {
       return;

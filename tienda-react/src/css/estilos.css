@@ -2935,3 +2935,43 @@ a:focus-visible,
         grid-template-columns: 1fr;
     }
 }
+.pago-rechazado {
+    max-width: 750px;
+    margin: 0 auto;
+    background: #ffffff;
+    border: 1px solid var(--gris-borde);
+    border-radius: 18px;
+    padding: 2.5rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+}
+
+.pago-rechazado-icono {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.25rem;
+    background: #dc3545;
+    color: #ffffff;
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
+.pago-rechazado h1 {
+    margin-bottom: 0.5rem;
+}
+
+.pago-rechazado-mensaje {
+    margin-top: 2rem;
+    padding: 1.25rem;
+    border-radius: 12px;
+    background: var(--gris-azulado);
+}
+
+@media (max-width: 767px) {
+    .pago-rechazado {
+        padding: 1.5rem;
+    }
+}

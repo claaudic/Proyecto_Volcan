@@ -18,7 +18,7 @@ import Login from './paginas/Login'
 import Registro from './paginas/Registro'
 import Checkout from './paginas/Checkout'
 import CompraExitosa from './paginas/CompraExitosa'
-
+import PagoRechazado from './paginas/PagoRechazado'
 function App() {
   return (
     <>
@@ -40,6 +40,8 @@ function App() {
         <Route path="/registro" element={<Registro />} />
         <Route path="/checkout" element={<Checkout />} />
           <Route path="/compra-exitosa" element={<CompraExitosa />} />
+          <Route path="/pago-rechazado" element={<PagoRechazado />} />
+
       </Routes>
 
       <Footer />

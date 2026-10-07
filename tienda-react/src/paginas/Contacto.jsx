@@ -5,6 +5,7 @@ import {
   validarCorreo,
   validarComentario
 } from '../utilidades/validaciones'
+import { claseCampo } from '../utilidades/formularios'
 
 // Migrado desde contacto.html del sitio en HTML.
 // La validacion que antes hacia js/contacto.js ahora vive en el estado del componente.
@@ -18,13 +19,6 @@ const REGLAS = {
   comentario: validarComentario
 }
 
-// Borde verde o rojo segun el error, igual que en el sitio en HTML
-function claseCampo(valor, error) {
-  if (valor.trim() === "") {
-    return ""
-  }
-  return error ? "campo-invalido" : "campo-valido"
-}
 
 function Contacto() {
   const [datos, setDatos] = useState(VACIO)

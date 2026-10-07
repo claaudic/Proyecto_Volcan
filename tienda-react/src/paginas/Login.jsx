@@ -2,16 +2,10 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useSesion } from '../contexto/sesionContexto'
 import { validarCorreo, validarContrasena } from '../utilidades/validaciones'
+import { claseCampo } from '../utilidades/formularios'
 
 // Migrado desde login.html y js/login.js.
 
-// Borde verde o rojo segun el error, igual que en el sitio en HTML
-function claseCampo(valor, error) {
-  if (valor.trim() === "") {
-    return ""
-  }
-  return error ? "campo-invalido" : "campo-valido"
-}
 
 // Si el correo tiene un dominio no permitido, propone el del equipo:
 // "admin@gmail.cl" -> "admin@gaselvolcan.cl"

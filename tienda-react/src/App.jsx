@@ -16,6 +16,7 @@ import DetalleBlog3 from './paginas/DetalleBlog3'
 import Contacto from './paginas/Contacto'
 import Login from './paginas/Login'
 import Registro from './paginas/Registro'
+import Perfil from './paginas/Perfil'
 import Checkout from './paginas/Checkout'
 import CompraExitosa from './paginas/CompraExitosa'
 
@@ -38,6 +39,7 @@ function App() {
         <Route path="/contacto" element={<Contacto />} />
         <Route path="/login" element={<Login />} />
         <Route path="/registro" element={<Registro />} />
+        <Route path="/perfil" element={<Perfil />} />
         <Route path="/checkout" element={<Checkout />} />
           <Route path="/compra-exitosa" element={<CompraExitosa />} />
       </Routes>

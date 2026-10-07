@@ -34,8 +34,13 @@ function ProveedorSesion({ children }) {
     setUsuario(null);
   }
 
+  // Despues de editar el perfil: actualiza el nombre que muestra el navbar
+  function actualizarUsuario(cambios) {
+    setUsuario({ ...usuario, ...cambios });
+  }
+
   return (
-    <SesionContexto.Provider value={{ usuario, iniciarSesion, cerrarSesion }}>
+    <SesionContexto.Provider value={{ usuario, iniciarSesion, cerrarSesion, actualizarUsuario }}>
       {children}
     </SesionContexto.Provider>
   );

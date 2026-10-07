@@ -80,3 +80,64 @@ export function validarComentario(valor) {
 
   return "";
 }
+
+// ---------- Registro de clientes (las mismas reglas de js/registro.js) ----------
+
+// Texto obligatorio con largo maximo: sirve para nombre y apellidos
+export function validarTexto(valor, maximo, mensajeVacio) {
+  const texto = valor.trim();
+
+  if (texto === "") {
+    return mensajeVacio;
+  }
+
+  if (texto.length > maximo) {
+    return "No puede superar los " + maximo + " caracteres.";
+  }
+
+  return "";
+}
+
+// Como validarCorreo, pero las cuentas del equipo no se crean desde la tienda
+export function validarCorreoCliente(valor) {
+  const correo = valor.trim().toLowerCase();
+
+  if (correo.endsWith("@gaselvolcan.cl")) {
+    return "Las cuentas del equipo las crea el administrador. Si trabajas en Gas El Volcán, pide tu acceso.";
+  }
+
+  const error = validarCorreo(valor);
+
+  if (error && correo !== "" && correo.length <= 100) {
+    return "Usa un correo @duoc.cl, @profesor.duoc.cl o @gmail.com.";
+  }
+
+  return error;
+}
+
+export function validarRepeticion(contrasena, repetida) {
+  if (repetida.trim() === "") {
+    return "Repite la contraseña.";
+  }
+
+  if (repetida.trim() !== contrasena.trim()) {
+    return "Las contraseñas no coinciden.";
+  }
+
+  return "";
+}
+
+// El telefono es opcional: vacio es valido
+export function validarTelefono(valor) {
+  const telefono = valor.trim();
+
+  if (telefono === "") {
+    return "";
+  }
+
+  if (!/^[+0-9\s]{8,15}$/.test(telefono)) {
+    return "Usa solo números, espacios y el signo +.";
+  }
+
+  return "";
+}

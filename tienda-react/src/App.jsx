@@ -15,6 +15,7 @@ import DetalleBlog2 from './paginas/DetalleBlog2'
 import DetalleBlog3 from './paginas/DetalleBlog3'
 import Contacto from './paginas/Contacto'
 import Login from './paginas/Login'
+import Registro from './paginas/Registro'
 import Checkout from './paginas/Checkout'
 import CompraExitosa from './paginas/CompraExitosa'
 
@@ -36,6 +37,7 @@ function App() {
         <Route path="/blogs/3" element={<DetalleBlog3 />} />
         <Route path="/contacto" element={<Contacto />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/registro" element={<Registro />} />
         <Route path="/checkout" element={<Checkout />} />
           <Route path="/compra-exitosa" element={<CompraExitosa />} />
       </Routes>

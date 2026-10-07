@@ -5,6 +5,11 @@
 export const CLAVE_USUARIOS = "usuariosSistema";
 export const CLAVE_SESION = "usuarioActivo";
 
+// Las cuentas base estan escritas en el codigo y no se pueden borrar de ahi.
+// Si un cliente base elimina su cuenta, su correo se anota en esta lista
+// para no volver a mostrarla. Es lo mismo que hacia el sitio en HTML.
+export const CLAVE_ELIMINADAS = "cuentasEliminadas";
+
 export const USUARIOS_BASE = [
   {
     nombre: "Sofía Pérez",
@@ -49,12 +54,25 @@ function leerRegistrados() {
   }
 }
 
+function leerEliminadas() {
+  try {
+    const guardado = localStorage.getItem(CLAVE_ELIMINADAS);
+    const lista = guardado ? JSON.parse(guardado) : [];
+    return Array.isArray(lista) ? lista : [];
+  } catch {
+    return [];
+  }
+}
+
 // Todas las cuentas: las registradas mas las base que no esten repetidas
+// ni eliminadas
 export function leerUsuarios() {
   const registrados = leerRegistrados();
+  const eliminadas = leerEliminadas();
 
   const base = USUARIOS_BASE.filter((cuenta) =>
-    !registrados.some((r) => r.correo.toLowerCase() === cuenta.correo)
+    !registrados.some((r) => r.correo.toLowerCase() === cuenta.correo) &&
+    !eliminadas.includes(cuenta.correo)
   );
 
   return [...registrados, ...base];
@@ -95,7 +113,52 @@ export function registrarCliente(datos) {
 
   localStorage.setItem(CLAVE_USUARIOS, JSON.stringify([...registrados, nueva]));
 
+  // Si ese correo se habia eliminado antes, puede volver a usarse
+  const eliminadas = leerEliminadas().filter((correo) => correo !== nueva.correo);
+  localStorage.setItem(CLAVE_ELIMINADAS, JSON.stringify(eliminadas));
+
   return nueva;
+}
+
+// LEER: la cuenta completa de un correo, o null
+export function buscarUsuario(correo) {
+  const limpio = correo.trim().toLowerCase();
+  return leerUsuarios().find((cuenta) => cuenta.correo.toLowerCase() === limpio) || null;
+}
+
+// ACTUALIZAR: cambia los datos de una cuenta. El correo no se puede cambiar.
+// Si es una cuenta base, se guarda una copia editada, que tiene prioridad
+// sobre la original.
+export function actualizarCuenta(correo, cambios) {
+  const actual = buscarUsuario(correo);
+
+  if (!actual) {
+    return null;
+  }
+
+  const editada = { ...actual, ...cambios, correo: actual.correo, rol: actual.rol };
+
+  const otros = leerRegistrados().filter((cuenta) =>
+    cuenta.correo.toLowerCase() !== actual.correo.toLowerCase()
+  );
+
+  localStorage.setItem(CLAVE_USUARIOS, JSON.stringify([...otros, editada]));
+
+  return editada;
+}
+
+// ELIMINAR: borra la cuenta. Si era una cuenta base, anota su correo
+// para que no vuelva a aparecer.
+export function eliminarCuenta(correo) {
+  const limpio = correo.trim().toLowerCase();
+
+  const quedan = leerRegistrados().filter((cuenta) => cuenta.correo.toLowerCase() !== limpio);
+  localStorage.setItem(CLAVE_USUARIOS, JSON.stringify(quedan));
+
+  const eliminadas = leerEliminadas();
+  if (!eliminadas.includes(limpio)) {
+    localStorage.setItem(CLAVE_ELIMINADAS, JSON.stringify([...eliminadas, limpio]));
+  }
 }
 
 // ---------- Sesion ----------

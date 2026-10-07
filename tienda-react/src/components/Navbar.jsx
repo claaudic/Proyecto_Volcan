@@ -1,4 +1,5 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { startTransition } from 'react'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useCarrito } from '../contexto/carritoContexto'
 import { useSesion } from '../contexto/sesionContexto'
 import { iniciales, nombreDeRol } from '../datos/usuarios'
@@ -8,9 +9,13 @@ function Navbar() {
   const { usuario, cerrarSesion } = useSesion()
   const navegar = useNavigate()
 
+  // Juntos en una transicion, igual que en Perfil: si se sale desde una
+  // pagina protegida, no alcanza a mandar al login antes de ir al inicio.
   function salir() {
-    cerrarSesion()
-    navegar("/")
+    startTransition(() => {
+      cerrarSesion()
+      navegar("/")
+    })
   }
 
   return (
@@ -36,22 +41,23 @@ function Navbar() {
                 <div className="collapse navbar-collapse" id="menuPrincipal">
                     <ul className="navbar-nav ms-auto align-items-lg-center">
                         <li className="nav-item">
-                            <Link className="nav-link active" aria-current="page" to="/">Inicio</Link>
+                            {/* NavLink marca solo el enlace de la pagina actual. "end": Inicio solo en "/" exacto */}
+                            <NavLink className="nav-link" end to="/">Inicio</NavLink>
                         </li>
                         <li className="nav-item">
-                            <Link className="nav-link" to="/productos">Productos</Link>
+                            <NavLink className="nav-link" to="/productos">Productos</NavLink>
                         </li>
                         <li className="nav-item">
-                            <Link className="nav-link" to="/categorias">Categorías</Link>
+                            <NavLink className="nav-link" to="/categorias">Categorías</NavLink>
                         </li>
                         <li className="nav-item">
-                            <Link className="nav-link" to="/nosotros">Nosotros</Link>
+                            <NavLink className="nav-link" to="/nosotros">Nosotros</NavLink>
                         </li>
                         <li className="nav-item">
-                            <Link className="nav-link" to="/blogs">Blogs</Link>
+                            <NavLink className="nav-link" to="/blogs">Blogs</NavLink>
                         </li>
                         <li className="nav-item">
-                            <Link className="nav-link" to="/contacto">Contacto</Link>
+                            <NavLink className="nav-link" to="/contacto">Contacto</NavLink>
                         </li>
 
 
@@ -59,10 +65,11 @@ function Navbar() {
                         <li className="nav-item nav-cuenta">
                             {usuario ? (
                                 <div className="cuenta-activa">
-                                    <span className="avatar-cuenta" title={usuario.nombre + " (" + nombreDeRol(usuario.rol) + ")"}>
+                                    {/* El avatar lleva al perfil */}
+                                    <Link to="/perfil" className="avatar-cuenta" title={"Mi perfil: " + usuario.nombre + " (" + nombreDeRol(usuario.rol) + ")"}>
                                         <span aria-hidden="true">{iniciales(usuario.nombre)}</span>
-                                        <span className="visually-hidden">Sesión iniciada: {usuario.nombre}</span>
-                                    </span>
+                                        <span className="visually-hidden">Mi perfil: {usuario.nombre}</span>
+                                    </Link>
                                     {usuario.rol !== "CLIENTE" && (
                                         <span className="rol-insignia">{nombreDeRol(usuario.rol)}</span>
                                     )}

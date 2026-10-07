@@ -20,6 +20,7 @@ import Checkout from './paginas/Checkout'
 import CompraExitosa from './paginas/CompraExitosa'
 import PagoRechazado from './paginas/PagoRechazado'
 import Categorias from './paginas/Categorias'
+import AdminDashboard from './paginas/AdminDashboard'
 function App() {
   return (
     <>
@@ -43,6 +44,7 @@ function App() {
           <Route path="/compra-exitosa" element={<CompraExitosa />} />
           <Route path="/pago-rechazado" element={<PagoRechazado />} />
           <Route path="/categorias" element={<Categorias />} />
+          <Route path="/admin" element={<AdminDashboard />} />
 
       </Routes>
 

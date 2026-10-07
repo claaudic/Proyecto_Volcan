@@ -19,6 +19,7 @@ import Registro from './paginas/Registro'
 import Checkout from './paginas/Checkout'
 import CompraExitosa from './paginas/CompraExitosa'
 import PagoRechazado from './paginas/PagoRechazado'
+import Categorias from './paginas/Categorias'
 function App() {
   return (
     <>
@@ -41,6 +42,7 @@ function App() {
         <Route path="/checkout" element={<Checkout />} />
           <Route path="/compra-exitosa" element={<CompraExitosa />} />
           <Route path="/pago-rechazado" element={<PagoRechazado />} />
+          <Route path="/categorias" element={<Categorias />} />
 
       </Routes>
 

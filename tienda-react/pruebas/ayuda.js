@@ -6,6 +6,7 @@ import { act } from "react";
 import { MemoryRouter } from "react-router-dom";
 import ProveedorCarrito from "../src/contexto/ProveedorCarrito";
 import ProveedorCatalogo from "../src/contexto/ProveedorCatalogo";
+import ProveedorSesion from "../src/contexto/ProveedorSesion";
 
 // Le avisa a React que estamos en un entorno de pruebas.
 // Sin esto, act() funciona igual pero imprime una advertencia.
@@ -36,28 +37,41 @@ export function montarConRouter(elemento) {
 
 // Para las paginas de la tienda: router + catalogo + carrito.
 // Parte con el carrito vacio y el catalogo inicial, y los limpia al terminar.
-export function montarEnTienda(elemento) {
+export function montarEnTienda(elemento, carritoInicial = null) {
     localStorage.removeItem("carritoVolcan");
     localStorage.removeItem("productosSistema");
+    localStorage.removeItem("usuarioActivo");
+
+    if (carritoInicial) {
+        localStorage.setItem(
+            "carritoVolcan",
+            JSON.stringify(carritoInicial)
+        );
+    }
 
     const contenedor = montar(
         <MemoryRouter>
-            <ProveedorCatalogo>
-                <ProveedorCarrito>{elemento}</ProveedorCarrito>
-            </ProveedorCatalogo>
+            <ProveedorSesion>
+                <ProveedorCatalogo>
+                    <ProveedorCarrito>
+                        {elemento}
+                    </ProveedorCarrito>
+                </ProveedorCatalogo>
+            </ProveedorSesion>
         </MemoryRouter>
     );
 
     const desmontarOriginal = contenedor.desmontar;
+
     contenedor.desmontar = () => {
         desmontarOriginal();
         localStorage.removeItem("carritoVolcan");
         localStorage.removeItem("productosSistema");
+        localStorage.removeItem("usuarioActivo");
     };
 
     return contenedor;
 }
-
 // Escribe un texto en un input o textarea, como si lo tipeara una persona.
 // React escucha el evento "input" para disparar su onChange.
 export function escribir(campo, texto) {

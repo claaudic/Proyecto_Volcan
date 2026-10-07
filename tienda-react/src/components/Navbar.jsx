@@ -48,6 +48,9 @@ function Navbar() {
                             <NavLink className="nav-link" to="/productos">Productos</NavLink>
                         </li>
                         <li className="nav-item">
+                            <NavLink className="nav-link" to="/categorias">Categorías</NavLink>
+                        </li>
+                        <li className="nav-item">
                             <NavLink className="nav-link" to="/nosotros">Nosotros</NavLink>
                         </li>
                         <li className="nav-item">
@@ -56,6 +59,8 @@ function Navbar() {
                         <li className="nav-item">
                             <NavLink className="nav-link" to="/contacto">Contacto</NavLink>
                         </li>
+
+
                         {/* Antes lo rellenaba js/sesion.js; ahora depende de la sesion */}
                         <li className="nav-item nav-cuenta">
                             {usuario ? (

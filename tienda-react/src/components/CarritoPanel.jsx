@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useCarrito } from "../contexto/carritoContexto";
 import { formatearPrecio, imagenDe } from "../datos/productos";
+import { cerrarPanelCarrito } from "../utilidades/panelCarrito";
 
 // Panel lateral del carrito (offcanvas de Bootstrap).
 // Migrado desde js/carrito-panel.js. El boton "Carrito" del navbar
@@ -27,7 +28,7 @@ function CarritoPanel() {
           <div className="panel-vacio">
             <p className="panel-vacio-titulo">Tu carrito está vacío</p>
             <p>Agrega productos desde el catálogo.</p>
-            <Link className="btn btn-principal" to="/productos" data-bs-dismiss="offcanvas">
+            <Link className="btn btn-principal" to="/productos" onClick={cerrarPanelCarrito}>
               Ver el catálogo
             </Link>
           </div>
@@ -85,8 +86,8 @@ function CarritoPanel() {
           </p>
           <p className="panel-nota">El despacho se coordina al confirmar el pedido.</p>
 
-          {/* data-bs-dismiss cierra el panel al ir al checkout */}
-          <Link className="btn btn-principal boton-ancho" to="/checkout" data-bs-dismiss="offcanvas">
+          {/* Cierra el panel y deja que Link navegue al checkout */}
+          <Link className="btn btn-principal boton-ancho" to="/checkout" onClick={cerrarPanelCarrito}>
             Pagar
           </Link>
 

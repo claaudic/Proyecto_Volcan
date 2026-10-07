@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import TarjetaProducto from '../components/TarjetaProducto'
 import EtiquetaStock from '../components/EtiquetaStock'
-import { PRODUCTOS, formatearPrecio, imagenDe } from '../datos/productos'
+import { formatearPrecio, imagenDe } from '../datos/productos'
+import { useCatalogo } from '../contexto/catalogoContexto'
 import { useCarrito } from '../contexto/carritoContexto'
 import { abrirPanelCarrito } from '../utilidades/panelCarrito'
 
@@ -25,8 +26,10 @@ function FichaProducto({ codigo }) {
   const [cantidad, setCantidad] = useState(1)
   const [aviso, setAviso] = useState("")
   const { agregar } = useCarrito()
+  const { activos } = useCatalogo()
 
-  const producto = PRODUCTOS.find((p) => p.codigo === codigo.toUpperCase())
+  // Un producto desactivado no tiene pagina: aparece como no encontrado
+  const producto = activos.find((p) => p.codigo === codigo.toUpperCase())
 
   if (!producto) {
     return (
@@ -72,7 +75,7 @@ function FichaProducto({ codigo }) {
     }
   }
 
-  const relacionados = PRODUCTOS
+  const relacionados = activos
     .filter((p) => p.categoria === producto.categoria && p.codigo !== producto.codigo)
     .slice(0, 4)
 

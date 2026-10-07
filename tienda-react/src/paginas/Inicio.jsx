@@ -1,14 +1,17 @@
 import { Link } from 'react-router-dom'
 import TarjetaProducto from '../components/TarjetaProducto'
-import { PRODUCTOS, formatearPrecio, imagenDe } from '../datos/productos'
+import { formatearPrecio, imagenDe } from '../datos/productos'
+import { useCatalogo } from '../contexto/catalogoContexto'
 
 // Migrado desde index.html del sitio en HTML.
 // Los mismos ocho productos que destacaba js/productos-publico.js
 const CODIGOS_DESTACADOS = ["CL001", "CL002", "CL003", "CL004", "RG001", "MG004", "AC001", "AC003"]
 
 function Inicio() {
+  const { activos } = useCatalogo()
+
   const destacados = CODIGOS_DESTACADOS
-    .map((codigo) => PRODUCTOS.find((p) => p.codigo === codigo))
+    .map((codigo) => activos.find((p) => p.codigo === codigo))
     .filter((producto) => producto !== undefined)
 
   return (

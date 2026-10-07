@@ -5,6 +5,7 @@ import { createRoot } from "react-dom/client";
 import { act } from "react";
 import { MemoryRouter } from "react-router-dom";
 import ProveedorCarrito from "../src/contexto/ProveedorCarrito";
+import ProveedorCatalogo from "../src/contexto/ProveedorCatalogo";
 
 // Le avisa a React que estamos en un entorno de pruebas.
 // Sin esto, act() funciona igual pero imprime una advertencia.
@@ -33,14 +34,17 @@ export function montarConRouter(elemento) {
     return montar(<MemoryRouter>{elemento}</MemoryRouter>);
 }
 
-// Para las paginas que usan el carrito: router + proveedor del carrito.
-// Parte con el carrito vacio y lo limpia al terminar.
+// Para las paginas de la tienda: router + catalogo + carrito.
+// Parte con el carrito vacio y el catalogo inicial, y los limpia al terminar.
 export function montarEnTienda(elemento) {
     localStorage.removeItem("carritoVolcan");
+    localStorage.removeItem("productosSistema");
 
     const contenedor = montar(
         <MemoryRouter>
-            <ProveedorCarrito>{elemento}</ProveedorCarrito>
+            <ProveedorCatalogo>
+                <ProveedorCarrito>{elemento}</ProveedorCarrito>
+            </ProveedorCatalogo>
         </MemoryRouter>
     );
 
@@ -48,6 +52,7 @@ export function montarEnTienda(elemento) {
     contenedor.desmontar = () => {
         desmontarOriginal();
         localStorage.removeItem("carritoVolcan");
+        localStorage.removeItem("productosSistema");
     };
 
     return contenedor;

@@ -69,6 +69,35 @@ export function buscarCuenta(correo, contrasena) {
   ) || null;
 }
 
+// ¿Ya existe una cuenta con este correo?
+export function correoRegistrado(correo) {
+  const limpio = correo.trim().toLowerCase();
+  return leerUsuarios().some((cuenta) => cuenta.correo.toLowerCase() === limpio);
+}
+
+// CREAR: guarda una cuenta de cliente nueva. Desde la tienda solo se crean
+// clientes; las cuentas del equipo las crea el administrador.
+// (En un sistema real la contrasena se guardaria con un hash en el servidor,
+// nunca en texto en el navegador.)
+export function registrarCliente(datos) {
+  const registrados = leerRegistrados();
+
+  const nueva = {
+    nombre: (datos.nombre.trim() + " " + datos.apellidos.trim()).trim(),
+    correo: datos.correo.trim().toLowerCase(),
+    contrasena: datos.contrasena.trim(),
+    rol: "CLIENTE",
+    activo: true,
+    telefono: (datos.telefono || "").trim(),
+    comuna: (datos.comuna || "").trim(),
+    direccion: (datos.direccion || "").trim()
+  };
+
+  localStorage.setItem(CLAVE_USUARIOS, JSON.stringify([...registrados, nueva]));
+
+  return nueva;
+}
+
 // ---------- Sesion ----------
 
 // Solo se guarda lo necesario: nunca la contrasena

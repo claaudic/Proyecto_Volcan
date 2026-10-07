@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import TarjetaProducto from '../components/TarjetaProducto'
-import { PRODUCTOS, formatearPrecio, imagenDe } from '../datos/productos'
+import { formatearPrecio, imagenDe } from '../datos/productos'
+import { useCatalogo } from '../contexto/catalogoContexto'
 import { useCarrito } from '../contexto/carritoContexto'
 import { abrirPanelCarrito } from '../utilidades/panelCarrito'
 
@@ -8,6 +9,9 @@ function Productos() {
   const [busqueda, setBusqueda] = useState("")
   const [categoria, setCategoria] = useState("")
   const { agregar } = useCarrito()
+
+  // Solo los productos activos: los que el administrador desactiva no se muestran
+  const { activos } = useCatalogo()
 
   // Agrega una unidad y, si se pudo, abre el panel del carrito
   function anadirAlCarrito(codigo) {
@@ -19,9 +23,9 @@ function Productos() {
   }
 
   // Las categorias salen de los propios productos, sin repetir
-  const categorias = [...new Set(PRODUCTOS.map((p) => p.categoria))]
+  const categorias = [...new Set(activos.map((p) => p.categoria))]
 
-  const filtrados = PRODUCTOS.filter((producto) => {
+  const filtrados = activos.filter((producto) => {
     const coincideNombre = producto.nombre
       .toLowerCase()
       .includes(busqueda.toLowerCase())
@@ -63,7 +67,7 @@ function Productos() {
       </div>
 
       <p className="text-muted mb-4">
-        {filtrados.length} de {PRODUCTOS.length} productos
+        {filtrados.length} de {activos.length} productos
       </p>
 
       <ul className="row g-4 list-unstyled">

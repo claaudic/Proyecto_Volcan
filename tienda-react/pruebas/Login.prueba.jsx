@@ -52,7 +52,7 @@ describe("Login: redirección por rol", () => {
 
     it("el cliente vuelve a la tienda", () => {
         abrirLogin();
-        entrar("cliente@gmail.com", "Clien1234");
+        entrar("camila@gmail.com", "Clien1234");
 
         expect(pantalla.querySelector("#destino").textContent).toBe("Inicio");
     });

@@ -37,7 +37,7 @@ export const USUARIOS_BASE = [
   },
   {
     nombre: "Camila Rojas",
-    correo: "cliente@gmail.com",
+    correo: "camila@gmail.com",
     contrasena: "Clien1234",
     rol: "CLIENTE"
   }

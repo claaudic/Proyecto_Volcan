@@ -55,11 +55,11 @@ describe("Checkout con sesión iniciada", () => {
     it("rellena los datos con los de la cuenta", () => {
         // Camila guardo su direccion y comuna en el perfil
         localStorage.setItem("usuariosSistema", JSON.stringify([{
-            nombre: "Camila Rojas", correo: "cliente@gmail.com", contrasena: "Clien1234",
+            nombre: "Camila Rojas", correo: "camila@gmail.com", contrasena: "Clien1234",
             rol: "CLIENTE", direccion: "Libertad 123", comuna: "chillan viejo"
         }]));
         localStorage.setItem("usuarioActivo", JSON.stringify({
-            nombre: "Camila Rojas", correo: "cliente@gmail.com", rol: "CLIENTE"
+            nombre: "Camila Rojas", correo: "camila@gmail.com", rol: "CLIENTE"
         }));
 
         pantalla = montar(

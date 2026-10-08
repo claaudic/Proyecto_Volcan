@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import TarjetaProducto from '../components/TarjetaProducto'
 import EtiquetaStock from '../components/EtiquetaStock'
@@ -6,6 +6,7 @@ import { formatearPrecio, imagenDe } from '../datos/productos'
 import { useCatalogo } from '../contexto/catalogoContexto'
 import { useCarrito } from '../contexto/carritoContexto'
 import { abrirPanelCarrito } from '../utilidades/panelCarrito'
+import { registrarVisto } from '../datos/vistos'
 
 // Migrado desde detalle-producto.html y js/detalle-producto.js.
 //
@@ -30,6 +31,16 @@ function FichaProducto({ codigo }) {
 
   // Un producto desactivado no tiene pagina: aparece como no encontrado
   const producto = activos.find((p) => p.codigo === codigo.toUpperCase())
+
+  // Despues de mostrar la ficha, se anota el producto como visto.
+  // Va antes del "return" de abajo: los hooks no pueden ir despues de un return.
+  const codigoVisto = producto ? producto.codigo : null
+
+  useEffect(() => {
+    if (codigoVisto) {
+      registrarVisto(codigoVisto)
+    }
+  }, [codigoVisto])
 
   if (!producto) {
     return (

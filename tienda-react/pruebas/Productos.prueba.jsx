@@ -28,9 +28,11 @@ describe("Productos", () => {
     it("filtra la lista al escribir en el buscador", () => {
         const buscador = pantalla.querySelector("input");
 
+        // Busca tambien en la descripcion y la categoria: aparecen
+        // las 4 de "Mangueras y Conexiones", no solo las 3 que lo dicen en el nombre
         escribir(buscador, "manguera");
 
-        expect(cantidadDeTarjetas()).toBe(3);
+        expect(cantidadDeTarjetas()).toBe(4);
     });
 
     it("filtra por categoría al hacer clic en su botón", () => {
@@ -40,6 +42,19 @@ describe("Productos", () => {
         clic(reguladores);
 
         expect(cantidadDeTarjetas()).toBe(3);
+    });
+
+    it("avisa si no hay resultados y permite volver a ver todo", () => {
+        escribir(pantalla.querySelector("input"), "parrilla");
+
+        expect(cantidadDeTarjetas()).toBe(0);
+        expect(pantalla.querySelector(".sin-resultados").textContent).toContain("No encontramos productos");
+
+        const verTodo = Array.from(pantalla.querySelectorAll("button"))
+            .find((b) => b.textContent.includes("Ver todo el catálogo"));
+        clic(verTodo);
+
+        expect(cantidadDeTarjetas()).toBe(14);
     });
 
 });

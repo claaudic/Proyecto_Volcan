@@ -46,6 +46,7 @@ function App() {
           <Route path="/compra-exitosa" element={<CompraExitosa />} />
           <Route path="/pago-rechazado" element={<PagoRechazado />} />
           <Route path="/categorias" element={<Categorias />} />
+          <Route path="/categorias/:nombre" element={<Categorias />} />
           <Route path="/admin" element={<AdminDashboard />} />
 
       </Routes>

@@ -9,10 +9,12 @@
     pointer-events: none;
 }
 
+/* Las luces son circulos con degradado radial: se desvanecen hacia el borde.
+   Antes usaban filter: blur, pero Chrome en algunos Mac lo dibujaba
+   por bloques y se veian cuadros en el fondo. */
 .luz {
     position: absolute;
     border-radius: 50%;
-    filter: blur(70px);
     opacity: 0.26;
 }
 
@@ -21,7 +23,7 @@
     height: 420px;
     top: -90px;
     left: -70px;
-    background-color: var(--verde);
+    background: radial-gradient(circle closest-side, var(--verde), transparent);
     animation: derivaUno 26s ease-in-out infinite alternate;
 }
 
@@ -30,7 +32,7 @@
     height: 480px;
     right: -110px;
     bottom: -150px;
-    background-color: var(--celeste);
+    background: radial-gradient(circle closest-side, var(--celeste), transparent);
     animation: derivaDos 31s ease-in-out infinite alternate;
 }
 

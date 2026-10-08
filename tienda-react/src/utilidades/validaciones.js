@@ -171,3 +171,34 @@ export function validarTelefonoObligatorio(valor) {
 
   return validarTelefono(valor);
 }
+export function runValido(valor) {
+  const run = String(valor)
+      .trim()
+      .toUpperCase();
+
+  if (!/^[0-9]{6,8}[0-9K]$/.test(run)) {
+    return false;
+  }
+
+  const cuerpo = run.slice(0, -1);
+  const verificador = run.slice(-1);
+
+  let suma = 0;
+  let factor = 2;
+
+  for (let i = cuerpo.length - 1; i >= 0; i -= 1) {
+    suma += Number(cuerpo[i]) * factor;
+    factor = factor === 7 ? 2 : factor + 1;
+  }
+
+  const resto = 11 - (suma % 11);
+
+  const esperado =
+      resto === 11
+          ? "0"
+          : resto === 10
+              ? "K"
+              : String(resto);
+
+  return verificador === esperado;
+}

@@ -6,11 +6,13 @@ import { useCarrito } from '../contexto/carritoContexto'
 import { crearPedido } from '../datos/pedidos'
 import { formatearPrecio } from '../datos/productos'
 import { validarNombre, validarCorreo } from '../utilidades/validaciones'
+import { useCatalogo } from '../contexto/catalogoContexto'
 
 function Checkout() {
     const navigate = useNavigate()
     const { detalle, vaciar } = useCarrito()
     const { usuario } = useSesion()
+    const { descontar } = useCatalogo()
 
     const [formulario, setFormulario] = useState({
         nombre: usuario?.nombre || '',
@@ -108,7 +110,7 @@ function Checkout() {
             productos: detalle.lineas,
             total: detalle.total
         })
-
+        descontar(detalle.lineas)
         vaciar()
 
         navigate('/compra-exitosa', {

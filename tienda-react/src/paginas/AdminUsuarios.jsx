@@ -3,6 +3,10 @@ import { Navigate } from 'react-router-dom'
 
 import { useSesion } from '../contexto/sesionContexto'
 
+import {validarCorreo, runValido} from '../utilidades/validaciones'
+import {
+    COMUNAS_COBERTURA
+} from '../datos/zonas'
 import {
     leerUsuarios,
     crearUsuario,
@@ -11,6 +15,7 @@ import {
     eliminarCuenta,
     nombreDeRol
 } from '../datos/usuarios'
+
 
 const FORMULARIO_VACIO = {
     run: '',
@@ -25,22 +30,7 @@ const FORMULARIO_VACIO = {
     rol: ''
 }
 
-const DOMINIOS_PERMITIDOS = [
-    '@gaselvolcan.cl',
-    '@duoc.cl',
-    '@profesor.duoc.cl',
-    '@gmail.com'
-]
 
-const COMUNAS_COBERTURA = [
-    'Chillán',
-    'Chillán Viejo',
-    'El Carmen',
-    'Pinto',
-    'San Ignacio',
-    'Bulnes',
-    'Quillón'
-]
 
 function AdminUsuarios() {
     const { usuario } = useSesion()
@@ -53,58 +43,26 @@ function AdminUsuarios() {
     const [errores, setErrores] = useState({})
     const [mensaje, setMensaje] = useState('')
 
-    // Solo puede entrar el administrador
     if (!usuario || usuario.rol !== 'ADMINISTRADOR') {
         return <Navigate to="/login" replace />
     }
 
+    const cuentaEditando = correoEditando
+        ? usuarios.find(
+            (cuenta) =>
+                cuenta.correo.toLowerCase() ===
+                correoEditando.toLowerCase()
+        )
+        : null
+
+    const editandoCuentaPropia =
+        Boolean(correoEditando) &&
+        usuario.correo?.toLowerCase() ===
+        correoEditando.toLowerCase()
+
     function refrescarUsuarios() {
         setUsuarios(leerUsuarios())
     }
-
-    // =========================
-    // VALIDAR RUN
-    // =========================
-
-    function runValido(valor) {
-        const run = String(valor)
-            .trim()
-            .toUpperCase()
-
-        if (!/^[0-9]{6,8}[0-9K]$/.test(run)) {
-            return false
-        }
-
-        const cuerpo = run.slice(0, -1)
-        const verificador = run.slice(-1)
-
-        let suma = 0
-        let factor = 2
-
-        for (let i = cuerpo.length - 1; i >= 0; i -= 1) {
-            suma += Number(cuerpo[i]) * factor
-
-            factor =
-                factor === 7
-                    ? 2
-                    : factor + 1
-        }
-
-        const resto = 11 - (suma % 11)
-
-        const esperado =
-            resto === 11
-                ? '0'
-                : resto === 10
-                    ? 'K'
-                    : String(resto)
-
-        return verificador === esperado
-    }
-
-    // =========================
-    // FORMULARIO
-    // =========================
 
     function cambiarCampo(evento) {
         const { name, value } = evento.target
@@ -131,29 +89,39 @@ function AdminUsuarios() {
         setMostrarFormulario(false)
     }
 
-    function abrirEditarUsuario(cuenta) {
-        let nombre = cuenta.nombre || ''
-        let apellidos = cuenta.apellidos || ''
+    function separarNombreCompleto(nombreCompleto) {
+        const partes = String(nombreCompleto || '')
+            .trim()
+            .split(/\s+/)
 
-        // Las cuentas base guardan nombre y apellido juntos
-        if (!apellidos && nombre.includes(' ')) {
-            const partes = nombre.split(' ')
-
-            nombre = partes.shift()
-            apellidos = partes.join(' ')
+        if (partes.length <= 1) {
+            return {
+                nombre: partes[0] || '',
+                apellidos: ''
+            }
         }
+
+        const nombre = partes.shift()
+
+        return {
+            nombre,
+            apellidos: partes.join(' ')
+        }
+    }
+
+    function abrirEditarUsuario(cuenta) {
+        const nombreSeparado =
+            separarNombreCompleto(cuenta.nombre)
 
         setFormulario({
             run: cuenta.run || '',
-            nombre,
-            apellidos,
+            nombre: nombreSeparado.nombre,
+            apellidos: nombreSeparado.apellidos,
             correo: cuenta.correo || '',
             contrasena: '',
             nacimiento: cuenta.nacimiento || '',
-            region: 'Ñuble',
-            comuna: COMUNAS_COBERTURA.includes(cuenta.comuna)
-                ? cuenta.comuna
-                : '',
+            region: cuenta.region || 'Ñuble',
+            comuna: cuenta.comuna || '',
             direccion: cuenta.direccion || '',
             rol: cuenta.rol || ''
         })
@@ -164,10 +132,6 @@ function AdminUsuarios() {
         setMostrarFormulario(true)
     }
 
-    // =========================
-    // VALIDACIONES
-    // =========================
-
     function validarFormulario() {
         const nuevosErrores = {}
 
@@ -175,19 +139,44 @@ function AdminUsuarios() {
             .trim()
             .toUpperCase()
 
-        const nombre = formulario.nombre.trim()
-        const apellidos = formulario.apellidos.trim()
+        const nombre =
+            formulario.nombre.trim()
 
-        const correo = formulario.correo
-            .trim()
-            .toLowerCase()
+        const apellidos =
+            formulario.apellidos.trim()
 
-        const contrasena = formulario.contrasena.trim()
-        const direccion = formulario.direccion.trim()
+        const correo =
+            formulario.correo
+                .trim()
+                .toLowerCase()
 
+        const contrasena =
+            formulario.contrasena.trim()
+
+        const direccion =
+            formulario.direccion.trim()
+
+        const creando =
+            !correoEditando
+
+        const exigirRun =
+            creando ||
+            Boolean(cuentaEditando?.run)
+
+        const exigirComuna =
+            creando ||
+            Boolean(cuentaEditando?.comuna)
+
+        const exigirDireccion =
+            creando ||
+            Boolean(cuentaEditando?.direccion)
+
+        // RUN
         if (run === '') {
-            nuevosErrores.run =
-                'Ingresa el RUN.'
+            if (exigirRun) {
+                nuevosErrores.run =
+                    'Ingresa el RUN.'
+            }
         } else if (
             run.length < 7 ||
             run.length > 9
@@ -199,6 +188,7 @@ function AdminUsuarios() {
                 'Ese RUN no es válido. Revisa el dígito verificador.'
         }
 
+        // NOMBRE
         if (nombre === '') {
             nuevosErrores.nombre =
                 'Ingresa el nombre.'
@@ -207,6 +197,7 @@ function AdminUsuarios() {
                 'El nombre no puede superar los 50 caracteres.'
         }
 
+        // APELLIDOS
         if (apellidos === '') {
             nuevosErrores.apellidos =
                 'Ingresa los apellidos.'
@@ -215,49 +206,54 @@ function AdminUsuarios() {
                 'Los apellidos no pueden superar los 100 caracteres.'
         }
 
-        if (correo === '') {
-            nuevosErrores.correo =
-                'Ingresa un correo.'
-        } else if (correo.length > 100) {
-            nuevosErrores.correo =
-                'El correo no puede superar los 100 caracteres.'
-        } else {
-            const dominioValido =
-                DOMINIOS_PERMITIDOS.some(
-                    (dominio) =>
-                        correo.endsWith(dominio)
-                )
+        // CORREO
+        const errorCorreo =
+            validarCorreo(correo)
 
-            if (!dominioValido) {
-                nuevosErrores.correo =
-                    'El dominio del correo no está permitido.'
-            }
+        if (errorCorreo) {
+            nuevosErrores.correo =
+                errorCorreo
         }
 
-        // Al editar puede dejar la contraseña vacía
-        if (!correoEditando || contrasena !== '') {
+        // CONTRASEÑA
+        if (
+            !correoEditando ||
+            contrasena !== ''
+        ) {
             if (contrasena.length < 4) {
                 nuevosErrores.contrasena =
                     'La contraseña debe tener al menos 4 caracteres.'
-            } else if (contrasena.length > 10) {
+            } else if (
+                contrasena.length > 10
+            ) {
                 nuevosErrores.contrasena =
                     'La contraseña no puede superar los 10 caracteres.'
             }
         }
 
-        if (formulario.comuna === '') {
+        // COMUNA
+        if (
+            formulario.comuna === '' &&
+            exigirComuna
+        ) {
             nuevosErrores.comuna =
                 'Selecciona una comuna.'
         }
 
+        // DIRECCIÓN
         if (direccion === '') {
-            nuevosErrores.direccion =
-                'Ingresa la dirección.'
-        } else if (direccion.length > 300) {
+            if (exigirDireccion) {
+                nuevosErrores.direccion =
+                    'Ingresa la dirección.'
+            }
+        } else if (
+            direccion.length > 300
+        ) {
             nuevosErrores.direccion =
                 'La dirección no puede superar los 300 caracteres.'
         }
 
+        // ROL
         if (formulario.rol === '') {
             nuevosErrores.rol =
                 'Selecciona un rol.'
@@ -265,12 +261,11 @@ function AdminUsuarios() {
 
         setErrores(nuevosErrores)
 
-        return Object.keys(nuevosErrores).length === 0
+        return (
+            Object.keys(nuevosErrores)
+                .length === 0
+        )
     }
-
-    // =========================
-    // GUARDAR
-    // =========================
 
     function guardarUsuario(evento) {
         evento.preventDefault()
@@ -281,19 +276,23 @@ function AdminUsuarios() {
         }
 
         const datos = {
-            run: formulario.run
-                .trim()
-                .toUpperCase(),
+            run:
+                formulario.run
+                    .trim()
+                    .toUpperCase(),
 
-            nombre: formulario.nombre.trim(),
+            nombre:
+                formulario.nombre.trim(),
 
             apellidos:
                 formulario.apellidos.trim(),
 
             correo:
-                formulario.correo
-                    .trim()
-                    .toLowerCase(),
+                editandoCuentaPropia
+                    ? correoEditando
+                    : formulario.correo
+                        .trim()
+                        .toLowerCase(),
 
             contrasena:
                 formulario.contrasena.trim(),
@@ -301,7 +300,8 @@ function AdminUsuarios() {
             nacimiento:
             formulario.nacimiento,
 
-            region: 'Ñuble',
+            region:
+                formulario.region || 'Ñuble',
 
             comuna:
             formulario.comuna,
@@ -310,7 +310,9 @@ function AdminUsuarios() {
                 formulario.direccion.trim(),
 
             rol:
-            formulario.rol
+                editandoCuentaPropia
+                    ? usuario.rol
+                    : formulario.rol
         }
 
         let resultado
@@ -335,44 +337,38 @@ function AdminUsuarios() {
         cerrarFormulario()
     }
 
-    // =========================
-    // ACTIVAR / DESACTIVAR
-    // =========================
-
     function alternarEstado(cuenta) {
         setMensaje('')
 
-        if (
+        const mismaCuenta =
             usuario.correo?.toLowerCase() ===
             cuenta.correo.toLowerCase()
-        ) {
+
+        if (mismaCuenta) {
             setMensaje(
                 'No puedes desactivar tu propia cuenta.'
             )
-
             return
         }
 
-        cambiarEstadoUsuario(cuenta.correo)
+        cambiarEstadoUsuario(
+            cuenta.correo
+        )
 
         refrescarUsuarios()
     }
 
-    // =========================
-    // ELIMINAR
-    // =========================
-
     function abrirEliminar(cuenta) {
         setMensaje('')
 
-        if (
+        const mismaCuenta =
             usuario.correo?.toLowerCase() ===
             cuenta.correo.toLowerCase()
-        ) {
+
+        if (mismaCuenta) {
             setMensaje(
                 'No puedes eliminar tu propia cuenta.'
             )
-
             return
         }
 
@@ -392,20 +388,8 @@ function AdminUsuarios() {
         refrescarUsuarios()
     }
 
-    function nombreCompleto(cuenta) {
-        if (cuenta.apellidos) {
-            return `${cuenta.nombre} ${cuenta.apellidos}`
-        }
-
-        return cuenta.nombre
-    }
-
     return (
         <main id="contenidoAdmin">
-
-            {/* =========================
-                ENCABEZADO
-            ========================== */}
 
             <section
                 className="pagina-encabezado"
@@ -436,7 +420,6 @@ function AdminUsuarios() {
                     </p>
 
                     <p className="encabezado-accion">
-
                         <button
                             type="button"
                             className="btn btn-principal"
@@ -444,7 +427,6 @@ function AdminUsuarios() {
                         >
                             + Crear usuario
                         </button>
-
                     </p>
 
                 </div>
@@ -460,10 +442,6 @@ function AdminUsuarios() {
                 </svg>
 
             </section>
-
-            {/* =========================
-                CONTENIDO
-            ========================== */}
 
             <div className="panel-cuerpo">
 
@@ -491,10 +469,6 @@ function AdminUsuarios() {
                         </div>
                     )}
 
-                    {/* =========================
-                        TABLA
-                    ========================== */}
-
                     <section className="mt-4">
 
                         <div className="tabla-marco table-responsive">
@@ -519,11 +493,7 @@ function AdminUsuarios() {
 
                                         <td>
                                             <strong>
-                                                {
-                                                    nombreCompleto(
-                                                        cuenta
-                                                    )
-                                                }
+                                                {cuenta.nombre}
                                             </strong>
                                         </td>
 
@@ -532,11 +502,9 @@ function AdminUsuarios() {
                                         </td>
 
                                         <td>
-                                            {
-                                                nombreDeRol(
-                                                    cuenta.rol
-                                                )
-                                            }
+                                            {nombreDeRol(
+                                                cuenta.rol
+                                            )}
                                         </td>
 
                                         <td>
@@ -623,16 +591,14 @@ function AdminUsuarios() {
 
             </div>
 
-            {/* =========================
-                MODAL CREAR / EDITAR
-            ========================== */}
-
             {mostrarFormulario && (
                 <>
 
                     <div
                         className="modal fade show"
-                        style={{ display: 'block' }}
+                        style={{
+                            display: 'block'
+                        }}
                         tabIndex="-1"
                         role="dialog"
                         aria-modal="true"
@@ -678,8 +644,6 @@ function AdminUsuarios() {
                                         }}
                                     >
 
-                                        {/* RUN */}
-
                                         <div className="mb-3">
 
                                             <label
@@ -695,7 +659,12 @@ function AdminUsuarios() {
                                                 type="text"
                                                 className="form-control"
                                                 maxLength="9"
-                                                placeholder="Sin puntos ni guion. Ej: 190110222"
+                                                placeholder={
+                                                    correoEditando &&
+                                                    !cuentaEditando?.run
+                                                        ? 'Opcional para esta cuenta antigua'
+                                                        : 'Sin puntos ni guion'
+                                                }
                                                 value={formulario.run}
                                                 onChange={cambiarCampo}
                                             />
@@ -707,8 +676,6 @@ function AdminUsuarios() {
                                             )}
 
                                         </div>
-
-                                        {/* NOMBRE */}
 
                                         <div className="mb-3">
 
@@ -737,8 +704,6 @@ function AdminUsuarios() {
 
                                         </div>
 
-                                        {/* APELLIDOS */}
-
                                         <div className="mb-3">
 
                                             <label
@@ -766,8 +731,6 @@ function AdminUsuarios() {
 
                                         </div>
 
-                                        {/* CORREO */}
-
                                         <div className="mb-3">
 
                                             <label
@@ -785,7 +748,15 @@ function AdminUsuarios() {
                                                 maxLength="100"
                                                 value={formulario.correo}
                                                 onChange={cambiarCampo}
+                                                disabled={editandoCuentaPropia}
                                             />
+
+                                            {editandoCuentaPropia && (
+                                                <div className="form-text">
+                                                    No puedes cambiar el correo
+                                                    de tu propia cuenta.
+                                                </div>
+                                            )}
 
                                             {errores.correo && (
                                                 <div className="text-danger mt-1">
@@ -794,8 +765,6 @@ function AdminUsuarios() {
                                             )}
 
                                         </div>
-
-                                        {/* CONTRASEÑA */}
 
                                         <div className="mb-3">
 
@@ -830,8 +799,6 @@ function AdminUsuarios() {
 
                                         </div>
 
-                                        {/* FECHA */}
-
                                         <div className="mb-3">
 
                                             <label
@@ -855,8 +822,6 @@ function AdminUsuarios() {
 
                                         </div>
 
-                                        {/* REGIÓN / COMUNA */}
-
                                         <div className="row">
 
                                             <div className="col-md-6 mb-3">
@@ -872,7 +837,10 @@ function AdminUsuarios() {
                                                     id="regionUsuario"
                                                     type="text"
                                                     className="form-control"
-                                                    value="Ñuble"
+                                                    value={
+                                                        formulario.region ||
+                                                        'Ñuble'
+                                                    }
                                                     readOnly
                                                 />
 
@@ -894,8 +862,14 @@ function AdminUsuarios() {
                                                     value={formulario.comuna}
                                                     onChange={cambiarCampo}
                                                 >
+
                                                     <option value="">
-                                                        Selecciona una comuna
+                                                        {
+                                                            correoEditando &&
+                                                            !cuentaEditando?.comuna
+                                                                ? 'Sin comuna registrada'
+                                                                : 'Selecciona una comuna'
+                                                        }
                                                     </option>
 
                                                     {COMUNAS_COBERTURA.map(
@@ -908,6 +882,7 @@ function AdminUsuarios() {
                                                             </option>
                                                         )
                                                     )}
+
                                                 </select>
 
                                                 {errores.comuna && (
@@ -919,8 +894,6 @@ function AdminUsuarios() {
                                             </div>
 
                                         </div>
-
-                                        {/* DIRECCIÓN */}
 
                                         <div className="mb-3">
 
@@ -937,6 +910,12 @@ function AdminUsuarios() {
                                                 type="text"
                                                 className="form-control"
                                                 maxLength="300"
+                                                placeholder={
+                                                    correoEditando &&
+                                                    !cuentaEditando?.direccion
+                                                        ? 'Opcional para esta cuenta antigua'
+                                                        : ''
+                                                }
                                                 value={formulario.direccion}
                                                 onChange={cambiarCampo}
                                             />
@@ -948,8 +927,6 @@ function AdminUsuarios() {
                                             )}
 
                                         </div>
-
-                                        {/* ROL */}
 
                                         <div className="mb-3">
 
@@ -966,11 +943,19 @@ function AdminUsuarios() {
                                                 className="form-select"
                                                 value={formulario.rol}
                                                 onChange={cambiarCampo}
+                                                disabled={editandoCuentaPropia}
                                             >
 
                                                 <option value="">
                                                     Selecciona un rol
                                                 </option>
+
+                                                {formulario.rol ===
+                                                    'ADMINISTRADOR' && (
+                                                        <option value="ADMINISTRADOR">
+                                                            Administrador
+                                                        </option>
+                                                    )}
 
                                                 <option value="REPARTIDOR">
                                                     Repartidor
@@ -985,6 +970,12 @@ function AdminUsuarios() {
                                                 </option>
 
                                             </select>
+
+                                            {editandoCuentaPropia && (
+                                                <div className="form-text">
+                                                    No puedes cambiar tu propio rol.
+                                                </div>
+                                            )}
 
                                             {errores.rol && (
                                                 <div className="text-danger mt-1">
@@ -1004,8 +995,6 @@ function AdminUsuarios() {
                                         )}
 
                                     </div>
-
-                                    {/* BOTONES */}
 
                                     <div className="modal-footer">
 
@@ -1043,16 +1032,14 @@ function AdminUsuarios() {
                 </>
             )}
 
-            {/* =========================
-                MODAL ELIMINAR
-            ========================== */}
-
             {usuarioABorrar && (
                 <>
 
                     <div
                         className="modal fade show"
-                        style={{ display: 'block' }}
+                        style={{
+                            display: 'block'
+                        }}
                         tabIndex="-1"
                         role="dialog"
                         aria-modal="true"
@@ -1091,11 +1078,7 @@ function AdminUsuarios() {
 
                                     <p className="mb-1">
                                         <strong>
-                                            {
-                                                nombreCompleto(
-                                                    usuarioABorrar
-                                                )
-                                            }
+                                            {usuarioABorrar.nombre}
                                         </strong>
                                     </p>
 

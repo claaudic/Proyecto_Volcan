@@ -48,8 +48,8 @@ describe('Datos de usuarios', () => {
         )
 
         expect(usuario).not.toBeNull()
-        expect(usuario.nombre).toBe('Juan')
-        expect(usuario.apellidos).toBe('Pérez')
+        expect(usuario.nombre).toBe('Juan Pérez')
+        expect(usuario.apellidos).toBeUndefined()
         expect(usuario.rol).toBe('CLIENTE')
         expect(usuario.activo).toBeTrue()
     })
@@ -123,8 +123,8 @@ describe('Datos de usuarios', () => {
             'juan@gmail.com'
         )
 
-        expect(usuario.nombre).toBe('Juan Carlos')
-        expect(usuario.apellidos).toBe('Pérez')
+        expect(usuario.nombre).toBe('Juan Carlos Pérez')
+        expect(usuario.apellidos).toBeUndefined()
         expect(usuario.comuna).toBe('Chillán Viejo')
         expect(usuario.direccion).toBe(
             'Nueva dirección 100'

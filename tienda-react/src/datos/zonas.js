@@ -1,7 +1,15 @@
 // Zonas de reparto de la distribuidora.
 // Los mismos datos de js/zonas.js del sitio en HTML.
 // Las usan el registro (para avisar si llegamos) y el buscador de Nosotros.
-
+export const COMUNAS_COBERTURA = [
+  "Chillán",
+  "Chillán Viejo",
+  "El Carmen",
+  "Pinto",
+  "San Ignacio",
+  "Bulnes",
+  "Quillón"
+];
 export const ZONAS = [
   {
     zona: "Zona Centro",

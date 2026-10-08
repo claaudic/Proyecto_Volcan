@@ -1,14 +1,8 @@
-// Cuentas de usuario y sesion activa.
-// Las cuentas base son las mismas de js/sesion.js del sitio en HTML.
-// Las cuentas que se crean con el registro se guardan en localStorage.
+export const CLAVE_USUARIOS = "usuariosSistema"
+export const CLAVE_SESION = "usuarioActivo"
 
-export const CLAVE_USUARIOS = "usuariosSistema";
-export const CLAVE_SESION = "usuarioActivo";
-
-// Las cuentas base estan escritas en el codigo y no se pueden borrar de ahi.
-// Si un cliente base elimina su cuenta, su correo se anota en esta lista
-// para no volver a mostrarla. Es lo mismo que hacia el sitio en HTML.
-export const CLAVE_ELIMINADAS = "cuentasEliminadas";
+// Las cuentas base estan escritas en el codigo.
+export const CLAVE_ELIMINADAS = "cuentasEliminadas"
 
 export const USUARIOS_BASE = [
   {
@@ -41,164 +35,448 @@ export const USUARIOS_BASE = [
     contrasena: "Clien1234",
     rol: "CLIENTE"
   }
-];
+]
 
-// Cuentas creadas con el registro (vacio si no hay o si esta danado)
+// =========================================
+// AYUDANTES
+// =========================================
+
+function limpiarCorreo(correo) {
+  return String(correo || "")
+      .trim()
+      .toLowerCase()
+}
+
+function esCuentaBase(correo) {
+  const limpio = limpiarCorreo(correo)
+
+  return USUARIOS_BASE.some(
+      (usuario) =>
+          limpiarCorreo(usuario.correo) === limpio
+  )
+}
+
+/*
+ * Todo el sistema trabaja con el nombre completo
+ * dentro de la propiedad "nombre".
+ *
+ * Ejemplo:
+ * nombre = "Camila"
+ * apellidos = "Rojas"
+ *
+ * Resultado:
+ * nombre = "Camila Rojas"
+ */
+function construirNombreCompleto(nombre, apellidos = "") {
+  const nombreLimpio = String(nombre || "").trim()
+  const apellidosLimpios = String(apellidos || "").trim()
+
+  if (apellidosLimpios === "") {
+    return nombreLimpio
+  }
+
+  /*
+   * Evita terminar con algo como:
+   * "Camila Rojas Rojas"
+   * si el nombre ya venía completo.
+   */
+  if (
+      nombreLimpio
+          .toLowerCase()
+          .endsWith(apellidosLimpios.toLowerCase())
+  ) {
+    return nombreLimpio
+  }
+
+  return `${nombreLimpio} ${apellidosLimpios}`.trim()
+}
+
+/*
+ * Corrige cuentas antiguas creadas por el panel
+ * que guardaban:
+ *
+ * nombre: "Camila"
+ * apellidos: "Rojas"
+ *
+ * Ahora quedan:
+ *
+ * nombre: "Camila Rojas"
+ *
+ * El resto del sitio ya trabaja de esta forma.
+ */
+function normalizarUsuario(usuario) {
+  const copia = { ...usuario }
+
+  if (copia.apellidos) {
+    copia.nombre = construirNombreCompleto(
+        copia.nombre,
+        copia.apellidos
+    )
+
+    delete copia.apellidos
+  }
+
+  copia.correo = limpiarCorreo(copia.correo)
+
+  return copia
+}
+
+// =========================================
+// PERSISTENCIA
+// =========================================
+
 function leerRegistrados() {
   try {
-    const guardado = localStorage.getItem(CLAVE_USUARIOS);
-    const lista = guardado ? JSON.parse(guardado) : [];
-    return Array.isArray(lista) ? lista : [];
+    const guardado =
+        localStorage.getItem(CLAVE_USUARIOS)
+
+    const lista =
+        guardado
+            ? JSON.parse(guardado)
+            : []
+
+    if (!Array.isArray(lista)) {
+      return []
+    }
+
+    return lista.map(normalizarUsuario)
   } catch {
-    return [];
+    return []
   }
+}
+
+function guardarRegistrados(usuarios) {
+  localStorage.setItem(
+      CLAVE_USUARIOS,
+      JSON.stringify(
+          usuarios.map(normalizarUsuario)
+      )
+  )
 }
 
 function leerEliminadas() {
   try {
-    const guardado = localStorage.getItem(CLAVE_ELIMINADAS);
-    const lista = guardado ? JSON.parse(guardado) : [];
-    return Array.isArray(lista) ? lista : [];
+    const guardado =
+        localStorage.getItem(CLAVE_ELIMINADAS)
+
+    const lista =
+        guardado
+            ? JSON.parse(guardado)
+            : []
+
+    return Array.isArray(lista)
+        ? lista.map(limpiarCorreo)
+        : []
   } catch {
-    return [];
+    return []
   }
 }
 
-// Todas las cuentas: las registradas mas las base que no esten repetidas
-// ni eliminadas
+function guardarEliminadas(correos) {
+  const lista = [
+    ...new Set(
+        correos.map(limpiarCorreo)
+    )
+  ]
+
+  localStorage.setItem(
+      CLAVE_ELIMINADAS,
+      JSON.stringify(lista)
+  )
+}
+
+// =========================================
+// LEER USUARIOS
+// =========================================
+
 export function leerUsuarios() {
-  const registrados = leerRegistrados();
-  const eliminadas = leerEliminadas();
+  const registrados = leerRegistrados()
+  const eliminadas = leerEliminadas()
 
-  const base = USUARIOS_BASE.filter((cuenta) =>
-    !registrados.some((r) => r.correo.toLowerCase() === cuenta.correo) &&
-    !eliminadas.includes(cuenta.correo)
-  );
+  const base = USUARIOS_BASE
+      .map(normalizarUsuario)
+      .filter((cuenta) => {
+        const correoBase =
+            limpiarCorreo(cuenta.correo)
 
-  return [...registrados, ...base];
+        const existeRegistrado =
+            registrados.some(
+                (registrado) =>
+                    limpiarCorreo(
+                        registrado.correo
+                    ) === correoBase
+            )
+
+        const estaEliminada =
+            eliminadas.includes(correoBase)
+
+        return (
+            !existeRegistrado &&
+            !estaEliminada
+        )
+      })
+
+  return [
+    ...registrados,
+    ...base
+  ]
 }
 
-// Devuelve la cuenta que coincide con el correo y la contrasena, o null
-export function buscarCuenta(correo, contrasena) {
-  const limpio = correo.trim().toLowerCase();
+// =========================================
+// LOGIN
+// =========================================
 
-  return leerUsuarios().find((cuenta) =>
-    cuenta.correo.toLowerCase() === limpio && cuenta.contrasena === contrasena.trim()
-  ) || null;
+export function buscarCuenta(
+    correo,
+    contrasena
+) {
+  const limpio =
+      limpiarCorreo(correo)
+
+  return (
+      leerUsuarios().find(
+          (cuenta) =>
+              limpiarCorreo(
+                  cuenta.correo
+              ) === limpio &&
+              cuenta.contrasena ===
+              contrasena.trim()
+      ) || null
+  )
 }
 
-// ¿Ya existe una cuenta con este correo?
+// =========================================
+// CORREO REGISTRADO
+// =========================================
+
 export function correoRegistrado(correo) {
-  const limpio = correo.trim().toLowerCase();
-  return leerUsuarios().some((cuenta) => cuenta.correo.toLowerCase() === limpio);
+  const limpio =
+      limpiarCorreo(correo)
+
+  return leerUsuarios().some(
+      (cuenta) =>
+          limpiarCorreo(
+              cuenta.correo
+          ) === limpio
+  )
 }
 
-// CREAR: guarda una cuenta de cliente nueva. Desde la tienda solo se crean
-// clientes; las cuentas del equipo las crea el administrador.
-// (En un sistema real la contrasena se guardaria con un hash en el servidor,
-// nunca en texto en el navegador.)
+// =========================================
+// REGISTRAR CLIENTE
+// =========================================
+
 export function registrarCliente(datos) {
-  const registrados = leerRegistrados();
+  const registrados =
+      leerRegistrados()
 
   const nueva = {
-    nombre: (datos.nombre.trim() + " " + datos.apellidos.trim()).trim(),
-    correo: datos.correo.trim().toLowerCase(),
-    contrasena: datos.contrasena.trim(),
+    nombre: construirNombreCompleto(
+        datos.nombre,
+        datos.apellidos
+    ),
+
+    correo:
+        limpiarCorreo(datos.correo),
+
+    contrasena:
+        datos.contrasena.trim(),
+
     rol: "CLIENTE",
+
     activo: true,
-    telefono: (datos.telefono || "").trim(),
-    comuna: (datos.comuna || "").trim(),
-    direccion: (datos.direccion || "").trim()
-  };
 
-  localStorage.setItem(CLAVE_USUARIOS, JSON.stringify([...registrados, nueva]));
+    telefono:
+        (datos.telefono || "").trim(),
 
-  // Si ese correo se habia eliminado antes, puede volver a usarse
-  const eliminadas = leerEliminadas().filter((correo) => correo !== nueva.correo);
-  localStorage.setItem(CLAVE_ELIMINADAS, JSON.stringify(eliminadas));
+    comuna:
+        (datos.comuna || "").trim(),
 
-  return nueva;
+    direccion:
+        (datos.direccion || "").trim()
+  }
+
+  guardarRegistrados([
+    ...registrados,
+    nueva
+  ])
+
+  /*
+   * Si había sido eliminada anteriormente,
+   * permitimos volver a registrar el correo.
+   */
+  const eliminadas =
+      leerEliminadas().filter(
+          (correo) =>
+              correo !== nueva.correo
+      )
+
+  guardarEliminadas(eliminadas)
+
+  return nueva
 }
 
-// LEER: la cuenta completa de un correo, o null
+// =========================================
+// BUSCAR USUARIO
+// =========================================
+
 export function buscarUsuario(correo) {
-  const limpio = correo.trim().toLowerCase();
-  return leerUsuarios().find((cuenta) => cuenta.correo.toLowerCase() === limpio) || null;
+  const limpio =
+      limpiarCorreo(correo)
+
+  return (
+      leerUsuarios().find(
+          (cuenta) =>
+              limpiarCorreo(
+                  cuenta.correo
+              ) === limpio
+      ) || null
+  )
 }
 
-// ACTUALIZAR: cambia los datos de una cuenta. El correo no se puede cambiar.
-// Si es una cuenta base, se guarda una copia editada, que tiene prioridad
-// sobre la original.
-export function actualizarCuenta(correo, cambios) {
-  const actual = buscarUsuario(correo);
+// =========================================
+// ACTUALIZAR CUENTA NORMAL
+// Perfil del cliente
+// =========================================
+
+export function actualizarCuenta(
+    correo,
+    cambios
+) {
+  const actual =
+      buscarUsuario(correo)
 
   if (!actual) {
-    return null;
+    return null
   }
 
-  const editada = { ...actual, ...cambios, correo: actual.correo, rol: actual.rol };
+  const editada = normalizarUsuario({
+    ...actual,
+    ...cambios,
 
-  const otros = leerRegistrados().filter((cuenta) =>
-    cuenta.correo.toLowerCase() !== actual.correo.toLowerCase()
-  );
+    // Desde el perfil no se cambia
+    // ni correo ni rol.
+    correo: actual.correo,
+    rol: actual.rol
+  })
 
-  localStorage.setItem(CLAVE_USUARIOS, JSON.stringify([...otros, editada]));
+  const otros =
+      leerRegistrados().filter(
+          (cuenta) =>
+              limpiarCorreo(
+                  cuenta.correo
+              ) !==
+              limpiarCorreo(
+                  actual.correo
+              )
+      )
 
-  return editada;
+  guardarRegistrados([
+    ...otros,
+    editada
+  ])
+
+  return editada
 }
 
-// ELIMINAR: borra la cuenta. Si era una cuenta base, anota su correo
-// para que no vuelva a aparecer.
+// =========================================
+// ELIMINAR
+// =========================================
+
 export function eliminarCuenta(correo) {
-  const limpio = correo.trim().toLowerCase();
+  const limpio =
+      limpiarCorreo(correo)
 
-  const quedan = leerRegistrados().filter((cuenta) => cuenta.correo.toLowerCase() !== limpio);
-  localStorage.setItem(CLAVE_USUARIOS, JSON.stringify(quedan));
+  const quedan =
+      leerRegistrados().filter(
+          (cuenta) =>
+              limpiarCorreo(
+                  cuenta.correo
+              ) !== limpio
+      )
 
-  const eliminadas = leerEliminadas();
+  guardarRegistrados(quedan)
+
+  const eliminadas =
+      leerEliminadas()
+
   if (!eliminadas.includes(limpio)) {
-    localStorage.setItem(CLAVE_ELIMINADAS, JSON.stringify([...eliminadas, limpio]));
+    guardarEliminadas([
+      ...eliminadas,
+      limpio
+    ])
   }
 }
-export function crearUsuario(datos) {
-  const registrados = leerRegistrados()
 
-  const correo = datos.correo.trim().toLowerCase()
+// =========================================
+// CREAR USUARIO DESDE ADMIN
+// =========================================
+
+export function crearUsuario(datos) {
+  const registrados =
+      leerRegistrados()
+
+  const correo =
+      limpiarCorreo(datos.correo)
 
   if (correoRegistrado(correo)) {
     return {
       ok: false,
-      mensaje: "Ya existe un usuario con ese correo."
+      mensaje:
+          "Ya existe un usuario con ese correo."
     }
   }
 
   const nuevo = {
-    run: (datos.run || "").trim().toUpperCase(),
-    nombre: datos.nombre.trim(),
-    apellidos: (datos.apellidos || "").trim(),
-    nacimiento: datos.nacimiento || "",
-    region: datos.region || "",
-    comuna: datos.comuna || "",
-    direccion: (datos.direccion || "").trim(),
+    run:
+        (datos.run || "")
+            .trim()
+            .toUpperCase(),
+
+    /*
+     * IMPORTANTE:
+     * guardamos nombre completo.
+     */
+    nombre:
+        construirNombreCompleto(
+            datos.nombre,
+            datos.apellidos
+        ),
+
+    nacimiento:
+        datos.nacimiento || "",
+
+    region:
+        datos.region || "",
+
+    comuna:
+        datos.comuna || "",
+
+    direccion:
+        (datos.direccion || "").trim(),
+
     correo,
-    contrasena: datos.contrasena.trim(),
-    rol: datos.rol,
+
+    contrasena:
+        datos.contrasena.trim(),
+
+    rol:
+    datos.rol,
+
     activo: true
   }
 
-  localStorage.setItem(
-      CLAVE_USUARIOS,
-      JSON.stringify([...registrados, nuevo])
-  )
+  guardarRegistrados([
+    ...registrados,
+    nuevo
+  ])
 
-  const eliminadas = leerEliminadas().filter(
-      (correoEliminado) => correoEliminado !== correo
-  )
+  const eliminadas =
+      leerEliminadas().filter(
+          (correoEliminado) =>
+              correoEliminado !== correo
+      )
 
-  localStorage.setItem(
-      CLAVE_ELIMINADAS,
-      JSON.stringify(eliminadas)
-  )
+  guardarEliminadas(eliminadas)
 
   return {
     ok: true,
@@ -206,48 +484,221 @@ export function crearUsuario(datos) {
   }
 }
 
-export function actualizarUsuarioAdmin(correoOriginal, cambios) {
-  const actual = buscarUsuario(correoOriginal)
+// =========================================
+// ACTUALIZAR DESDE ADMIN
+// =========================================
+
+export function actualizarUsuarioAdmin(
+    correoOriginal,
+    cambios
+) {
+  const actual =
+      buscarUsuario(correoOriginal)
 
   if (!actual) {
-    return null
+    return {
+      ok: false,
+      mensaje:
+          "No se encontró el usuario."
+    }
   }
 
-  const correoNuevo = cambios.correo
-      ? cambios.correo.trim().toLowerCase()
-      : actual.correo
+  const correoAnterior =
+      limpiarCorreo(
+          actual.correo
+      )
 
-  const repetido = leerUsuarios().some((usuario) =>
-      usuario.correo.toLowerCase() === correoNuevo &&
-      usuario.correo.toLowerCase() !== actual.correo.toLowerCase()
-  )
+  const correoSolicitado =
+      cambios.correo
+          ? limpiarCorreo(
+              cambios.correo
+          )
+          : correoAnterior
+
+  const rolSolicitado =
+      cambios.rol ||
+      actual.rol
+
+  // =====================================
+  // PROTEGER AL ADMINISTRADOR ACTUAL
+  // =====================================
+
+  const sesion =
+      leerSesion()
+
+  const esUsuarioActual =
+      sesion &&
+      limpiarCorreo(
+          sesion.correo
+      ) === correoAnterior
+
+  if (esUsuarioActual) {
+    if (
+        correoSolicitado !==
+        correoAnterior
+    ) {
+      return {
+        ok: false,
+        mensaje:
+            "No puedes cambiar el correo de tu propia cuenta."
+      }
+    }
+
+    if (
+        rolSolicitado !==
+        actual.rol
+    ) {
+      return {
+        ok: false,
+        mensaje:
+            "No puedes cambiar el rol de tu propia cuenta."
+      }
+    }
+  }
+
+  // =====================================
+  // EVITAR CORREO DUPLICADO
+  // =====================================
+
+  const repetido =
+      leerUsuarios().some(
+          (usuario) =>
+              limpiarCorreo(
+                  usuario.correo
+              ) ===
+              correoSolicitado &&
+              limpiarCorreo(
+                  usuario.correo
+              ) !==
+              correoAnterior
+      )
 
   if (repetido) {
     return {
       ok: false,
-      mensaje: "Ya existe un usuario con ese correo."
+      mensaje:
+          "Ya existe un usuario con ese correo."
     }
   }
 
-  const editado = {
+  // =====================================
+  // NOMBRE COMPLETO
+  // =====================================
+
+  let nombreNuevo =
+      actual.nombre
+
+  if (
+      cambios.nombre !== undefined ||
+      cambios.apellidos !== undefined
+  ) {
+    nombreNuevo =
+        construirNombreCompleto(
+            cambios.nombre ??
+            actual.nombre,
+
+            cambios.apellidos ??
+            ""
+        )
+  }
+
+  // =====================================
+  // CREAR VERSIÓN EDITADA
+  // =====================================
+
+  const editado = normalizarUsuario({
     ...actual,
     ...cambios,
-    correo: correoNuevo,
-    rol: cambios.rol || actual.rol
-  }
 
+    nombre:
+    nombreNuevo,
+
+    correo:
+    correoSolicitado,
+
+    rol:
+    rolSolicitado
+  })
+
+  /*
+   * Si deja contraseña vacía,
+   * mantenemos la anterior.
+   */
   if (!cambios.contrasena) {
-    editado.contrasena = actual.contrasena
+    editado.contrasena =
+        actual.contrasena
   }
 
-  const otros = leerRegistrados().filter(
-      (usuario) =>
-          usuario.correo.toLowerCase() !== actual.correo.toLowerCase()
-  )
+  /*
+   * Nunca guardamos "apellidos"
+   * como propiedad separada.
+   */
+  delete editado.apellidos
 
-  localStorage.setItem(
-      CLAVE_USUARIOS,
-      JSON.stringify([...otros, editado])
+  const otros =
+      leerRegistrados().filter(
+          (usuario) =>
+              limpiarCorreo(
+                  usuario.correo
+              ) !==
+              correoAnterior
+      )
+
+  guardarRegistrados([
+    ...otros,
+    editado
+  ])
+
+  // =====================================
+  // CUENTA BASE + CAMBIO DE CORREO
+  // =====================================
+
+  /*
+   * Este era uno de los errores importantes.
+   *
+   * Si "admin@gaselvolcan.cl" o cualquier
+   * cuenta base cambia de correo, la cuenta
+   * base original volvería a aparecer.
+   *
+   * Por eso marcamos el correo original
+   * como eliminado.
+   */
+  if (
+      correoSolicitado !==
+      correoAnterior &&
+      esCuentaBase(
+          correoAnterior
+      )
+  ) {
+    const eliminadas =
+        leerEliminadas()
+
+    if (
+        !eliminadas.includes(
+            correoAnterior
+        )
+    ) {
+      guardarEliminadas([
+        ...eliminadas,
+        correoAnterior
+      ])
+    }
+  }
+
+  /*
+   * Si el nuevo correo estaba marcado
+   * como eliminado anteriormente,
+   * lo habilitamos de nuevo.
+   */
+  const eliminadasActualizadas =
+      leerEliminadas().filter(
+          (correo) =>
+              correo !==
+              correoSolicitado
+      )
+
+  guardarEliminadas(
+      eliminadasActualizadas
   )
 
   return {
@@ -256,66 +707,131 @@ export function actualizarUsuarioAdmin(correoOriginal, cambios) {
   }
 }
 
-export function cambiarEstadoUsuario(correo) {
-  const usuario = buscarUsuario(correo)
+// =========================================
+// ACTIVAR / DESACTIVAR
+// =========================================
+
+export function cambiarEstadoUsuario(
+    correo
+) {
+  const usuario =
+      buscarUsuario(correo)
 
   if (!usuario) {
     return null
   }
 
-  return actualizarCuenta(correo, {
-    activo: usuario.activo === false
-  })
-}
-// ---------- Sesion ----------
+  /*
+   * También protegemos aquí la sesión
+   * actual, aunque la interfaz ya lo
+   * compruebe.
+   */
+  const sesion =
+      leerSesion()
 
-// Solo se guarda lo necesario: nunca la contrasena
+  if (
+      sesion &&
+      limpiarCorreo(
+          sesion.correo
+      ) ===
+      limpiarCorreo(
+          usuario.correo
+      )
+  ) {
+    return null
+  }
+
+  return actualizarCuenta(
+      correo,
+      {
+        activo:
+            usuario.activo === false
+      }
+  )
+}
+
+// =========================================
+// SESIÓN
+// =========================================
+
 export function leerSesion() {
   try {
-    const guardado = localStorage.getItem(CLAVE_SESION);
-    return guardado ? JSON.parse(guardado) : null;
+    const guardado =
+        localStorage.getItem(
+            CLAVE_SESION
+        )
+
+    return guardado
+        ? JSON.parse(guardado)
+        : null
   } catch {
-    return null;
+    return null
   }
 }
 
 export function guardarSesion(usuario) {
   if (usuario) {
-    localStorage.setItem(CLAVE_SESION, JSON.stringify(usuario));
+    localStorage.setItem(
+        CLAVE_SESION,
+        JSON.stringify(usuario)
+    )
   } else {
-    localStorage.removeItem(CLAVE_SESION);
+    localStorage.removeItem(
+        CLAVE_SESION
+    )
   }
 }
+
+// =========================================
+// INICIALES
+// =========================================
 
 // "Camila Rojas" -> "CR"
 export function iniciales(nombre) {
-  const partes = String(nombre).trim().split(/\s+/);
+  const partes =
+      String(nombre)
+          .trim()
+          .split(/\s+/)
 
   if (partes.length === 1) {
-    return partes[0].slice(0, 2).toUpperCase();
+    return partes[0]
+        .slice(0, 2)
+        .toUpperCase()
   }
 
-  return (partes[0][0] + partes[1][0]).toUpperCase();
+  return (
+      partes[0][0] +
+      partes[1][0]
+  ).toUpperCase()
 }
+
+// =========================================
+// NOMBRE DE ROL
+// =========================================
 
 export function nombreDeRol(rol) {
   const nombres = {
-    ADMINISTRADOR: "Administrador",
-    DESPACHADORA: "Despachadora",
-    REPARTIDOR: "Repartidor"
-  };
+    ADMINISTRADOR:
+        "Administrador",
 
-  return nombres[rol] || "Cliente";
+    DESPACHADORA:
+        "Despachadora",
+
+    REPARTIDOR:
+        "Repartidor"
+  }
+
+  return nombres[rol] || "Cliente"
 }
 
-// Panel de trabajo de cada rol. Los clientes no tienen panel: siguen en la tienda.
-// Cuando existan los paneles de la despachadora y del repartidor,
-// se agregan aqui sus rutas y el login los llevara solos.
+// =========================================
+// PANELES POR ROL
+// =========================================
+
 export const PANELES = {
   ADMINISTRADOR: "/admin"
-};
+}
 
-// Devuelve la ruta del panel del rol, o null si no tiene
 export function panelDeRol(rol) {
-  return PANELES[rol] || null;
+  return PANELES[rol] || null
 }

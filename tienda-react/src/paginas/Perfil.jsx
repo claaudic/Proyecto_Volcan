@@ -1,7 +1,7 @@
 import { startTransition, useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useSesion } from '../contexto/sesionContexto'
-import { buscarUsuario, actualizarCuenta, eliminarCuenta, nombreDeRol } from '../datos/usuarios'
+import { buscarUsuario, actualizarCuenta, eliminarCuenta, nombreDeRol, panelDeRol } from '../datos/usuarios'
 import { leerPedidos } from '../datos/pedidos'
 import { formatearPrecio } from '../datos/productos'
 import { buscarZona } from '../datos/zonas'
@@ -140,6 +140,10 @@ function FichaPerfil({ usuario }) {
               : "Revisa y actualiza tus datos de contacto."}
           </p>
         </div>
+
+        <svg className="encabezado-monte" viewBox="0 0 1440 60" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+          <path d="M0 60 L0 38 L110 22 L214 40 L318 16 L430 36 L536 20 L648 38 L764 18 L876 36 L992 22 L1104 40 L1216 20 L1330 34 L1440 22 L1440 60 Z" />
+        </svg>
       </section>
 
       <section className="perfil" aria-labelledby="titulo-datos">
@@ -307,6 +311,9 @@ function FichaPerfil({ usuario }) {
                 <p className="perfil-rol-nota">
                   Tu correo {usuario.correo} tiene acceso al panel de trabajo.
                 </p>
+                {panelDeRol(usuario.rol) && (
+                  <Link className="btn btn-principal" to={panelDeRol(usuario.rol)}>Ir a mi panel</Link>
+                )}
               </div>
             )}
           </div>

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useSesion } from '../contexto/sesionContexto'
+import { panelDeRol } from '../datos/usuarios'
 import { validarCorreo, validarContrasena } from '../utilidades/validaciones'
 import { claseCampo } from '../utilidades/formularios'
 
@@ -65,9 +66,8 @@ function Login() {
       return
     }
 
-    // Por ahora todos los roles vuelven al inicio. Cuando existan los paneles
-    // de administracion, despachadora y repartidor, aqui se redirige segun el rol.
-    navegar("/")
+    // El equipo va a su panel de trabajo; los clientes vuelven a la tienda
+    navegar(panelDeRol(resultado.rol) || "/")
   }
 
   return (

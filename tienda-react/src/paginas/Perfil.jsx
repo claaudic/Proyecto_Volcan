@@ -6,7 +6,7 @@ import { leerPedidos } from '../datos/pedidos'
 import { formatearPrecio } from '../datos/productos'
 import { buscarZona } from '../datos/zonas'
 import { claseCampo } from '../utilidades/formularios'
-import { validarTexto, validarTelefono } from '../utilidades/validaciones'
+import { validarTexto, validarTelefono, validarDireccion } from '../utilidades/validaciones'
 
 // Migrado desde perfil.html y js/perfil.js.
 
@@ -59,7 +59,7 @@ function FichaPerfil({ usuario }) {
     apellidos: (d) => validarTexto(d.apellidos, 100, "Ingresa tus apellidos."),
     telefono: (d) => validarTelefono(d.telefono),
     ...(esCliente && {
-      direccion: (d) => validarTexto(d.direccion, 300, "Ingresa tu dirección de despacho.")
+      direccion: (d) => validarDireccion(d.direccion)
     })
   }
 

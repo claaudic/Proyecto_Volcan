@@ -7,7 +7,12 @@ import { crearPedido } from '../datos/pedidos'
 import { formatearPrecio, imagenDe } from '../datos/productos'
 import { buscarUsuario } from '../datos/usuarios'
 import { normalizar } from '../datos/zonas'
-import { validarNombre, validarCorreo } from '../utilidades/validaciones'
+import {
+    validarNombre,
+    validarCorreo,
+    validarDireccion,
+    validarTelefonoObligatorio
+} from '../utilidades/validaciones'
 import { useCatalogo } from '../contexto/catalogoContexto'
 import {
     validarNumeroTarjeta,
@@ -45,6 +50,7 @@ function Checkout() {
     const [formulario, setFormulario] = useState({
         nombre: cuenta?.nombre || '',
         correo: cuenta?.correo || '',
+        telefono: cuenta?.telefono || '',
         direccion: cuenta?.direccion || '',
         comuna: comunaCuenta || '',
         indicaciones: '',
@@ -89,11 +95,17 @@ function Checkout() {
             nuevosErrores.correo = errorCorreo
         }
 
-        if (formulario.direccion.trim() === '') {
-            nuevosErrores.direccion = 'Ingresa una dirección de entrega.'
-        } else if (formulario.direccion.trim().length > 300) {
-            nuevosErrores.direccion =
-                'La dirección no puede superar los 300 caracteres.'
+        const errorTelefono = validarTelefonoObligatorio(formulario.telefono)
+
+        if (errorTelefono) {
+            nuevosErrores.telefono = errorTelefono
+        }
+
+        // Calle y numero: misma regla que el perfil
+        const errorDireccion = validarDireccion(formulario.direccion)
+
+        if (errorDireccion) {
+            nuevosErrores.direccion = errorDireccion
         }
 
         if (formulario.comuna === '') {
@@ -155,7 +167,8 @@ function Checkout() {
             const pedido = crearPedido({
                 cliente: {
                     nombre: formulario.nombre.trim(),
-                    correo: formulario.correo.trim()
+                    correo: formulario.correo.trim(),
+                    telefono: formulario.telefono.trim()
                 },
                 entrega: {
                     direccion: formulario.direccion.trim(),
@@ -264,6 +277,9 @@ function Checkout() {
                                         </div>
                                         <div className="col-sm-6">
                                             {campo('correo', 'Correo electrónico', entrada('correo', { type: 'email', autoComplete: 'email', maxLength: 100 }))}
+                                        </div>
+                                        <div className="col-sm-6">
+                                            {campo('telefono', 'Teléfono', entrada('telefono', { type: 'tel', autoComplete: 'tel', maxLength: 15, placeholder: '+56 9 1234 5678' }))}
                                         </div>
                                     </div>
                                 </div>

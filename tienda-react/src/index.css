@@ -121,3 +121,30 @@ a.rol-insignia:hover {
 .checkout-lateral .checkout-total strong {
   font-size: 1.5rem;
 }
+
+/* ---------- Compra exitosa ---------- */
+.compra-exitosa h2 {
+  color: var(--tinta);
+  font-size: 1.1875rem;
+  font-weight: 700;
+}
+
+/* Lista de datos: etiqueta a la izquierda, valor a la derecha */
+.compra-exitosa-datos {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.4rem 1rem;
+  margin-bottom: 2rem;
+}
+
+.compra-exitosa-datos dt {
+  color: var(--texto-suave);
+  font-weight: 500;
+}
+
+.compra-exitosa-datos dd {
+  margin: 0;
+  color: var(--tinta);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}

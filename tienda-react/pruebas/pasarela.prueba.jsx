@@ -97,6 +97,7 @@ describe("Pasarela: checkout completo", () => {
     function pagarCon(tarjeta) {
         escribir(pantalla.querySelector("#nombre"), "Camila Rojas");
         escribir(pantalla.querySelector("#correo"), "camila@gmail.com");
+        escribir(pantalla.querySelector("#telefono"), "+56 9 1234 5678");
         escribir(pantalla.querySelector("#direccion"), "Libertad 123");
 
         // El select avisa sus cambios con el evento "change"

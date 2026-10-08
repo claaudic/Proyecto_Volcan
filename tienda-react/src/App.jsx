@@ -23,6 +23,7 @@ import PagoRechazado from './paginas/PagoRechazado'
 import Categorias from './paginas/Categorias'
 import AdminDashboard from './paginas/AdminDashboard'
 import AdminProductos from './paginas/AdminProductos'
+import AdminUsuarios from './paginas/AdminUsuarios'
 function App() {
   return (
     <>
@@ -50,6 +51,7 @@ function App() {
           <Route path="/categorias/:nombre" element={<Categorias />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/productos" element={<AdminProductos />} />
+          <Route path="/admin/usuarios" element={<AdminUsuarios />} />
 
       </Routes>
 

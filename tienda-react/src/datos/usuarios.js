@@ -160,7 +160,113 @@ export function eliminarCuenta(correo) {
     localStorage.setItem(CLAVE_ELIMINADAS, JSON.stringify([...eliminadas, limpio]));
   }
 }
+export function crearUsuario(datos) {
+  const registrados = leerRegistrados()
 
+  const correo = datos.correo.trim().toLowerCase()
+
+  if (correoRegistrado(correo)) {
+    return {
+      ok: false,
+      mensaje: "Ya existe un usuario con ese correo."
+    }
+  }
+
+  const nuevo = {
+    run: (datos.run || "").trim().toUpperCase(),
+    nombre: datos.nombre.trim(),
+    apellidos: (datos.apellidos || "").trim(),
+    nacimiento: datos.nacimiento || "",
+    region: datos.region || "",
+    comuna: datos.comuna || "",
+    direccion: (datos.direccion || "").trim(),
+    correo,
+    contrasena: datos.contrasena.trim(),
+    rol: datos.rol,
+    activo: true
+  }
+
+  localStorage.setItem(
+      CLAVE_USUARIOS,
+      JSON.stringify([...registrados, nuevo])
+  )
+
+  const eliminadas = leerEliminadas().filter(
+      (correoEliminado) => correoEliminado !== correo
+  )
+
+  localStorage.setItem(
+      CLAVE_ELIMINADAS,
+      JSON.stringify(eliminadas)
+  )
+
+  return {
+    ok: true,
+    usuario: nuevo
+  }
+}
+
+export function actualizarUsuarioAdmin(correoOriginal, cambios) {
+  const actual = buscarUsuario(correoOriginal)
+
+  if (!actual) {
+    return null
+  }
+
+  const correoNuevo = cambios.correo
+      ? cambios.correo.trim().toLowerCase()
+      : actual.correo
+
+  const repetido = leerUsuarios().some((usuario) =>
+      usuario.correo.toLowerCase() === correoNuevo &&
+      usuario.correo.toLowerCase() !== actual.correo.toLowerCase()
+  )
+
+  if (repetido) {
+    return {
+      ok: false,
+      mensaje: "Ya existe un usuario con ese correo."
+    }
+  }
+
+  const editado = {
+    ...actual,
+    ...cambios,
+    correo: correoNuevo,
+    rol: cambios.rol || actual.rol
+  }
+
+  if (!cambios.contrasena) {
+    editado.contrasena = actual.contrasena
+  }
+
+  const otros = leerRegistrados().filter(
+      (usuario) =>
+          usuario.correo.toLowerCase() !== actual.correo.toLowerCase()
+  )
+
+  localStorage.setItem(
+      CLAVE_USUARIOS,
+      JSON.stringify([...otros, editado])
+  )
+
+  return {
+    ok: true,
+    usuario: editado
+  }
+}
+
+export function cambiarEstadoUsuario(correo) {
+  const usuario = buscarUsuario(correo)
+
+  if (!usuario) {
+    return null
+  }
+
+  return actualizarCuenta(correo, {
+    activo: usuario.activo === false
+  })
+}
 // ---------- Sesion ----------
 
 // Solo se guarda lo necesario: nunca la contrasena

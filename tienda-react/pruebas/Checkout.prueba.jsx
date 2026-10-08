@@ -1,5 +1,9 @@
 import Checkout from "../src/paginas/Checkout";
-import { montarEnTienda, clic } from "./ayuda";
+import { MemoryRouter } from "react-router-dom";
+import { montarEnTienda, montar, clic } from "./ayuda";
+import ProveedorSesion from "../src/contexto/ProveedorSesion";
+import ProveedorCatalogo from "../src/contexto/ProveedorCatalogo";
+import ProveedorCarrito from "../src/contexto/ProveedorCarrito";
 
 describe("Checkout", () => {
 
@@ -23,7 +27,7 @@ describe("Checkout", () => {
 
     function erroresVisibles() {
         return Array.from(
-            pantalla.querySelectorAll(".invalid-feedback")
+            pantalla.querySelectorAll(".mensaje-error-campo")
         )
             .map((mensaje) => mensaje.textContent)
             .filter((texto) => texto !== "");
@@ -35,6 +39,45 @@ describe("Checkout", () => {
         clic(enviar);
 
         expect(erroresVisibles().length).toBeGreaterThan(0);
+    });
+
+});
+describe("Checkout con sesión iniciada", () => {
+
+    let pantalla;
+
+    afterEach(() => {
+        pantalla.desmontar();
+        localStorage.removeItem("usuarioActivo");
+        localStorage.removeItem("usuariosSistema");
+    });
+
+    it("rellena los datos con los de la cuenta", () => {
+        // Camila guardo su direccion y comuna en el perfil
+        localStorage.setItem("usuariosSistema", JSON.stringify([{
+            nombre: "Camila Rojas", correo: "cliente@gmail.com", contrasena: "Clien1234",
+            rol: "CLIENTE", direccion: "Libertad 123", comuna: "chillan viejo"
+        }]));
+        localStorage.setItem("usuarioActivo", JSON.stringify({
+            nombre: "Camila Rojas", correo: "cliente@gmail.com", rol: "CLIENTE"
+        }));
+
+        pantalla = montar(
+            <MemoryRouter>
+                <ProveedorSesion>
+                    <ProveedorCatalogo>
+                        <ProveedorCarrito>
+                            <Checkout />
+                        </ProveedorCarrito>
+                    </ProveedorCatalogo>
+                </ProveedorSesion>
+            </MemoryRouter>
+        );
+
+        expect(pantalla.querySelector("#nombre").value).toBe("Camila Rojas");
+        expect(pantalla.querySelector("#direccion").value).toBe("Libertad 123");
+        // Escrita sin tilde en la cuenta, igual se reconoce
+        expect(pantalla.querySelector("#comuna").value).toBe("Chillán Viejo");
     });
 
 });

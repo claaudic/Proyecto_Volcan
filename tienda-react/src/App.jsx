@@ -22,6 +22,7 @@ import CompraExitosa from './paginas/CompraExitosa'
 import PagoRechazado from './paginas/PagoRechazado'
 import Categorias from './paginas/Categorias'
 import AdminDashboard from './paginas/AdminDashboard'
+import AdminProductos from './paginas/AdminProductos'
 function App() {
   return (
     <>
@@ -48,6 +49,7 @@ function App() {
           <Route path="/categorias" element={<Categorias />} />
           <Route path="/categorias/:nombre" element={<Categorias />} />
           <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/productos" element={<AdminProductos />} />
 
       </Routes>
 

@@ -1,62 +1,232 @@
-import { Link, Navigate } from 'react-router-dom'
+import { useState } from 'react'
+import { Navigate } from 'react-router-dom'
 import { useSesion } from '../contexto/sesionContexto'
 import { useCatalogo } from '../contexto/catalogoContexto'
-import { leerPedidos } from '../datos/pedidos'
 import { formatearPrecio } from '../datos/productos'
 
-function AdminDashboard() {
-    const { usuario } = useSesion()
-    const { productos } = useCatalogo()
+const FORMULARIO_VACIO = {
+    codigo: '',
+    nombre: '',
+    descripcion: '',
+    categoria: '',
+    unidad: '',
+    precioResidencial: '',
+    precioComercial: '',
+    stock: '',
+    stockCritico: '',
+    imagen: ''
+}
 
-    // Solo puede entrar el administrador
+function AdminProductos() {
+    const { usuario } = useSesion()
+
+    const {
+        productos,
+        crear,
+        editar,
+        cambiarEstado,
+        eliminar
+    } = useCatalogo()
+
+    const [formulario, setFormulario] = useState(FORMULARIO_VACIO)
+    const [codigoEditando, setCodigoEditando] = useState(null)
+    const [mostrarFormulario, setMostrarFormulario] = useState(false)
+    const [productoABorrar, setProductoABorrar] = useState(null)
+    const [errores, setErrores] = useState({})
+
     if (!usuario || usuario.rol !== 'ADMINISTRADOR') {
         return <Navigate to="/login" replace />
     }
 
-    const pedidos = leerPedidos()
+    const totalProductos = productos.length
 
-    // =========================
-    // INDICADORES
-    // =========================
-
-    const pendientes = pedidos.filter(
-        (pedido) => pedido.estado === 'Pendiente'
+    const productosActivos = productos.filter(
+        (producto) => producto.activo === true
     ).length
 
-    const sinRepartidor = pedidos.filter(
-        (pedido) => !pedido.repartidor
-    ).length
+    const productosStockCritico = productos.filter((producto) => {
+        return (
+            producto.stockCritico !== null &&
+            producto.stockCritico !== '' &&
+            Number(producto.stock) <= Number(producto.stockCritico)
+        )
+    }).length
 
-    const productosPorStock = [...productos].sort(
-        (a, b) => Number(a.stock) - Number(b.stock)
-    )
+    function cambiarCampo(evento) {
+        const { name, value } = evento.target
 
-    const productoMenorStock =
-        productosPorStock.length > 0
-            ? productosPorStock[0]
-            : null
+        setFormulario((anterior) => ({
+            ...anterior,
+            [name]: value
+        }))
+    }
 
-    const totalVendido = pedidos.reduce((total, pedido) => {
-        if (pedido.estado === 'Cancelado') {
-            return total
+    function cerrarFormulario() {
+        setMostrarFormulario(false)
+        setCodigoEditando(null)
+        setErrores({})
+        setFormulario(FORMULARIO_VACIO)
+    }
+
+    function abrirNuevoProducto() {
+        setFormulario(FORMULARIO_VACIO)
+        setCodigoEditando(null)
+        setErrores({})
+        setMostrarFormulario(true)
+    }
+
+    function abrirEditarProducto(producto) {
+        setFormulario({
+            codigo: producto.codigo,
+            nombre: producto.nombre,
+            descripcion: producto.descripcion || '',
+            categoria: producto.categoria,
+            unidad: producto.unidad,
+            precioResidencial: producto.precioResidencial,
+            precioComercial: producto.precioComercial,
+            stock: producto.stock,
+            stockCritico: producto.stockCritico ?? '',
+            imagen: producto.imagen || ''
+        })
+
+        setCodigoEditando(producto.codigo)
+        setErrores({})
+        setMostrarFormulario(true)
+    }
+
+    function validarFormulario() {
+        const nuevosErrores = {}
+
+        const codigo = formulario.codigo.trim().toUpperCase()
+        const nombre = formulario.nombre.trim()
+        const descripcion = formulario.descripcion.trim()
+
+        if (codigo === '') {
+            nuevosErrores.codigo = 'Ingresa el código del producto.'
+        } else if (codigo.length < 3) {
+            nuevosErrores.codigo =
+                'El código debe tener al menos 3 caracteres.'
         }
 
-        return total + Number(pedido.total || 0)
-    }, 0)
+        if (nombre === '') {
+            nuevosErrores.nombre = 'Ingresa el nombre del producto.'
+        } else if (nombre.length > 100) {
+            nuevosErrores.nombre =
+                'El nombre no puede superar los 100 caracteres.'
+        }
 
-    const ultimosPedidos = pedidos.slice(0, 5)
-    const productosStockBajo = productosPorStock.slice(0, 5)
+        if (descripcion.length > 500) {
+            nuevosErrores.descripcion =
+                'La descripción no puede superar los 500 caracteres.'
+        }
 
-    function claseEstado(estado) {
-        return `estado estado-${String(estado)
-            .toLowerCase()
-            .replaceAll(' ', '-')}`
+        if (formulario.categoria === '') {
+            nuevosErrores.categoria =
+                'Selecciona una categoría.'
+        }
+
+        if (formulario.unidad === '') {
+            nuevosErrores.unidad =
+                'Selecciona una unidad.'
+        }
+
+        if (
+            formulario.precioResidencial === '' ||
+            Number(formulario.precioResidencial) < 0
+        ) {
+            nuevosErrores.precioResidencial =
+                'Ingresa un precio residencial válido.'
+        }
+
+        if (
+            formulario.precioComercial === '' ||
+            Number(formulario.precioComercial) < 0
+        ) {
+            nuevosErrores.precioComercial =
+                'Ingresa un precio comercial válido.'
+        }
+
+        if (
+            formulario.stock === '' ||
+            Number(formulario.stock) < 0 ||
+            !Number.isInteger(Number(formulario.stock))
+        ) {
+            nuevosErrores.stock =
+                'El stock debe ser un número entero mayor o igual a 0.'
+        }
+
+        if (
+            formulario.stockCritico !== '' &&
+            (
+                Number(formulario.stockCritico) < 0 ||
+                !Number.isInteger(Number(formulario.stockCritico))
+            )
+        ) {
+            nuevosErrores.stockCritico =
+                'El stock crítico debe ser un número entero mayor o igual a 0.'
+        }
+
+        const codigoDuplicado = productos.some((producto) => {
+            return (
+                producto.codigo.toUpperCase() === codigo &&
+                producto.codigo !== codigoEditando
+            )
+        })
+
+        if (codigoDuplicado) {
+            nuevosErrores.codigo =
+                'Ya existe un producto con ese código.'
+        }
+
+        setErrores(nuevosErrores)
+
+        return Object.keys(nuevosErrores).length === 0
+    }
+
+    function guardarProducto(evento) {
+        evento.preventDefault()
+
+        if (!validarFormulario()) {
+            return
+        }
+
+        const datos = {
+            codigo: formulario.codigo.trim().toUpperCase(),
+            nombre: formulario.nombre.trim(),
+            descripcion: formulario.descripcion.trim(),
+            categoria: formulario.categoria,
+            unidad: formulario.unidad,
+            precioResidencial: Number(formulario.precioResidencial),
+            precioComercial: Number(formulario.precioComercial),
+            stock: Number(formulario.stock),
+            stockCritico:
+                formulario.stockCritico === ''
+                    ? null
+                    : Number(formulario.stockCritico),
+            imagen: formulario.imagen.trim()
+        }
+
+        if (codigoEditando) {
+            editar(codigoEditando, datos)
+        } else {
+            crear(datos)
+        }
+
+        cerrarFormulario()
+    }
+
+    function confirmarEliminar() {
+        if (!productoABorrar) {
+            return
+        }
+
+        eliminar(productoABorrar.codigo)
+        setProductoABorrar(null)
     }
 
     return (
         <main id="contenidoAdmin">
 
-            {/* Encabezado migrado desde admin/index.html */}
             <section
                 className="pagina-encabezado"
                 aria-labelledby="titulo-pagina"
@@ -68,21 +238,26 @@ function AdminDashboard() {
                 </div>
 
                 <div className="container">
-                    <p className="panel-etiqueta">Administración</p>
+                    <p className="panel-etiqueta">
+                        Administración
+                    </p>
 
                     <h1 id="titulo-pagina">
-                        Panel de administración
+                        Gestión de productos
                     </h1>
 
                     <p className="pagina-bajada">
-                        Gestiona el catálogo, las cuentas de usuario y las órdenes
-                        del sistema.
+                        Administra el catálogo e inventario de Gas El Volcán.
                     </p>
 
                     <p className="encabezado-accion">
-                        <Link className="btn btn-secundario" to="/">
-                            Ver la tienda
-                        </Link>
+                        <button
+                            type="button"
+                            className="btn btn-principal"
+                            onClick={abrirNuevoProducto}
+                        >
+                            + Crear producto
+                        </button>
                     </p>
                 </div>
 
@@ -100,256 +275,660 @@ function AdminDashboard() {
             <div className="panel-cuerpo">
                 <div className="container">
 
-                    {/* =========================
-              RESUMEN
-          ========================== */}
-                    <section
-                        className="panel-seccion"
-                        aria-labelledby="titulo-resumen"
-                    >
-                        <h2
-                            id="titulo-resumen"
-                            className="visually-hidden"
-                        >
-                            Resumen del día
-                        </h2>
+                    <section className="panel-aviso">
+                        <h2>Inventario</h2>
 
-                        <div className="row g-4">
-
-                            <div className="col-12 col-sm-6 col-lg-3">
-                                <article className="tarjeta-dato">
-                                    <div
-                                        className="tarjeta-dato-icono tono-rosa"
-                                        aria-hidden="true"
-                                    >
-                                        P
-                                    </div>
-
-                                    <div>
-                                        <p className="tarjeta-dato-texto">
-                                            Pedidos pendientes
-                                        </p>
-
-                                        <p className="tarjeta-dato-numero">
-                                            {pendientes}
-                                        </p>
-                                    </div>
-                                </article>
-                            </div>
-
-                            <div className="col-12 col-sm-6 col-lg-3">
-                                <article className="tarjeta-dato">
-                                    <div
-                                        className="tarjeta-dato-icono tono-celeste"
-                                        aria-hidden="true"
-                                    >
-                                        R
-                                    </div>
-
-                                    <div>
-                                        <p className="tarjeta-dato-texto">
-                                            Sin repartidor asignado
-                                        </p>
-
-                                        <p className="tarjeta-dato-numero">
-                                            {sinRepartidor}
-                                        </p>
-                                    </div>
-                                </article>
-                            </div>
-
-                            <div className="col-12 col-sm-6 col-lg-3">
-                                <article className="tarjeta-dato">
-                                    <div
-                                        className="tarjeta-dato-icono tono-tinta"
-                                        aria-hidden="true"
-                                    >
-                                        S
-                                    </div>
-
-                                    <div>
-                                        <p className="tarjeta-dato-texto">
-                                            Stock más bajo
-                                        </p>
-
-                                        <p className="tarjeta-dato-numero">
-                                            {productoMenorStock
-                                                ? productoMenorStock.stock
-                                                : 0}
-                                        </p>
-
-                                        {productoMenorStock && (
-                                            <small>
-                                                {productoMenorStock.nombre}
-                                            </small>
-                                        )}
-                                    </div>
-                                </article>
-                            </div>
-
-                            <div className="col-12 col-sm-6 col-lg-3">
-                                <article className="tarjeta-dato">
-                                    <div
-                                        className="tarjeta-dato-icono tono-verde"
-                                        aria-hidden="true"
-                                    >
-                                        $
-                                    </div>
-
-                                    <div>
-                                        <p className="tarjeta-dato-texto">
-                                            Total registrado
-                                        </p>
-
-                                        <p className="tarjeta-dato-numero">
-                                            {formatearPrecio(totalVendido)}
-                                        </p>
-                                    </div>
-                                </article>
-                            </div>
-
-                        </div>
+                        <p>
+                            Puedes crear, editar, controlar el stock
+                            y desactivar productos.
+                        </p>
                     </section>
 
-                    {/* =========================
-              ÚLTIMOS PEDIDOS
-          ========================== */}
-                    <section
-                        className="panel-seccion"
-                        aria-labelledby="titulo-ultimos"
-                    >
-                        <div className="panel-titulo">
-                            <div>
-                                <p className="panel-etiqueta">
-                                    Actividad
-                                </p>
+                    <section className="row g-4 mt-1">
 
-                                <h2 id="titulo-ultimos">
-                                    Últimos pedidos
-                                </h2>
-                            </div>
+                        <div className="col-12 col-md-4">
+                            <article className="tarjeta-dato">
+                                <div>
+                                    <p className="tarjeta-dato-texto">
+                                        Productos
+                                    </p>
 
-                            <p className="panel-titulo-nota">
-                                <Link to="/admin/ordenes">
-                                    Ver todas las órdenes
-                                </Link>
+                                    <p className="tarjeta-dato-numero">
+                                        {totalProductos}
+                                    </p>
+                                </div>
+                            </article>
+                        </div>
+
+                        <div className="col-12 col-md-4">
+                            <article className="tarjeta-dato">
+                                <div>
+                                    <p className="tarjeta-dato-texto">
+                                        Productos activos
+                                    </p>
+
+                                    <p className="tarjeta-dato-numero">
+                                        {productosActivos}
+                                    </p>
+                                </div>
+                            </article>
+                        </div>
+
+                        <div className="col-12 col-md-4">
+                            <article className="tarjeta-dato">
+                                <div>
+                                    <p className="tarjeta-dato-texto">
+                                        Stock crítico
+                                    </p>
+
+                                    <p className="tarjeta-dato-numero">
+                                        {productosStockCritico}
+                                    </p>
+                                </div>
+                            </article>
+                        </div>
+
+                    </section>
+
+                    <section className="mt-5">
+
+                        <div className="mb-3">
+                            <p className="panel-etiqueta mb-1">
+                                Inventario
                             </p>
+
+                            <h2>
+                                Lista de productos
+                            </h2>
                         </div>
 
                         <div className="tabla-marco table-responsive">
                             <table className="tabla-panel">
+
                                 <thead>
                                 <tr>
-                                    <th>N° Pedido</th>
-                                    <th>Cliente</th>
-                                    <th>Comuna</th>
-                                    <th>Estado</th>
-                                    <th>Total</th>
-                                </tr>
-                                </thead>
-
-                                <tbody>
-                                {ultimosPedidos.length === 0 ? (
-                                    <tr>
-                                        <td colSpan="5">
-                                            Todavía no hay pedidos registrados.
-                                        </td>
-                                    </tr>
-                                ) : (
-                                    ultimosPedidos.map((pedido) => (
-                                        <tr key={pedido.numero}>
-                                            <td>
-                                                <strong>#{pedido.numero}</strong>
-                                            </td>
-
-                                            <td>
-                                                {pedido.cliente?.nombre || 'Sin nombre'}
-                                            </td>
-
-                                            <td>
-                                                {pedido.entrega?.comuna || 'Sin comuna'}
-                                            </td>
-
-                                            <td>
-                          <span className={claseEstado(pedido.estado)}>
-                            {pedido.estado}
-                          </span>
-                                            </td>
-
-                                            <td>
-                                                {formatearPrecio(pedido.total)}
-                                            </td>
-                                        </tr>
-                                    ))
-                                )}
-                                </tbody>
-                            </table>
-                        </div>
-                    </section>
-
-                    {/* =========================
-              STOCK BAJO
-          ========================== */}
-                    <section
-                        className="panel-seccion"
-                        aria-labelledby="titulo-stock"
-                    >
-                        <div className="panel-titulo">
-                            <div>
-                                <p className="panel-etiqueta">
-                                    Inventario
-                                </p>
-
-                                <h2 id="titulo-stock">
-                                    Productos con menos stock
-                                </h2>
-                            </div>
-
-                            <p className="panel-titulo-nota">
-                                <Link to="/admin/productos">
-                                    Ir al catálogo
-                                </Link>
-                            </p>
-                        </div>
-
-                        <div className="tabla-marco table-responsive">
-                            <table className="tabla-panel">
-                                <thead>
-                                <tr>
+                                    <th>Código</th>
                                     <th>Producto</th>
                                     <th>Categoría</th>
+                                    <th>Unidad</th>
+                                    <th>Precio residencial</th>
+                                    <th>Precio comercial</th>
                                     <th>Stock</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
                                 </tr>
                                 </thead>
 
                                 <tbody>
-                                {productosStockBajo.length === 0 ? (
-                                    <tr>
-                                        <td colSpan="3">
-                                            No hay productos en el catálogo.
-                                        </td>
-                                    </tr>
-                                ) : (
-                                    productosStockBajo.map((producto) => (
+                                {productos.map((producto) => {
+                                    const stockCritico =
+                                        producto.stockCritico !== null &&
+                                        producto.stockCritico !== '' &&
+                                        Number(producto.stock) <=
+                                        Number(producto.stockCritico)
+
+                                    return (
                                         <tr key={producto.codigo}>
-                                            <td>{producto.nombre}</td>
-                                            <td>{producto.categoria}</td>
 
                                             <td>
-                                                <strong>{producto.stock}</strong>
+                                                <strong>
+                                                    {producto.codigo}
+                                                </strong>
                                             </td>
+
+                                            <td>
+                                                <strong>
+                                                    {producto.nombre}
+                                                </strong>
+
+                                                <small className="d-block text-muted">
+                                                    {producto.descripcion}
+                                                </small>
+                                            </td>
+
+                                            <td>
+                                                {producto.categoria}
+                                            </td>
+
+                                            <td>
+                                                {producto.unidad}
+                                            </td>
+
+                                            <td>
+                                                {formatearPrecio(
+                                                    producto.precioResidencial
+                                                )}
+                                            </td>
+
+                                            <td>
+                                                {formatearPrecio(
+                                                    producto.precioComercial
+                                                )}
+                                            </td>
+
+                                            <td>
+                                                {stockCritico ? (
+                                                    <>
+                                                            <span className="badge bg-danger">
+                                                                {producto.stock}
+                                                            </span>
+
+                                                        <small className="d-block text-danger mt-1">
+                                                            Stock crítico
+                                                        </small>
+                                                    </>
+                                                ) : (
+                                                    producto.stock
+                                                )}
+                                            </td>
+
+                                            <td>
+                                                    <span
+                                                        className={
+                                                            producto.activo
+                                                                ? 'badge bg-success'
+                                                                : 'badge bg-secondary'
+                                                        }
+                                                    >
+                                                        {producto.activo
+                                                            ? 'Activo'
+                                                            : 'Inactivo'}
+                                                    </span>
+                                            </td>
+
+                                            <td>
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-sm btn-outline-primary me-1 mb-1"
+                                                    onClick={() =>
+                                                        abrirEditarProducto(producto)
+                                                    }
+                                                >
+                                                    Editar
+                                                </button>
+
+                                                <button
+                                                    type="button"
+                                                    className={
+                                                        `btn btn-sm ${
+                                                            producto.activo
+                                                                ? 'btn-outline-warning'
+                                                                : 'btn-outline-success'
+                                                        } me-1 mb-1`
+                                                    }
+                                                    onClick={() =>
+                                                        cambiarEstado(producto.codigo)
+                                                    }
+                                                >
+                                                    {producto.activo
+                                                        ? 'Desactivar'
+                                                        : 'Activar'}
+                                                </button>
+
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-sm btn-outline-danger mb-1"
+                                                    onClick={() =>
+                                                        setProductoABorrar(producto)
+                                                    }
+                                                >
+                                                    Eliminar
+                                                </button>
+                                            </td>
+
                                         </tr>
-                                    ))
-                                )}
+                                    )
+                                })}
                                 </tbody>
+
                             </table>
                         </div>
                     </section>
 
                 </div>
             </div>
+
+            {mostrarFormulario && (
+                <>
+                    <div
+                        className="modal fade show"
+                        style={{ display: 'block' }}
+                        tabIndex="-1"
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="tituloModalProducto"
+                    >
+                        <div className="modal-dialog modal-dialog-centered modal-lg">
+                            <div className="modal-content">
+
+                                <div className="modal-header">
+                                    <h2
+                                        className="modal-title fs-5"
+                                        id="tituloModalProducto"
+                                    >
+                                        {codigoEditando
+                                            ? 'Editar producto'
+                                            : 'Crear producto'}
+                                    </h2>
+
+                                    <button
+                                        type="button"
+                                        className="btn-close"
+                                        aria-label="Cerrar"
+                                        onClick={cerrarFormulario}
+                                    ></button>
+                                </div>
+
+                                <form
+                                    noValidate
+                                    onSubmit={guardarProducto}
+                                >
+                                    <div className="modal-body">
+
+                                        <div className="mb-3">
+                                            <label
+                                                htmlFor="codigoProducto"
+                                                className="form-label"
+                                            >
+                                                Código
+                                            </label>
+
+                                            <input
+                                                id="codigoProducto"
+                                                name="codigo"
+                                                type="text"
+                                                className="form-control"
+                                                maxLength="20"
+                                                placeholder="Ej: CL001"
+                                                value={formulario.codigo}
+                                                onChange={cambiarCampo}
+                                            />
+
+                                            {errores.codigo && (
+                                                <div className="text-danger mt-1">
+                                                    {errores.codigo}
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div className="mb-3">
+                                            <label
+                                                htmlFor="nombreProducto"
+                                                className="form-label"
+                                            >
+                                                Nombre
+                                            </label>
+
+                                            <input
+                                                id="nombreProducto"
+                                                name="nombre"
+                                                type="text"
+                                                className="form-control"
+                                                maxLength="100"
+                                                value={formulario.nombre}
+                                                onChange={cambiarCampo}
+                                            />
+
+                                            {errores.nombre && (
+                                                <div className="text-danger mt-1">
+                                                    {errores.nombre}
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div className="mb-3">
+                                            <label
+                                                htmlFor="descripcionProducto"
+                                                className="form-label"
+                                            >
+                                                Descripción
+                                            </label>
+
+                                            <textarea
+                                                id="descripcionProducto"
+                                                name="descripcion"
+                                                className="form-control"
+                                                maxLength="500"
+                                                rows="3"
+                                                value={formulario.descripcion}
+                                                onChange={cambiarCampo}
+                                            />
+
+                                            {errores.descripcion && (
+                                                <div className="text-danger mt-1">
+                                                    {errores.descripcion}
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div className="row">
+
+                                            <div className="col-12 col-md-6 mb-3">
+                                                <label
+                                                    htmlFor="categoriaProducto"
+                                                    className="form-label"
+                                                >
+                                                    Categoría
+                                                </label>
+
+                                                <select
+                                                    id="categoriaProducto"
+                                                    name="categoria"
+                                                    className="form-select"
+                                                    value={formulario.categoria}
+                                                    onChange={cambiarCampo}
+                                                >
+                                                    <option value="">
+                                                        Selecciona una categoría
+                                                    </option>
+
+                                                    <option value="Cilindros de Gas">
+                                                        Cilindros de Gas
+                                                    </option>
+
+                                                    <option value="Reguladores">
+                                                        Reguladores
+                                                    </option>
+
+                                                    <option value="Mangueras y Conexiones">
+                                                        Mangueras y Conexiones
+                                                    </option>
+
+                                                    <option value="Accesorios">
+                                                        Accesorios
+                                                    </option>
+                                                </select>
+
+                                                {errores.categoria && (
+                                                    <div className="text-danger mt-1">
+                                                        {errores.categoria}
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <div className="col-12 col-md-6 mb-3">
+                                                <label
+                                                    htmlFor="unidadProducto"
+                                                    className="form-label"
+                                                >
+                                                    Unidad
+                                                </label>
+
+                                                <select
+                                                    id="unidadProducto"
+                                                    name="unidad"
+                                                    className="form-select"
+                                                    value={formulario.unidad}
+                                                    onChange={cambiarCampo}
+                                                >
+                                                    <option value="">
+                                                        Selecciona una unidad
+                                                    </option>
+
+                                                    <option value="Unidad">
+                                                        Unidad
+                                                    </option>
+
+                                                    <option value="Kit">
+                                                        Kit
+                                                    </option>
+                                                </select>
+
+                                                {errores.unidad && (
+                                                    <div className="text-danger mt-1">
+                                                        {errores.unidad}
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                        </div>
+
+                                        <div className="row">
+
+                                            <div className="col-12 col-md-6 mb-3">
+                                                <label
+                                                    htmlFor="precioResidencialProducto"
+                                                    className="form-label"
+                                                >
+                                                    Precio residencial
+                                                </label>
+
+                                                <input
+                                                    id="precioResidencialProducto"
+                                                    name="precioResidencial"
+                                                    type="number"
+                                                    min="0"
+                                                    step="1"
+                                                    className="form-control"
+                                                    value={formulario.precioResidencial}
+                                                    onChange={cambiarCampo}
+                                                />
+
+                                                {errores.precioResidencial && (
+                                                    <div className="text-danger mt-1">
+                                                        {errores.precioResidencial}
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <div className="col-12 col-md-6 mb-3">
+                                                <label
+                                                    htmlFor="precioComercialProducto"
+                                                    className="form-label"
+                                                >
+                                                    Precio comercial
+                                                </label>
+
+                                                <input
+                                                    id="precioComercialProducto"
+                                                    name="precioComercial"
+                                                    type="number"
+                                                    min="0"
+                                                    step="1"
+                                                    className="form-control"
+                                                    value={formulario.precioComercial}
+                                                    onChange={cambiarCampo}
+                                                />
+
+                                                {errores.precioComercial && (
+                                                    <div className="text-danger mt-1">
+                                                        {errores.precioComercial}
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                        </div>
+
+                                        <div className="row">
+
+                                            <div className="col-12 col-md-6 mb-3">
+                                                <label
+                                                    htmlFor="stockProducto"
+                                                    className="form-label"
+                                                >
+                                                    Stock actual
+                                                </label>
+
+                                                <input
+                                                    id="stockProducto"
+                                                    name="stock"
+                                                    type="number"
+                                                    min="0"
+                                                    step="1"
+                                                    className="form-control"
+                                                    value={formulario.stock}
+                                                    onChange={cambiarCampo}
+                                                />
+
+                                                {errores.stock && (
+                                                    <div className="text-danger mt-1">
+                                                        {errores.stock}
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <div className="col-12 col-md-6 mb-3">
+                                                <label
+                                                    htmlFor="stockCriticoProducto"
+                                                    className="form-label"
+                                                >
+                                                    Stock crítico
+                                                </label>
+
+                                                <input
+                                                    id="stockCriticoProducto"
+                                                    name="stockCritico"
+                                                    type="number"
+                                                    min="0"
+                                                    step="1"
+                                                    className="form-control"
+                                                    value={formulario.stockCritico}
+                                                    onChange={cambiarCampo}
+                                                />
+
+                                                {errores.stockCritico && (
+                                                    <div className="text-danger mt-1">
+                                                        {errores.stockCritico}
+                                                    </div>
+                                                )}
+
+                                                <small className="text-muted">
+                                                    Opcional. Genera una alerta cuando
+                                                    el stock llegue a este valor.
+                                                </small>
+                                            </div>
+
+                                        </div>
+
+                                        <div className="mb-3">
+                                            <label
+                                                htmlFor="imagenProducto"
+                                                className="form-label"
+                                            >
+                                                Imagen
+                                            </label>
+
+                                            <input
+                                                id="imagenProducto"
+                                                name="imagen"
+                                                type="text"
+                                                className="form-control"
+                                                value={formulario.imagen}
+                                                onChange={cambiarCampo}
+                                            />
+
+                                            <small className="text-muted">
+                                                Opcional.
+                                            </small>
+                                        </div>
+
+                                    </div>
+
+                                    <div className="modal-footer">
+                                        <button
+                                            type="button"
+                                            className="btn btn-secundario"
+                                            onClick={cerrarFormulario}
+                                        >
+                                            Cancelar
+                                        </button>
+
+                                        <button
+                                            type="submit"
+                                            className="btn btn-principal"
+                                        >
+                                            Guardar producto
+                                        </button>
+                                    </div>
+                                </form>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="modal-backdrop fade show"></div>
+                </>
+            )}
+
+            {productoABorrar && (
+                <>
+                    <div
+                        className="modal fade show"
+                        style={{ display: 'block' }}
+                        tabIndex="-1"
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="tituloBorrarProducto"
+                    >
+                        <div className="modal-dialog modal-dialog-centered">
+                            <div className="modal-content">
+
+                                <div className="modal-header">
+                                    <h2
+                                        className="modal-title fs-5"
+                                        id="tituloBorrarProducto"
+                                    >
+                                        ¿Seguro que quieres eliminar este producto?
+                                    </h2>
+
+                                    <button
+                                        type="button"
+                                        className="btn-close"
+                                        aria-label="Cerrar"
+                                        onClick={() =>
+                                            setProductoABorrar(null)
+                                        }
+                                    ></button>
+                                </div>
+
+                                <div className="modal-body">
+                                    <p>
+                                        Estás a punto de eliminar:
+                                    </p>
+
+                                    <p>
+                                        <strong>
+                                            {productoABorrar.nombre}
+                                        </strong>
+                                    </p>
+
+                                    <p className="mb-0">
+                                        Esta acción no se puede deshacer.
+                                        Si solo quieres dejar de venderlo
+                                        temporalmente, usa Desactivar.
+                                    </p>
+                                </div>
+
+                                <div className="modal-footer">
+                                    <button
+                                        type="button"
+                                        className="btn btn-secundario"
+                                        onClick={() =>
+                                            setProductoABorrar(null)
+                                        }
+                                    >
+                                        Cancelar
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        className="btn btn-peligro"
+                                        onClick={confirmarEliminar}
+                                    >
+                                        Sí, eliminar
+                                    </button>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="modal-backdrop fade show"></div>
+                </>
+            )}
+
         </main>
     )
 }
 
-export default AdminDashboard
+export default AdminProductos

@@ -1,7 +1,31 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { buscarZona } from '../datos/zonas'
 
-// Migrado desde nosotros.html del sitio en HTML.
+// Migrado desde nosotros.html y el buscador de js/zonas.js.
 function Nosotros() {
+  const [comuna, setComuna] = useState("")
+
+  // Lo que se busco al apretar "Revisar". null = todavia no se busca nada
+  const [buscada, setBuscada] = useState(null)
+
+  // El resultado se calcula desde la comuna buscada, no necesita estado propio
+  const zona = buscada ? buscarZona(buscada) : null
+
+  function cambiar(evento) {
+    setComuna(evento.target.value)
+
+    // Si se borra el campo, se esconde el resultado
+    if (evento.target.value.trim() === "") {
+      setBuscada(null)
+    }
+  }
+
+  function revisar(evento) {
+    evento.preventDefault()
+    setBuscada(comuna.trim() === "" ? null : comuna)
+  }
+
   return (
     <main>
       <section className="pagina-encabezado" aria-labelledby="titulo-nosotros">
@@ -131,7 +155,7 @@ function Nosotros() {
             <h2 id="titulo-zonas">Dónde llegamos</h2>
           </div>
 
-          <form className="cobertura" id="formCobertura" noValidate>
+          <form className="cobertura" id="formCobertura" noValidate onSubmit={revisar}>
             <label htmlFor="comuna">¿Llegamos a tu comuna?</label>
             <div className="cobertura-fila">
               <input
@@ -140,7 +164,9 @@ function Nosotros() {
                 name="comuna"
                 placeholder="Escribe tu comuna"
                 autoComplete="address-level2"
-                list="comunasCubiertas" />
+                list="comunasCubiertas"
+                value={comuna}
+                onChange={cambiar} />
               <datalist id="comunasCubiertas">
                 <option value="Chillán"></option>
                 <option value="Chillán Viejo"></option>
@@ -152,7 +178,29 @@ function Nosotros() {
               </datalist>
               <button type="submit" className="btn btn-principal">Revisar</button>
             </div>
-            <div className="resultado-cobertura d-none" id="resultadoCobertura" role="status" aria-live="polite"></div>
+
+            {/* El contenedor siempre existe para que el lector de pantalla anuncie los cambios */}
+            <div role="status" aria-live="polite">
+              {buscada && (zona ? (
+                <div className="resultado-cobertura resultado-si">
+                  <p className="resultado-titulo">Sí, llegamos a {zona.etiqueta}</p>
+                  <ul className="resultado-datos">
+                    <li><span>Zona</span><strong>{zona.zona}</strong></li>
+                    <li><span>Días</span><strong>{zona.dias}</strong></li>
+                    <li><span>Horario</span><strong>{zona.horario}</strong></li>
+                    <li><span>Entrega</span><strong>{zona.entrega}</strong></li>
+                  </ul>
+                </div>
+              ) : (
+                <div className="resultado-cobertura resultado-sin">
+                  <p className="resultado-titulo">Todavía no llegamos ahí</p>
+                  <p className="resultado-texto">
+                    No tenemos reparto en esa comuna.
+                    Escríbenos por <Link to="/contacto">Contacto</Link> y lo revisamos.
+                  </p>
+                </div>
+              ))}
+            </div>
           </form>
 
           <div className="tabla-scroll">

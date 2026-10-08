@@ -1,6 +1,10 @@
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 
 function PagoRechazado() {
+    // El checkout manda el motivo del rechazo al navegar hasta aqui
+    const location = useLocation()
+    const motivo = location.state?.motivo
+
     return (
         <main className="container py-5">
             <section className="pago-rechazado">
@@ -10,6 +14,7 @@ function PagoRechazado() {
 
                 <p className="text-muted">
                     No se pudo realizar el pago.
+                    {motivo && <strong> {motivo}</strong>}
                 </p>
 
                 <div className="pago-rechazado-mensaje">

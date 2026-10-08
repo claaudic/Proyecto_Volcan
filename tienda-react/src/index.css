@@ -31,3 +31,120 @@ a.rol-insignia:hover {
   color: var(--blanco);
   background-color: rgba(255, 255, 255, 0.26);
 }
+
+/* ---------- Checkout ---------- */
+.checkout {
+  padding: 2.5rem 0 4.5rem;
+}
+
+.checkout-paso + .checkout-paso {
+  margin-top: 1.5rem;
+}
+
+.checkout-paso h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 1.25rem;
+}
+
+/* Numero del paso: el orden en que se completa el formulario */
+.paso-numero {
+  display: inline-grid;
+  width: 1.9rem;
+  height: 1.9rem;
+  place-items: center;
+  color: var(--blanco);
+  background: var(--degradado);
+  border-radius: 50%;
+  font-size: 0.9rem;
+}
+
+.checkout-paso .campo {
+  margin-bottom: 0.25rem;
+}
+
+.campo textarea.checkout-indicaciones {
+  min-height: 90px;
+}
+
+/* El resumen se queda a la vista mientras se completa el formulario */
+.checkout-lateral {
+  position: sticky;
+  top: 1.5rem;
+}
+
+.checkout-lineas {
+  margin: 1rem 0 0;
+}
+
+.checkout-linea {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  gap: 0.85rem;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--gris-borde);
+}
+
+.checkout-linea img {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  padding: 0.3rem;
+  background-color: var(--gris-azulado);
+  border-radius: var(--radio);
+}
+
+.checkout-linea div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  color: var(--tinta);
+  font-size: 0.9375rem;
+}
+
+.checkout-linea span {
+  color: var(--texto-suave);
+  font-size: 0.85rem;
+}
+
+.checkout-lateral .checkout-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 1.25rem 0;
+  color: var(--tinta);
+  font-size: 1.05rem;
+}
+
+.checkout-lateral .checkout-total strong {
+  font-size: 1.5rem;
+}
+
+/* ---------- Compra exitosa ---------- */
+.compra-exitosa h2 {
+  color: var(--tinta);
+  font-size: 1.1875rem;
+  font-weight: 700;
+}
+
+/* Lista de datos: etiqueta a la izquierda, valor a la derecha */
+.compra-exitosa-datos {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.4rem 1rem;
+  margin-bottom: 2rem;
+}
+
+.compra-exitosa-datos dt {
+  color: var(--texto-suave);
+  font-weight: 500;
+}
+
+.compra-exitosa-datos dd {
+  margin: 0;
+  color: var(--tinta);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}

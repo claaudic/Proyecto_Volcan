@@ -70,6 +70,35 @@ function CompraExitosa() {
                     </div>
 
                     <div>
+                        {/* Datos de quien compro (Figura 7 de las instrucciones) */}
+                        {pedido.cliente && (
+                            <>
+                                <h2 className="h4 mb-3">Datos del comprador</h2>
+
+                                <dl className="compra-exitosa-datos">
+                                    <dt>Nombre</dt>
+                                    <dd>{pedido.cliente.nombre}</dd>
+
+                                    <dt>Correo</dt>
+                                    <dd>{pedido.cliente.correo}</dd>
+
+                                    {pedido.cliente.telefono && (
+                                        <>
+                                            <dt>Teléfono</dt>
+                                            <dd>{pedido.cliente.telefono}</dd>
+                                        </>
+                                    )}
+
+                                    {pedido.pago && (
+                                        <>
+                                            <dt>Pagado con</dt>
+                                            <dd>Tarjeta {pedido.pago.tarjeta}</dd>
+                                        </>
+                                    )}
+                                </dl>
+                            </>
+                        )}
+
                         <h2 className="h4 mb-3">Dirección de entrega</h2>
 
                         <p className="mb-1">

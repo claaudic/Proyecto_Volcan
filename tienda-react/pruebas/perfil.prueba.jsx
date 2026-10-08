@@ -26,40 +26,40 @@ describe("Perfil: datos de la cuenta", () => {
     afterEach(limpiar);
 
     it("actualiza una cuenta base sin cambiar su correo ni su rol", () => {
-        actualizarCuenta("cliente@gmail.com", {
+        actualizarCuenta("camila@gmail.com", {
             nombre: "Camila Rojas Díaz",
             telefono: "+56 9 1234 5678",
             correo: "otro@gmail.com",
             rol: "ADMINISTRADOR"
         });
 
-        const cuenta = buscarUsuario("cliente@gmail.com");
+        const cuenta = buscarUsuario("camila@gmail.com");
         expect(cuenta.nombre).toBe("Camila Rojas Díaz");
         expect(cuenta.telefono).toBe("+56 9 1234 5678");
         expect(cuenta.rol).toBe("CLIENTE");
         expect(buscarUsuario("otro@gmail.com")).toBeNull();
 
         // La contrasena original sigue sirviendo para entrar
-        expect(buscarCuenta("cliente@gmail.com", "Clien1234")).not.toBeNull();
+        expect(buscarCuenta("camila@gmail.com", "Clien1234")).not.toBeNull();
     });
 
     it("una cuenta eliminada ya no puede iniciar sesión", () => {
-        eliminarCuenta("cliente@gmail.com");
+        eliminarCuenta("camila@gmail.com");
 
-        expect(buscarCuenta("cliente@gmail.com", "Clien1234")).toBeNull();
+        expect(buscarCuenta("camila@gmail.com", "Clien1234")).toBeNull();
     });
 
     it("un correo eliminado se puede volver a registrar", () => {
-        eliminarCuenta("cliente@gmail.com");
+        eliminarCuenta("camila@gmail.com");
 
         registrarCliente({
             nombre: "Camila",
             apellidos: "Rojas",
-            correo: "cliente@gmail.com",
+            correo: "camila@gmail.com",
             contrasena: "Nueva123"
         });
 
-        expect(buscarCuenta("cliente@gmail.com", "Nueva123")).not.toBeNull();
+        expect(buscarCuenta("camila@gmail.com", "Nueva123")).not.toBeNull();
     });
 
 });
@@ -71,7 +71,7 @@ describe("Perfil: página", () => {
     // Inicia sesion como Camila antes de montar la pagina
     function montarPerfil() {
         localStorage.setItem("usuarioActivo", JSON.stringify({
-            nombre: "Camila Rojas", correo: "cliente@gmail.com", rol: "CLIENTE"
+            nombre: "Camila Rojas", correo: "camila@gmail.com", rol: "CLIENTE"
         }));
 
         contenedor = montar(
@@ -92,7 +92,7 @@ describe("Perfil: página", () => {
         localStorage.setItem("pedidos_volcan", JSON.stringify([
             {
                 numero: 1, fecha: "2026-10-01T12:00:00.000Z", estado: "Pendiente",
-                cliente: { nombre: "Camila Rojas", correo: "cliente@gmail.com" },
+                cliente: { nombre: "Camila Rojas", correo: "camila@gmail.com" },
                 productos: [{ codigo: "CL001", nombre: "Cilindro 5 kg", cantidad: 1, subtotal: 10000 }],
                 total: 10000
             },
@@ -123,7 +123,7 @@ describe("Perfil: página", () => {
         });
 
         expect(contenedor.querySelector(".mensaje-exito").textContent).toBe("Tus datos quedaron guardados.");
-        expect(buscarUsuario("cliente@gmail.com").nombre).toBe("Camila Rojas Díaz");
+        expect(buscarUsuario("camila@gmail.com").nombre).toBe("Camila Rojas Díaz");
         expect(JSON.parse(localStorage.getItem("usuarioActivo")).nombre).toBe("Camila Rojas Díaz");
     });
 

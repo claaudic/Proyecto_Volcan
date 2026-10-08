@@ -1,5 +1,8 @@
 # Tienda Gas El Volcán
 
+> **EP2 (React):** la versión actual del sitio está en la carpeta [`tienda-react/`](tienda-react/README.md), con sus instrucciones, cuentas y tarjetas de prueba.
+> Este documento describe el sitio en HTML de la **EP1**, que se conserva como referencia.
+
 Tienda online para la **Distribuidora de Gas El Volcán**, empresa familiar de Chillán, Región de Ñuble, dedicada a la distribución de gas licuado a domicilio desde 1998.
 
 Los clientes pueden revisar el catálogo, consultar la cobertura de despacho por comuna, armar su pedido y seguir su historial desde su perfil. La empresa cuenta con paneles internos para administración, despacho y reparto.

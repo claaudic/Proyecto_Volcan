@@ -2884,7 +2884,7 @@ a:focus-visible,
     align-items: center;
     justify-content: center;
     margin-bottom: 1.25rem;
-    background: var(--color-principal);
+    background: var(--verde);
     color: #ffffff;
     font-size: 1.8rem;
     font-weight: 700;
@@ -2892,6 +2892,9 @@ a:focus-visible,
 
 .compra-exitosa h1 {
     margin-bottom: 0.5rem;
+    color: var(--tinta);
+    font-weight: 800;
+    letter-spacing: -0.03em;
 }
 
 .compra-exitosa-numero {
@@ -2949,7 +2952,7 @@ a:focus-visible,
     align-items: center;
     justify-content: center;
     margin-bottom: 1.25rem;
-    background: #dc3545;
+    background: var(--accion);
     color: #ffffff;
     font-size: 1.8rem;
     font-weight: 700;
@@ -2957,6 +2960,9 @@ a:focus-visible,
 
 .pago-rechazado h1 {
     margin-bottom: 0.5rem;
+    color: var(--tinta);
+    font-weight: 800;
+    letter-spacing: -0.03em;
 }
 
 .pago-rechazado-mensaje {

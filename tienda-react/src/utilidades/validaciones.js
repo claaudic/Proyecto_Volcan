@@ -141,3 +141,33 @@ export function validarTelefono(valor) {
 
   return "";
 }
+
+// Direccion de despacho: calle y numero. Debe tener al menos una letra
+// y un numero, entre 5 y 300 caracteres ("Libertad 123" si, "abcde" no).
+// No comprueba que la calle exista: eso necesitaria una API de direcciones.
+export function validarDireccion(valor) {
+  const texto = valor.trim();
+
+  if (texto === "") {
+    return "Ingresa tu dirección de despacho.";
+  }
+
+  if (texto.length > 300) {
+    return "No puede superar los 300 caracteres.";
+  }
+
+  if (texto.length < 5 || !/[A-Za-zÁÉÍÓÚÑáéíóúñ]/.test(texto) || !/\d/.test(texto)) {
+    return "Escribe la calle y el número, por ejemplo: Libertad 123.";
+  }
+
+  return "";
+}
+
+// Telefono obligatorio (en el checkout, para coordinar el despacho)
+export function validarTelefonoObligatorio(valor) {
+  if (valor.trim() === "") {
+    return "Ingresa un teléfono de contacto.";
+  }
+
+  return validarTelefono(valor);
+}

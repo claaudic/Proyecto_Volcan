@@ -27,7 +27,8 @@ function ProveedorSesion({ children }) {
 
     // Se guarda solo lo necesario, nunca la contrasena
     setUsuario({ nombre: cuenta.nombre, correo: cuenta.correo, rol: cuenta.rol });
-    return { ok: true, mensaje: "" };
+    // El rol se devuelve para que el login sepa a que panel llevar
+    return { ok: true, mensaje: "", rol: cuenta.rol };
   }
 
   function cerrarSesion() {

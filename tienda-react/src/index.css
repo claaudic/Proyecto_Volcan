@@ -21,3 +21,13 @@
   font-size: 1.375rem;
   font-weight: 700;
 }
+
+/* La insignia del rol en el navbar tambien es enlace al panel */
+a.rol-insignia {
+  text-decoration: none;
+}
+
+a.rol-insignia:hover {
+  color: var(--blanco);
+  background-color: rgba(255, 255, 255, 0.26);
+}

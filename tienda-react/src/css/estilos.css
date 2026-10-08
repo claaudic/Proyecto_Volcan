@@ -523,9 +523,8 @@ a:focus-visible,
     height: 300px;
     top: -140px;
     left: 6%;
-    background-color: var(--verde);
+    background: radial-gradient(circle closest-side, var(--verde), transparent);
     opacity: 0.16;
-    filter: blur(60px);
 }
 
 .luz-encabezado-celeste {
@@ -533,9 +532,8 @@ a:focus-visible,
     height: 340px;
     right: 8%;
     bottom: -170px;
-    background-color: var(--celeste);
+    background: radial-gradient(circle closest-side, var(--celeste), transparent);
     opacity: 0.2;
-    filter: blur(60px);
 }
 
 .encabezado-arco {
@@ -544,9 +542,7 @@ a:focus-visible,
     right: -4%;
     width: min(34vw, 420px);
     aspect-ratio: 1 / 0.9;
-    background: linear-gradient(140deg, rgba(14, 159, 110, 0.16), rgba(56, 189, 248, 0.22));
-    border-radius: 46% 54% 40% 60% / 50% 42% 58% 50%;
-    filter: blur(45px);
+    background: radial-gradient(ellipse closest-side, rgba(56, 189, 248, 0.22), rgba(14, 159, 110, 0.1) 55%, transparent);
 }
 
 .encabezado-monte {

@@ -201,3 +201,15 @@ export function nombreDeRol(rol) {
 
   return nombres[rol] || "Cliente";
 }
+
+// Panel de trabajo de cada rol. Los clientes no tienen panel: siguen en la tienda.
+// Cuando existan los paneles de la despachadora y del repartidor,
+// se agregan aqui sus rutas y el login los llevara solos.
+export const PANELES = {
+  ADMINISTRADOR: "/admin"
+};
+
+// Devuelve la ruta del panel del rol, o null si no tiene
+export function panelDeRol(rol) {
+  return PANELES[rol] || null;
+}

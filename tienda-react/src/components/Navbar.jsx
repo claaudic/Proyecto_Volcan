@@ -2,7 +2,7 @@ import { startTransition } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useCarrito } from '../contexto/carritoContexto'
 import { useSesion } from '../contexto/sesionContexto'
-import { iniciales, nombreDeRol } from '../datos/usuarios'
+import { iniciales, nombreDeRol, panelDeRol } from '../datos/usuarios'
 
 function Navbar() {
   const { detalle } = useCarrito()
@@ -70,8 +70,15 @@ function Navbar() {
                                         <span aria-hidden="true">{iniciales(usuario.nombre)}</span>
                                         <span className="visually-hidden">Mi perfil: {usuario.nombre}</span>
                                     </Link>
+                                    {/* Si el rol tiene panel, la insignia lleva a el */}
                                     {usuario.rol !== "CLIENTE" && (
-                                        <span className="rol-insignia">{nombreDeRol(usuario.rol)}</span>
+                                        panelDeRol(usuario.rol) ? (
+                                            <Link className="rol-insignia" to={panelDeRol(usuario.rol)} title="Ir a mi panel">
+                                                {nombreDeRol(usuario.rol)}
+                                            </Link>
+                                        ) : (
+                                            <span className="rol-insignia">{nombreDeRol(usuario.rol)}</span>
+                                        )
                                     )}
                                     <button type="button" className="btn btn-cuenta" onClick={salir}>Salir</button>
                                 </div>

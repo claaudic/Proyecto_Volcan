@@ -1,5 +1,6 @@
-import Productos from "../src/paginas/Productos";
-import { montarEnTienda, escribir, clic } from "./ayuda";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import Productos from "./Productos";
+import { montarEnTienda, escribir, clic } from "../test/ayuda";
 
 // Pruebas de RENDERIZADO, ESTADO y EVENTOS sobre el catalogo.
 

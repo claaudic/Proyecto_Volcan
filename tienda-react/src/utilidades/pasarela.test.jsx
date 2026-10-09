@@ -1,12 +1,13 @@
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { act } from "react";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
-import { montar, escribir } from "./ayuda";
-import ProveedorSesion from "../src/contexto/ProveedorSesion";
-import ProveedorCatalogo from "../src/contexto/ProveedorCatalogo";
-import ProveedorCarrito from "../src/contexto/ProveedorCarrito";
-import Checkout from "../src/paginas/Checkout";
-import PagoRechazado from "../src/paginas/PagoRechazado";
-import { leerPedidos } from "../src/datos/pedidos";
+import { montar, escribir } from "../test/ayuda";
+import ProveedorSesion from "../contexto/ProveedorSesion";
+import ProveedorCatalogo from "../contexto/ProveedorCatalogo";
+import ProveedorCarrito from "../contexto/ProveedorCarrito";
+import Checkout from "../paginas/Checkout";
+import PagoRechazado from "../paginas/PagoRechazado";
+import { leerPedidos } from "../datos/pedidos";
 import {
     pasaLuhn,
     validarNumeroTarjeta,
@@ -14,7 +15,7 @@ import {
     validarCvv,
     procesarPago,
     ultimosCuatro
-} from "../src/utilidades/pasarela";
+} from "./pasarela";
 
 // Pruebas de la pasarela de pago simulada: sus reglas
 // y el recorrido completo del checkout (aprobado y rechazado).
@@ -66,8 +67,8 @@ describe("Pasarela: checkout completo", () => {
         localStorage.removeItem("pedidos_volcan");
         localStorage.setItem("carritoVolcan", JSON.stringify([{ codigo: "CL002", cantidad: 1 }]));
 
-        // El "banco" tarda 1,2 segundos: el reloj de Jasmine adelanta el tiempo
-        jasmine.clock().install();
+        // El "banco" tarda 1,2 segundos: el reloj falso de Vitest adelanta el tiempo
+        vi.useFakeTimers();
 
         pantalla = montar(
             <MemoryRouter initialEntries={["/checkout"]}>
@@ -88,7 +89,7 @@ describe("Pasarela: checkout completo", () => {
 
     afterEach(() => {
         pantalla.desmontar();
-        jasmine.clock().uninstall();
+        vi.useRealTimers();
         ["usuarioActivo", "productosSistema", "pedidos_volcan", "carritoVolcan"]
             .forEach((clave) => localStorage.removeItem(clave));
     });
@@ -128,7 +129,7 @@ describe("Pasarela: checkout completo", () => {
 
     it("con una tarjeta aprobada crea el pedido y guarda solo los últimos 4 dígitos", () => {
         pagarCon("4111 1111 1111 1111");
-        act(() => { jasmine.clock().tick(1200); });
+        act(() => { vi.advanceTimersByTime(1200); });
 
         expect(pantalla.textContent).toContain("Compra exitosa");
 
@@ -140,7 +141,7 @@ describe("Pasarela: checkout completo", () => {
 
     it("con una tarjeta rechazada muestra el motivo y no crea pedido", () => {
         pagarCon("4000 0000 0000 9995");
-        act(() => { jasmine.clock().tick(1200); });
+        act(() => { vi.advanceTimersByTime(1200); });
 
         expect(pantalla.textContent).toContain("Pago rechazado");
         expect(pantalla.textContent).toContain("Fondos insuficientes.");

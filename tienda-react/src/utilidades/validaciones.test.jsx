@@ -1,9 +1,10 @@
+import { describe, it, expect } from "vitest";
     import {
         validarCorreo,
         validarDireccion,
         validarTelefonoObligatorio,
         runValido
-    } from "../src/utilidades/validaciones";
+    } from "./validaciones";
 
     describe("validarCorreo", () => {
 
@@ -51,19 +52,19 @@
     describe("runValido", () => {
 
         it("acepta un RUN válido", () => {
-            expect(runValido("190110222")).toBeTrue();
+            expect(runValido("190110222")).toBe(true);
         });
 
         it("rechaza un RUN con dígito verificador incorrecto", () => {
-            expect(runValido("190110221")).toBeFalse();
+            expect(runValido("190110221")).toBe(false);
         });
 
         it("acepta K como dígito verificador", () => {
-            expect(runValido("1000005K")).toBeTrue();
+            expect(runValido("1000005K")).toBe(true);
         });
 
         it("rechaza RUN con puntos o guion", () => {
-            expect(runValido("19.011.022-2")).toBeFalse();
+            expect(runValido("19.011.022-2")).toBe(false);
         });
 
     });

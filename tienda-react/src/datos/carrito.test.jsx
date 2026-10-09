@@ -1,3 +1,4 @@
+import { describe, it, expect, vi } from "vitest";
 import {
     agregarItem,
     cambiarCantidadItem,
@@ -6,7 +7,7 @@ import {
     guardarCarrito,
     leerCarrito,
     CLAVE_CARRITO
-} from "../src/datos/carrito";
+} from "./carrito";
 
 // Pruebas de la LOGICA del carrito (el CRUD) y de su PERSISTENCIA.
 // Datos reales del catalogo: CL002 = Cilindro 11 kg, $12.000, stock 200.
@@ -95,8 +96,8 @@ describe("Carrito: operaciones", () => {
 describe("Carrito: persistencia con mocks", () => {
 
     it("guarda el carrito en localStorage como texto JSON", () => {
-        // spyOn reemplaza setItem por un espia: registra la llamada pero no guarda nada
-        spyOn(Storage.prototype, "setItem");
+        // vi.spyOn reemplaza setItem por un espia: registra la llamada pero no guarda nada
+        vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {});
 
         guardarCarrito([{ codigo: "CL002", cantidad: 2 }]);
 
@@ -108,7 +109,7 @@ describe("Carrito: persistencia con mocks", () => {
 
     it("parte vacío si lo guardado está dañado", () => {
         // El falso getItem devuelve un texto que no es JSON valido
-        spyOn(Storage.prototype, "getItem").and.returnValue("esto no es json");
+        vi.spyOn(Storage.prototype, "getItem").mockReturnValue("esto no es json");
 
         expect(leerCarrito()).toEqual([]);
     });

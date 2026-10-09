@@ -1,15 +1,16 @@
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { act } from "react";
 import { MemoryRouter } from "react-router-dom";
-import { montar, montarEnRuta, escribir } from "./ayuda";
-import App from "../src/App";
-import ProveedorSesion from "../src/contexto/ProveedorSesion";
-import ProveedorCatalogo from "../src/contexto/ProveedorCatalogo";
-import ProveedorCarrito from "../src/contexto/ProveedorCarrito";
-import Inicio from "../src/paginas/Inicio";
-import DetalleProducto from "../src/paginas/DetalleProducto";
-import Registro from "../src/paginas/Registro";
-import Navbar from "../src/components/Navbar";
-import { buscarCuenta } from "../src/datos/usuarios";
+import { montar, montarEnRuta, escribir } from "../test/ayuda";
+import App from "../App";
+import ProveedorSesion from "../contexto/ProveedorSesion";
+import ProveedorCatalogo from "../contexto/ProveedorCatalogo";
+import ProveedorCarrito from "../contexto/ProveedorCarrito";
+import Inicio from "./Inicio";
+import DetalleProducto from "./DetalleProducto";
+import Registro from "./Registro";
+import Navbar from "../components/Navbar";
+import { buscarCuenta } from "../datos/usuarios";
 
 // Pruebas de las paginas de la tienda que no tenian pruebas:
 // Inicio, Detalle del producto, Registro y la barra de navegacion.

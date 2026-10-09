@@ -1,3 +1,4 @@
+import { describe, it, expect, vi } from "vitest";
 import {
     crearProducto,
     editarProducto,
@@ -6,8 +7,8 @@ import {
     descontarStock,
     productosActivos,
     leerCatalogo
-} from "../src/datos/catalogo";
-import { imagenDe, PRODUCTOS } from "../src/datos/productos";
+} from "./catalogo";
+import { imagenDe, PRODUCTOS } from "./productos";
 
 // Pruebas del CRUD del catalogo: lo que va a usar el panel de administracion.
 // Se trabaja sobre una lista chica de ejemplo, para que cada caso sea claro.
@@ -89,7 +90,7 @@ describe("Catálogo: imágenes", () => {
 describe("Catálogo: persistencia con mocks", () => {
 
     it("parte desde el catálogo inicial si lo guardado está dañado", () => {
-        spyOn(Storage.prototype, "getItem").and.returnValue("{ dañado");
+        vi.spyOn(Storage.prototype, "getItem").mockReturnValue("{ dañado");
 
         expect(leerCatalogo()).toBe(PRODUCTOS);
     });

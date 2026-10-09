@@ -5,7 +5,7 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist', 'cobertura']),
+  globalIgnores(['dist', 'coverage']),
   {
     files: ['**/*.{js,jsx}'],
     extends: [
@@ -19,10 +19,8 @@ export default defineConfig([
     },
   },
   {
-    // En la carpeta de pruebas existen describe, it y expect, que los aporta Jasmine
-    files: ['pruebas/**/*.{js,jsx}'],
-    languageOptions: {
-      globals: { ...globals.browser, ...globals.jasmine },
-    },
+    // Las pruebas y su ayuda exportan funciones que no son componentes
+    files: ['src/**/*.test.{js,jsx}', 'src/test/**/*.{js,jsx}'],
+    rules: { 'react-refresh/only-export-components': 'off' },
   },
 ])

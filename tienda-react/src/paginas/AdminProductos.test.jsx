@@ -1,13 +1,14 @@
+import { describe, it, expect } from "vitest";
 import { act } from "react";
 import { MemoryRouter } from "react-router-dom";
 
-import AdminProductos from "../src/paginas/AdminProductos";
-import ProveedorCatalogo from "../src/contexto/ProveedorCatalogo";
-import ProveedorSesion from "../src/contexto/ProveedorSesion";
-import { CLAVE_CATALOGO } from "../src/datos/catalogo";
-import { CLAVE_SESION } from "../src/datos/usuarios";
-import { imagenDe } from "../src/datos/productos";
-import { clic, escribir, montar } from "./ayuda";
+import AdminProductos from "./AdminProductos";
+import ProveedorCatalogo from "../contexto/ProveedorCatalogo";
+import ProveedorSesion from "../contexto/ProveedorSesion";
+import { CLAVE_CATALOGO } from "../datos/catalogo";
+import { CLAVE_SESION } from "../datos/usuarios";
+import { imagenDe } from "../datos/productos";
+import { clic, escribir, montar } from "../test/ayuda";
 
 function seleccionar(campo, valor) {
     const asignar = Object.getOwnPropertyDescriptor(

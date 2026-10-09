@@ -1,9 +1,10 @@
+import { describe, it, expect, afterEach } from "vitest";
 import { act } from "react";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
-import { montar, escribir } from "./ayuda";
-import ProveedorSesion from "../src/contexto/ProveedorSesion";
-import Login from "../src/paginas/Login";
-import { panelDeRol } from "../src/datos/usuarios";
+import { montar, escribir } from "../test/ayuda";
+import ProveedorSesion from "../contexto/ProveedorSesion";
+import Login from "./Login";
+import { panelDeRol } from "../datos/usuarios";
 
 // Pruebas del login: a donde lleva a cada rol despues de entrar.
 

@@ -1,6 +1,7 @@
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { MemoryRouter } from "react-router-dom";
-import CompraExitosa from "../src/paginas/CompraExitosa";
-import { montar } from "./ayuda";
+import CompraExitosa from "./CompraExitosa";
+import { montar } from "../test/ayuda";
 
 describe("CompraExitosa", () => {
 

@@ -4,9 +4,9 @@
 import { createRoot } from "react-dom/client";
 import { act } from "react";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
-import ProveedorCarrito from "../src/contexto/ProveedorCarrito";
-import ProveedorCatalogo from "../src/contexto/ProveedorCatalogo";
-import ProveedorSesion from "../src/contexto/ProveedorSesion";
+import ProveedorCarrito from "../contexto/ProveedorCarrito";
+import ProveedorCatalogo from "../contexto/ProveedorCatalogo";
+import ProveedorSesion from "../contexto/ProveedorSesion";
 
 // Le avisa a React que estamos en un entorno de pruebas.
 // Sin esto, act() funciona igual pero imprime una advertencia.

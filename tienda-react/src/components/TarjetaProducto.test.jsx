@@ -1,5 +1,6 @@
-import TarjetaProducto from "../src/components/TarjetaProducto";
-import { montarConRouter, clic } from "./ayuda";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import TarjetaProducto from "./TarjetaProducto";
+import { montarConRouter, clic } from "../test/ayuda";
 
 // Pruebas de PROPIEDADES: la tarjeta debe mostrar los datos que recibe.
 
@@ -41,7 +42,7 @@ describe("TarjetaProducto", () => {
 describe("TarjetaProducto con el botón Añadir", () => {
 
     it("llama a la función que recibe al hacer clic en Añadir", () => {
-        const alAnadir = jasmine.createSpy("alAnadir").and.returnValue({ ok: true });
+        const alAnadir = vi.fn().mockReturnValue({ ok: true });
 
         const pantalla = montarConRouter(
             <TarjetaProducto

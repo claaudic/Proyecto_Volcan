@@ -1,6 +1,7 @@
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { act } from "react";
-import Nosotros from "../src/paginas/Nosotros";
-import { montarConRouter, escribir } from "./ayuda";
+import Nosotros from "./Nosotros";
+import { montarConRouter, escribir } from "../test/ayuda";
 
 // Pruebas del buscador de cobertura de Nosotros:
 // escribe una comuna, aprieta "Revisar" y revisa el resultado.

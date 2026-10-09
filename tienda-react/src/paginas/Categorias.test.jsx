@@ -1,11 +1,12 @@
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
-import { montar } from "./ayuda";
-import ProveedorCatalogo from "../src/contexto/ProveedorCatalogo";
-import ProveedorCarrito from "../src/contexto/ProveedorCarrito";
-import Categorias from "../src/paginas/Categorias";
-import { slugCategoria, agruparPorCategoria } from "../src/datos/categorias";
-import { PRODUCTOS } from "../src/datos/productos";
-import { leerVistos, registrarVisto } from "../src/datos/vistos";
+import { montar } from "../test/ayuda";
+import ProveedorCatalogo from "../contexto/ProveedorCatalogo";
+import ProveedorCarrito from "../contexto/ProveedorCarrito";
+import Categorias from "./Categorias";
+import { slugCategoria, agruparPorCategoria } from "../datos/categorias";
+import { PRODUCTOS } from "../datos/productos";
+import { leerVistos, registrarVisto } from "../datos/vistos";
 
 // Pruebas de la vista Categorias: las funciones que agrupan
 // y las dos vistas (portada y una categoria).

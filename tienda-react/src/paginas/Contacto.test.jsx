@@ -1,5 +1,6 @@
-import Contacto from "../src/paginas/Contacto";
-import { montarConRouter, clic } from "./ayuda";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import Contacto from "./Contacto";
+import { montarConRouter, clic } from "../test/ayuda";
 
 // Pruebas de RENDERIZADO CONDICIONAL: los mensajes de error
 // solo deben aparecer cuando de verdad hay un error.

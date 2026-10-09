@@ -1,7 +1,8 @@
-import { montarEnRuta, clic } from "./ayuda";
-import AdminDashboard from "../src/paginas/AdminDashboard";
-import AdminProductos from "../src/paginas/AdminProductos";
-import AdminUsuarios from "../src/paginas/AdminUsuarios";
+import { describe, it, expect, afterEach } from "vitest";
+import { montarEnRuta, clic } from "../test/ayuda";
+import AdminDashboard from "./AdminDashboard";
+import AdminProductos from "./AdminProductos";
+import AdminUsuarios from "./AdminUsuarios";
 
 // Pruebas del panel de administracion: quien puede entrar
 // y que cada vista muestre los datos del sistema.

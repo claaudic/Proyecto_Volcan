@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach } from "vitest";
 import {
     leerUsuarios,
     buscarUsuario,
@@ -5,7 +6,7 @@ import {
     actualizarUsuarioAdmin,
     cambiarEstadoUsuario,
     eliminarCuenta
-} from '../src/datos/usuarios'
+} from './usuarios'
 
 describe('Datos de usuarios', () => {
 
@@ -41,7 +42,7 @@ describe('Datos de usuarios', () => {
             rol: 'CLIENTE'
         })
 
-        expect(resultado.ok).toBeTrue()
+        expect(resultado.ok).toBe(true)
 
         const usuario = buscarUsuario(
             'juan@gmail.com'
@@ -51,7 +52,7 @@ describe('Datos de usuarios', () => {
         expect(usuario.nombre).toBe('Juan Pérez')
         expect(usuario.apellidos).toBeUndefined()
         expect(usuario.rol).toBe('CLIENTE')
-        expect(usuario.activo).toBeTrue()
+        expect(usuario.activo).toBe(true)
     })
 
     it('no debe permitir correos repetidos', () => {
@@ -81,7 +82,7 @@ describe('Datos de usuarios', () => {
             rol: 'REPARTIDOR'
         })
 
-        expect(resultado.ok).toBeFalse()
+        expect(resultado.ok).toBe(false)
 
         expect(resultado.mensaje).toBe(
             'Ya existe un usuario con ese correo.'
@@ -117,7 +118,7 @@ describe('Datos de usuarios', () => {
             }
         )
 
-        expect(resultado.ok).toBeTrue()
+        expect(resultado.ok).toBe(true)
 
         const usuario = buscarUsuario(
             'juan@gmail.com'
@@ -165,7 +166,7 @@ describe('Datos de usuarios', () => {
             }
         )
 
-        expect(resultado.ok).toBeTrue()
+        expect(resultado.ok).toBe(true)
 
         const usuarioAnterior = buscarUsuario(
             'juan@gmail.com'
@@ -224,7 +225,7 @@ describe('Datos de usuarios', () => {
             }
         )
 
-        expect(resultado.ok).toBeFalse()
+        expect(resultado.ok).toBe(false)
 
         expect(resultado.mensaje).toBe(
             'Ya existe un usuario con ese correo.'
@@ -253,7 +254,7 @@ describe('Datos de usuarios', () => {
             'juan@gmail.com'
         )
 
-        expect(usuario.activo).toBeFalse()
+        expect(usuario.activo).toBe(false)
     })
 
     it('debe volver a activar un usuario', () => {
@@ -282,7 +283,7 @@ describe('Datos de usuarios', () => {
             'juan@gmail.com'
         )
 
-        expect(usuario.activo).toBeTrue()
+        expect(usuario.activo).toBe(true)
     })
 
     it('debe eliminar un usuario', () => {

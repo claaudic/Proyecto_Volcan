@@ -1,10 +1,11 @@
+import { describe, it, expect, afterEach } from "vitest";
 import {
     validarCorreoCliente,
     validarRepeticion,
     validarTelefono
-} from "../src/utilidades/validaciones";
-import { buscarZona } from "../src/datos/zonas";
-import { registrarCliente, correoRegistrado, buscarCuenta } from "../src/datos/usuarios";
+} from "../utilidades/validaciones";
+import { buscarZona } from "../datos/zonas";
+import { registrarCliente, correoRegistrado, buscarCuenta } from "../datos/usuarios";
 
 // Pruebas del registro de clientes: sus reglas de validacion,
 // el aviso de cobertura y que la cuenta nueva quede guardada.

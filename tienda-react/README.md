@@ -16,7 +16,7 @@ Los clientes revisan el catálogo, consultan si hay reparto en su comuna, compra
 | Estilos | Bootstrap 5.3.8 · CSS propio · tipografía Figtree |
 | Estado compartido | Context de React (carrito, sesión y catálogo) |
 | Persistencia | `localStorage` del navegador |
-| Pruebas | Jasmine + Karma (Chrome sin ventana) · cobertura con karma-coverage |
+| Pruebas | Vitest + Testing Library · jsdom (navegador simulado) · cobertura con @vitest/coverage-v8 |
 
 ---
 
@@ -35,7 +35,9 @@ Para cerrar el servidor: **Ctrl + C** en la terminal.
 | Comando | Qué hace |
 |---|---|
 | `npm run dev` | Inicia el sitio en modo desarrollo |
-| `npm test` | Ejecuta las pruebas y muestra la cobertura |
+| `npm test` | Ejecuta las pruebas y queda atento: las repite al guardar un archivo |
+| `npm run test:run` | Ejecuta las pruebas una vez |
+| `npm run test:coverage` | Ejecuta las pruebas y muestra la cobertura |
 | `npm run lint` | Revisa el código con ESLint |
 | `npm run build` | Genera la versión final en `dist/` |
 
@@ -111,9 +113,8 @@ Reglas de validación:
 ```
 tienda-react/
 ├── index.html           Página base: carga la tipografía y monta React
-├── karma.conf.cjs       Configuración de las pruebas
+├── vite.config.js       Configuración de Vite y de las pruebas (Vitest)
 ├── public/img/          Imágenes del sitio
-├── pruebas/             Pruebas con Jasmine (*.prueba.jsx)
 └── src/
     ├── main.jsx         Punto de entrada: router y proveedores de Context
     ├── App.jsx          Navbar, rutas y footer
@@ -122,6 +123,7 @@ tienda-react/
     ├── datos/           Fuente de datos simulada y funciones CRUD
     ├── paginas/         Una vista por ruta
     ├── utilidades/      Validaciones, pasarela de pago y ayudas
+    ├── test/            Configuración y ayudas de las pruebas
     └── css/             Estilos del sitio
 ```
 
@@ -130,12 +132,16 @@ tienda-react/
 ## Pruebas
 
 ```bash
-npm test
+npm run test:run        # una vez
+npm test                # queda atento y repite al guardar (Ctrl + C para salir)
+npm run test:coverage   # con cobertura
 ```
 
-Hay **72 pruebas** en `pruebas/`: renderizado, props, estado, eventos, las funciones CRUD de los datos, las validaciones de los formularios y el recorrido completo de la compra (pago aprobado y rechazado).
+Las pruebas usan **Vitest** y corren en **jsdom**, un navegador simulado: no abren un navegador real. Cada archivo de prueba está junto al código que prueba, con el nombre `*.test.jsx` (por ejemplo `src/utilidades/pasarela.test.jsx`). `src/test/setup.js` limpia `localStorage` antes y después de cada prueba para que no se afecten entre sí.
 
-Al terminar, Karma muestra el resumen de cobertura y genera el informe detallado en `cobertura/html/index.html`. El informe mide los archivos que las pruebas cargan.
+Hay **107 pruebas en 18 archivos**: renderizado, props, estado, eventos, las funciones CRUD de los datos, las validaciones de los formularios, el panel de administración y el recorrido completo de la compra (pago aprobado y rechazado).
+
+`npm run test:coverage` muestra la tabla en la terminal y genera el informe detallado en `coverage/index.html`. Se mide todo `src/`, excepto `main.jsx`, la configuración de pruebas y las pruebas mismas.
 
 ---
 

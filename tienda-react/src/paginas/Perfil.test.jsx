@@ -1,15 +1,16 @@
+import { describe, it, expect, afterEach } from "vitest";
 import { MemoryRouter } from "react-router-dom";
-import { montar, escribir } from "./ayuda";
+import { montar, escribir } from "../test/ayuda";
 import { act } from "react";
-import ProveedorSesion from "../src/contexto/ProveedorSesion";
-import Perfil from "../src/paginas/Perfil";
+import ProveedorSesion from "../contexto/ProveedorSesion";
+import Perfil from "./Perfil";
 import {
     actualizarCuenta,
     eliminarCuenta,
     buscarUsuario,
     buscarCuenta,
     registrarCliente
-} from "../src/datos/usuarios";
+} from "../datos/usuarios";
 
 // Pruebas del perfil: editar y eliminar la cuenta,
 // y que cada cliente vea solo sus propios pedidos.

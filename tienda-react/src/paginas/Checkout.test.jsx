@@ -1,9 +1,10 @@
-import Checkout from "../src/paginas/Checkout";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import Checkout from "./Checkout";
 import { MemoryRouter } from "react-router-dom";
-import { montarEnTienda, montar, clic } from "./ayuda";
-import ProveedorSesion from "../src/contexto/ProveedorSesion";
-import ProveedorCatalogo from "../src/contexto/ProveedorCatalogo";
-import ProveedorCarrito from "../src/contexto/ProveedorCarrito";
+import { montarEnTienda, montar, clic } from "../test/ayuda";
+import ProveedorSesion from "../contexto/ProveedorSesion";
+import ProveedorCatalogo from "../contexto/ProveedorCatalogo";
+import ProveedorCarrito from "../contexto/ProveedorCarrito";
 
 describe("Checkout", () => {
 

@@ -86,7 +86,7 @@ Inicio · Productos · Detalle del producto · Nosotros · Blogs y sus tres art�
 
 **Pendientes**
 
-- `registro.html` — alta de cliente
+- No hay vistas pendientes en la versión HTML conservada como referencia.
 
 ---
 

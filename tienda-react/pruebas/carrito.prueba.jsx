@@ -69,6 +69,24 @@ describe("Carrito: operaciones", () => {
         expect(detalle.unidades).toBe(3);
     });
 
+    it("agrega la imagen del catálogo al detalle sin guardarla en el carrito", () => {
+        const catalogo = [
+            {
+                codigo: "PR999",
+                nombre: "Producto nuevo",
+                imagen: "img/producto-nuevo.jpg",
+                precioResidencial: 1000,
+                stock: 4
+            }
+        ];
+
+        const detalle = detalleDelCarrito([
+            { codigo: "PR999", cantidad: 1 }
+        ], catalogo);
+
+        expect(detalle.lineas[0].imagen).toBe("img/producto-nuevo.jpg");
+    });
+
 });
 
 // Pruebas con MOCKS: reemplazan localStorage por una version falsa,

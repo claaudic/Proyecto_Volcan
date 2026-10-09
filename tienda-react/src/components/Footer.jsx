@@ -1,4 +1,6 @@
- function Footer(){
+import { Link } from 'react-router-dom'
+
+function Footer(){
     return(
          <footer>
         <div className="container pie-grid">
@@ -13,21 +15,21 @@
             <div>
                 <h2>Navegación</h2>
                 <ul className="footer-enlaces">
-                    <li><a href="index.html">Inicio</a></li>
-                    <li><a href="productos.html">Productos</a></li>
-                    <li><a href="nosotros.html">Nosotros</a></li>
-                    <li><a href="blogs.html">Blogs</a></li>
-                    <li><a href="contacto.html">Contacto</a></li>
+                    <li><Link to="/">Inicio</Link></li>
+                    <li><Link to="/productos">Productos</Link></li>
+                    <li><Link to="/nosotros">Nosotros</Link></li>
+                    <li><Link to="/blogs">Blogs</Link></li>
+                    <li><Link to="/contacto">Contacto</Link></li>
                 </ul>
             </div>
 
             <div>
                 <h2>Productos</h2>
                 <ul className="footer-enlaces">
-                    <li><a href="productos.html">Cilindros de Gas</a></li>
-                    <li><a href="productos.html">Reguladores</a></li>
-                    <li><a href="productos.html">Mangueras y Conexiones</a></li>
-                    <li><a href="productos.html">Accesorios</a></li>
+                    <li><Link to="/categorias/cilindros-de-gas">Cilindros de Gas</Link></li>
+                    <li><Link to="/categorias/reguladores">Reguladores</Link></li>
+                    <li><Link to="/categorias/mangueras-y-conexiones">Mangueras y Conexiones</Link></li>
+                    <li><Link to="/categorias/accesorios">Accesorios</Link></li>
                 </ul>
             </div>
 
@@ -72,4 +74,4 @@
   );
  }
 
- export default Footer;
+export default Footer;

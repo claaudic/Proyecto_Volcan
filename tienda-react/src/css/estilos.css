@@ -2588,6 +2588,114 @@ a:focus-visible,
     overflow: hidden;
 }
 
+.admin-producto-modal.panel-seccion {
+    margin-bottom: 0;
+    overflow: hidden;
+    background-color: var(--blanco);
+    border: 1px solid rgba(14, 159, 110, 0.28);
+    border-radius: 16px;
+    box-shadow: 0 24px 70px rgba(18, 48, 58, 0.28);
+}
+
+.admin-producto-modal .panel-titulo {
+    align-items: center;
+    margin-bottom: 0;
+    padding: 1.35rem 1.6rem;
+    background:
+        radial-gradient(circle at 0 0, rgba(56, 189, 248, 0.18), transparent 34%),
+        linear-gradient(115deg, rgba(14, 159, 110, 0.12), rgba(239, 246, 247, 0.72));
+    border-bottom: 1px solid var(--gris-borde);
+}
+
+.admin-producto-modal .panel-etiqueta {
+    margin-bottom: 0.25rem;
+}
+
+.admin-producto-modal .panel-titulo h2 {
+    font-size: 1.65rem;
+}
+
+.admin-producto-modal .btn-close {
+    flex-shrink: 0;
+    width: 2.25rem;
+    height: 2.25rem;
+    margin-left: 1rem;
+    background-color: var(--blanco);
+    border: 1px solid var(--gris-borde);
+    border-radius: 50%;
+    opacity: 0.85;
+}
+
+.admin-producto-modal .btn-close:hover {
+    opacity: 1;
+    box-shadow: var(--sombra);
+}
+
+.admin-producto-form {
+    min-height: 0;
+    background-color: rgba(239, 246, 247, 0.35);
+}
+
+.admin-producto-campos {
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 1.5rem 1.6rem 1.6rem;
+    overflow-y: auto;
+}
+
+.admin-producto-form .form-label {
+    margin-bottom: 0.4rem;
+    color: var(--tinta);
+    font-size: 0.875rem;
+    font-weight: 700;
+}
+
+.admin-producto-form .form-control,
+.admin-producto-form .form-select {
+    min-height: 46px;
+    color: var(--tinta);
+    background-color: var(--blanco);
+    border: 1px solid var(--gris-borde);
+    border-radius: var(--radio);
+    box-shadow: 0 1px 0 rgba(18, 48, 58, 0.02);
+}
+
+.admin-producto-form textarea.form-control {
+    min-height: 104px;
+}
+
+.admin-producto-form .form-control:focus,
+.admin-producto-form .form-select:focus {
+    border-color: var(--verde);
+    box-shadow: 0 0 0 3px rgba(14, 159, 110, 0.14);
+}
+
+.admin-producto-footer {
+    flex: 0 0 auto;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    padding: 1rem 1.6rem;
+    background-color: var(--blanco);
+    border-top: 1px solid var(--gris-borde);
+}
+
+@media (max-width: 768px) {
+    .admin-producto-modal .panel-titulo,
+    .admin-producto-campos,
+    .admin-producto-footer {
+        padding-right: 1rem;
+        padding-left: 1rem;
+    }
+
+    .admin-producto-footer {
+        flex-direction: column-reverse;
+    }
+
+    .admin-producto-footer .btn {
+        width: 100%;
+    }
+}
+
 .hero-carrusel {
     overflow: hidden;
     border-radius: var(--radio);

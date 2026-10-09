@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useSesion } from '../contexto/sesionContexto'
 import { useCarrito } from '../contexto/carritoContexto'
 import { crearPedido } from '../datos/pedidos'
-import { formatearPrecio, imagenDe } from '../datos/productos'
+import { formatearPrecio, imagenDe, IMAGEN_RESPALDO } from '../datos/productos'
 import { buscarUsuario } from '../datos/usuarios'
 import { normalizar } from '../datos/zonas'
 import {
@@ -79,6 +79,14 @@ function Checkout() {
             ...anteriores,
             [name]: ''
         }))
+    }
+
+    function usarImagenRespaldo(evento) {
+        if (evento.currentTarget.src.endsWith(IMAGEN_RESPALDO)) {
+            return
+        }
+
+        evento.currentTarget.src = IMAGEN_RESPALDO
     }
 
     function validarFormulario() {
@@ -354,7 +362,7 @@ function Checkout() {
                                     <ul className="checkout-lineas list-unstyled">
                                         {detalle.lineas.map((linea) => (
                                             <li key={linea.codigo} className="checkout-linea">
-                                                <img src={imagenDe(linea.codigo)} alt="" />
+                                                <img src={imagenDe(linea)} alt="" onError={usarImagenRespaldo} />
                                                 <div>
                                                     <strong>{linea.nombre}</strong>
                                                     <span>{linea.cantidad} × {formatearPrecio(linea.precio)}</span>

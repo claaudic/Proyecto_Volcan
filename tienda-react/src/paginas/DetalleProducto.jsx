@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import TarjetaProducto from '../components/TarjetaProducto'
 import EtiquetaStock from '../components/EtiquetaStock'
-import { formatearPrecio, imagenDe } from '../datos/productos'
+import { formatearPrecio, imagenDe, IMAGEN_RESPALDO } from '../datos/productos'
 import { useCatalogo } from '../contexto/catalogoContexto'
 import { useCarrito } from '../contexto/carritoContexto'
 import { abrirPanelCarrito } from '../utilidades/panelCarrito'
@@ -86,6 +86,14 @@ function FichaProducto({ codigo }) {
     }
   }
 
+  function usarImagenRespaldo(evento) {
+    if (evento.currentTarget.src.endsWith(IMAGEN_RESPALDO)) {
+      return
+    }
+
+    evento.currentTarget.src = IMAGEN_RESPALDO
+  }
+
   const relacionados = activos
     .filter((p) => p.categoria === producto.categoria && p.codigo !== producto.codigo)
     .slice(0, 4)
@@ -104,7 +112,7 @@ function FichaProducto({ codigo }) {
 
           <div className="detalle-grid">
             <figure className="detalle-imagen">
-              <img src={imagenDe(producto.codigo)} alt={producto.nombre} />
+              <img src={imagenDe(producto)} alt={producto.nombre} onError={usarImagenRespaldo} />
             </figure>
 
             <div className="detalle-datos">
@@ -201,7 +209,7 @@ function FichaProducto({ codigo }) {
                       nombre={otro.nombre}
                       categoria={otro.categoria}
                       precio={formatearPrecio(otro.precioResidencial)}
-                      imagen={imagenDe(otro.codigo)}
+                      imagen={imagenDe(otro)}
                     />
                   </li>
                 ))}

@@ -1,4 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { renderizar } from "../test/renderizar";
 import Productos from "./Productos";
 import { montarEnTienda, escribir, clic } from "../test/ayuda";
 
@@ -56,6 +59,20 @@ describe("Productos", () => {
         clic(verTodo);
 
         expect(cantidadDeTarjetas()).toBe(14);
+    });
+
+});
+
+describe("Productos: añadir al carrito", () => {
+
+    it("el botón Añadir de una tarjeta agrega una unidad", async () => {
+        const user = userEvent.setup();
+        renderizar(<Productos />);
+
+        await user.click(screen.getAllByRole("button", { name: "Añadir" })[0]);
+
+        expect(JSON.parse(localStorage.getItem("carritoVolcan"))).toEqual([{ codigo: "CL001", cantidad: 1 }]);
+        expect(screen.getAllByRole("button", { name: "Agregado" })).toHaveLength(1);
     });
 
 });

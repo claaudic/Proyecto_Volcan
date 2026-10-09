@@ -21,6 +21,13 @@ export default defineConfig({
         'src/test/**',
         'src/**/*.test.{js,jsx}',
       ],
+      // Cada archivo debe tener al menos 80 % de lineas y sentencias
+      // cubiertas; si alguno baja, npm run test:coverage falla
+      thresholds: {
+        lines: 80,
+        statements: 80,
+        perFile: true,
+      },
     },
   },
 })

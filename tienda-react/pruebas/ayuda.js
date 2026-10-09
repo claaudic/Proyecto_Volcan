@@ -3,7 +3,7 @@
 
 import { createRoot } from "react-dom/client";
 import { act } from "react";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, Routes, Route } from "react-router-dom";
 import ProveedorCarrito from "../src/contexto/ProveedorCarrito";
 import ProveedorCatalogo from "../src/contexto/ProveedorCatalogo";
 import ProveedorSesion from "../src/contexto/ProveedorSesion";
@@ -87,4 +87,53 @@ export function escribir(campo, texto) {
 // Hace clic en un elemento.
 export function clic(elemento) {
     act(() => { elemento.click(); });
+}
+
+// Para probar una pagina en una direccion, con todos los proveedores.
+//   url:     direccion inicial, por ejemplo "/producto/CL002"
+//   rutas:   { "/producto/:codigo": <DetalleProducto /> , ... }
+//   opciones.usuario: la pagina parte con esa sesion iniciada
+//   opciones.carrito: la pagina parte con ese carrito, por ejemplo [{ codigo: "CL001", cantidad: 2 }]
+// Parte con todo limpio y lo limpia al terminar.
+const CLAVES_TIENDA = [
+    "carritoVolcan", "productosSistema", "usuarioActivo",
+    "usuariosSistema", "cuentasEliminadas", "pedidos_volcan"
+];
+
+export function montarEnRuta(url, rutas, opciones = {}) {
+    CLAVES_TIENDA.forEach((clave) => localStorage.removeItem(clave));
+
+    if (opciones.usuario) {
+        localStorage.setItem("usuarioActivo", JSON.stringify(opciones.usuario));
+    }
+
+    if (opciones.carrito) {
+        localStorage.setItem("carritoVolcan", JSON.stringify(opciones.carrito));
+    }
+
+    const contenedor = montar(
+        <MemoryRouter initialEntries={[url]}>
+            <ProveedorSesion>
+                <ProveedorCatalogo>
+                    <ProveedorCarrito>
+                        <Routes>
+                            {Object.keys(rutas).map((ruta) => (
+                                <Route key={ruta} path={ruta} element={rutas[ruta]} />
+                            ))}
+                            {/* Para saber cuando una pagina nos manda al login */}
+                            <Route path="/login" element={<p id="paginaLogin">Login</p>} />
+                        </Routes>
+                    </ProveedorCarrito>
+                </ProveedorCatalogo>
+            </ProveedorSesion>
+        </MemoryRouter>
+    );
+
+    const desmontarOriginal = contenedor.desmontar;
+    contenedor.desmontar = () => {
+        desmontarOriginal();
+        CLAVES_TIENDA.forEach((clave) => localStorage.removeItem(clave));
+    };
+
+    return contenedor;
 }

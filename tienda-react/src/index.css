@@ -148,3 +148,8 @@ a.rol-insignia:hover {
   font-weight: 600;
   overflow-wrap: anywhere;
 }
+
+/* Pagina 404: los dos botones van juntos, el margen lo pone su contenedor */
+.detalle-no-encontrado .d-flex .btn-principal {
+  margin-top: 0;
+}

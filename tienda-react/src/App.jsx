@@ -25,6 +25,7 @@ import AdminDashboard from './paginas/AdminDashboard'
 import AdminProductos from './paginas/AdminProductos'
 import AdminUsuarios from './paginas/AdminUsuarios'
 import AdminOrdenes from './paginas/AdminOrdenes'
+import NoEncontrada from './paginas/NoEncontrada'
 function App() {
   return (
     <>
@@ -54,6 +55,9 @@ function App() {
           <Route path="/admin/ordenes" element={<AdminOrdenes />} />
           <Route path="/admin/productos" element={<AdminProductos />} />
           <Route path="/admin/usuarios" element={<AdminUsuarios />} />
+
+        {/* Va al final: cualquier direccion que no coincida con las de arriba */}
+        <Route path="*" element={<NoEncontrada />} />
 
       </Routes>
 

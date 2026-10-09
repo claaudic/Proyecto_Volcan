@@ -1,5 +1,10 @@
 import { act } from "react";
-import { montarEnRuta, escribir } from "./ayuda";
+import { MemoryRouter } from "react-router-dom";
+import { montar, montarEnRuta, escribir } from "./ayuda";
+import App from "../src/App";
+import ProveedorSesion from "../src/contexto/ProveedorSesion";
+import ProveedorCatalogo from "../src/contexto/ProveedorCatalogo";
+import ProveedorCarrito from "../src/contexto/ProveedorCarrito";
 import Inicio from "../src/paginas/Inicio";
 import DetalleProducto from "../src/paginas/DetalleProducto";
 import Registro from "../src/paginas/Registro";
@@ -124,6 +129,45 @@ describe("Barra de navegación", () => {
         });
 
         expect(pantalla.querySelector(".carrito-total").textContent).toBe("3");
+    });
+
+});
+
+describe("Página no encontrada (404)", () => {
+
+    let pantalla;
+
+    afterEach(() => {
+        pantalla.desmontar();
+    });
+
+    // Se monta la App completa para probar su ruta "*" de verdad
+    function abrirApp(url) {
+        localStorage.removeItem("usuarioActivo");
+        pantalla = montar(
+            <MemoryRouter initialEntries={[url]}>
+                <ProveedorSesion>
+                    <ProveedorCatalogo>
+                        <ProveedorCarrito>
+                            <App />
+                        </ProveedorCarrito>
+                    </ProveedorCatalogo>
+                </ProveedorSesion>
+            </MemoryRouter>
+        );
+    }
+
+    it("muestra el aviso en una dirección que no existe", () => {
+        abrirApp("/esta-pagina-no-existe");
+
+        expect(pantalla.textContent).toContain("Página no encontrada");
+        expect(pantalla.textContent).toContain("/esta-pagina-no-existe");
+    });
+
+    it("no aparece en una página que sí existe", () => {
+        abrirApp("/nosotros");
+
+        expect(pantalla.textContent).not.toContain("Página no encontrada");
     });
 
 });

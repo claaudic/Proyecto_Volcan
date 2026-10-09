@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useCarrito } from "../contexto/carritoContexto";
-import { formatearPrecio, imagenDe } from "../datos/productos";
+import { formatearPrecio, imagenDe, IMAGEN_RESPALDO } from "../datos/productos";
 import { cerrarPanelCarrito } from "../utilidades/panelCarrito";
 
 // Panel lateral del carrito (offcanvas de Bootstrap).
@@ -10,6 +10,14 @@ import { cerrarPanelCarrito } from "../utilidades/panelCarrito";
 function CarritoPanel() {
   const { detalle, cambiarCantidad, quitar, vaciar } = useCarrito();
   const vacio = detalle.lineas.length === 0;
+
+  function usarImagenRespaldo(evento) {
+    if (evento.currentTarget.src.endsWith(IMAGEN_RESPALDO)) {
+      return;
+    }
+
+    evento.currentTarget.src = IMAGEN_RESPALDO;
+  }
 
   return (
     <div
@@ -36,7 +44,7 @@ function CarritoPanel() {
           <ul className="panel-lista list-unstyled">
             {detalle.lineas.map((linea) => (
               <li key={linea.codigo} className="panel-item">
-                <img src={imagenDe(linea.codigo)} alt={linea.nombre} />
+                <img src={imagenDe(linea)} alt={linea.nombre} onError={usarImagenRespaldo} />
 
                 <div className="panel-datos">
                   <h3>{linea.nombre}</h3>

@@ -118,7 +118,7 @@ function Inicio() {
                   nombre={producto.nombre}
                   categoria={producto.categoria}
                   precio={formatearPrecio(producto.precioResidencial)}
-                  imagen={imagenDe(producto.codigo)}
+                  imagen={imagenDe(producto)}
                 />
               </li>
             ))}

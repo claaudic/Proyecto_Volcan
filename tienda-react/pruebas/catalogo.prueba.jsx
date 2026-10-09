@@ -7,7 +7,7 @@ import {
     productosActivos,
     leerCatalogo
 } from "../src/datos/catalogo";
-import { PRODUCTOS } from "../src/datos/productos";
+import { imagenDe, PRODUCTOS } from "../src/datos/productos";
 
 // Pruebas del CRUD del catalogo: lo que va a usar el panel de administracion.
 // Se trabaja sobre una lista chica de ejemplo, para que cada caso sea claro.
@@ -60,6 +60,28 @@ describe("Catálogo: operaciones", () => {
 
         expect(despues[0].stock).toBe(77);
         expect(despues[1].stock).toBe(0);
+    });
+
+});
+
+describe("Catálogo: imágenes", () => {
+
+    it("usa la imagen guardada en el producto si existe", () => {
+        const producto = {
+            codigo: "PR999",
+            imagen: "img/producto-nuevo.jpg"
+        };
+
+        expect(imagenDe(producto)).toBe("/img/producto-nuevo.jpg");
+    });
+
+    it("mantiene la imagen antigua basada en el código si no hay imagen guardada", () => {
+        const producto = {
+            codigo: "CL001",
+            imagen: ""
+        };
+
+        expect(imagenDe(producto)).toBe("/img/cl001.jpg");
     });
 
 });

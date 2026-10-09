@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { Navigate } from 'react-router-dom'
 import { useSesion } from '../contexto/sesionContexto'
 import { useCatalogo } from '../contexto/catalogoContexto'
@@ -27,7 +27,6 @@ function AdminProductos() {
         cambiarEstado,
         eliminar
     } = useCatalogo()
-    const formularioRef = useRef(null)
     const [formulario, setFormulario] = useState(FORMULARIO_VACIO)
     const [codigoEditando, setCodigoEditando] = useState(null)
     const [mostrarFormulario, setMostrarFormulario] = useState(false)
@@ -85,13 +84,11 @@ function AdminProductos() {
         setCodigoEditando(producto.codigo)
         setErrores({})
         setMostrarFormulario(true)
+    }
 
-        setTimeout(() => {
-            formularioRef.current?.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
-            })
-        }, 100)
+    function cerrarFormulario() {
+        setMostrarFormulario(false)
+        setErrores({})
     }
 
     function validarFormulario() {
@@ -333,14 +330,16 @@ function AdminProductos() {
 
                     <section className="mt-5">
 
-                        <div className="mb-3">
-                            <p className="panel-etiqueta mb-1">
-                                Inventario
-                            </p>
+                        <div className="panel-titulo">
+                            <div>
+                                <p className="panel-etiqueta">
+                                    Inventario
+                                </p>
 
-                            <h2>
-                                Lista de productos
-                            </h2>
+                                <h2>
+                                    Lista de productos
+                                </h2>
+                            </div>
                         </div>
 
                         <div className="tabla-marco table-responsive">
@@ -431,7 +430,7 @@ function AdminProductos() {
                                             <td>
                                                 <button
                                                     type="button"
-                                                    className="btn btn-sm btn-outline-primary me-1 mb-1"
+                                                    className="btn btn-sm btn-secundario me-1 mb-1"
                                                     onClick={() =>
                                                         abrirEditarProducto(producto)
                                                     }
@@ -441,13 +440,7 @@ function AdminProductos() {
 
                                                 <button
                                                     type="button"
-                                                    className={
-                                                        `btn btn-sm ${
-                                                            producto.activo
-                                                                ? 'btn-outline-warning'
-                                                                : 'btn-outline-success'
-                                                        } me-1 mb-1`
-                                                    }
+                                                    className="btn btn-sm btn-principal me-1 mb-1"
                                                     onClick={() =>
                                                         cambiarEstado(producto.codigo)
                                                     }
@@ -459,7 +452,7 @@ function AdminProductos() {
 
                                                 <button
                                                     type="button"
-                                                    className="btn btn-sm btn-outline-danger mb-1"
+                                                    className="btn btn-sm btn-peligro mb-1"
                                                     onClick={() =>
                                                         setProductoABorrar(producto)
                                                     }
@@ -478,28 +471,43 @@ function AdminProductos() {
                     </section>
 
                     {mostrarFormulario && (
-                        <section
-                            ref={formularioRef}
-                            className="panel-seccion mt-5"
+                        <>
+                        <div
+                            className="modal show d-block"
+                            tabIndex="-1"
+                            role="dialog"
+                            aria-modal="true"
+                            aria-labelledby="titulo-formulario-producto"
                         >
+                            <div className="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+                        <section className="modal-content panel-seccion admin-producto-modal">
                             <div className="panel-titulo">
                                 <div>
                                     <p className="panel-etiqueta">
                                         Producto
                                     </p>
 
-                                    <h2>
+                                    <h2 id="titulo-formulario-producto">
                                         {codigoEditando
                                             ? 'Editar producto'
                                             : 'Crear producto'}
                                     </h2>
                                 </div>
+
+                                <button
+                                    type="button"
+                                    className="btn-close"
+                                    aria-label="Cerrar"
+                                    onClick={cerrarFormulario}
+                                ></button>
                             </div>
 
                             <form
+                                className="admin-producto-form"
                                 noValidate
                                 onSubmit={guardarProducto}
                             >
+                                <div className="admin-producto-campos">
 
                                 <div className="mb-3">
                                     <label
@@ -788,13 +796,13 @@ function AdminProductos() {
                                     />
                                 </div>
 
-                                <div className="d-flex gap-2">
+                                </div>
+
+                                <div className="modal-footer admin-producto-footer">
                                     <button
                                         type="button"
                                         className="btn btn-secundario"
-                                        onClick={() =>
-                                            setMostrarFormulario(false)
-                                        }
+                                        onClick={cerrarFormulario}
                                     >
                                         Cancelar
                                     </button>
@@ -803,53 +811,92 @@ function AdminProductos() {
                                         type="submit"
                                         className="btn btn-principal"
                                     >
-                                        Guardar producto
+                                        {codigoEditando
+                                            ? 'Guardar cambios'
+                                            : 'Agregar producto'}
                                     </button>
                                 </div>
 
                             </form>
                         </section>
+                            </div>
+                        </div>
+                        <div className="modal-backdrop show"></div>
+                        </>
                     )}
 
                     {productoABorrar && (
-                        <section className="panel-seccion mt-4">
-                            <h2>
-                                ¿Eliminar el producto?
-                            </h2>
+                        <>
+                            <div
+                                className="modal fade show"
+                                style={{
+                                    display: 'block'
+                                }}
+                                tabIndex="-1"
+                                role="dialog"
+                                aria-modal="true"
+                                aria-labelledby="titulo-eliminar-producto"
+                            >
+                                <div className="modal-dialog modal-dialog-centered">
+                                    <div className="modal-content">
+                                        <div className="modal-header">
+                                            <h2
+                                                id="titulo-eliminar-producto"
+                                                className="modal-title fs-5"
+                                            >
+                                                ¿Eliminar el producto?
+                                            </h2>
 
-                            <p>
-                                Vas a eliminar{' '}
-                                <strong>
-                                    {productoABorrar.nombre}
-                                </strong>{' '}
-                                del catálogo.
-                            </p>
+                                            <button
+                                                type="button"
+                                                className="btn-close"
+                                                aria-label="Cerrar"
+                                                onClick={() =>
+                                                    setProductoABorrar(null)
+                                                }
+                                            ></button>
+                                        </div>
 
-                            <p>
-                                Si solo quieres dejar de venderlo por un tiempo,
-                                usa Desactivar.
-                            </p>
+                                        <div className="modal-body">
+                                            <p>
+                                                Vas a eliminar{' '}
+                                                <strong>
+                                                    {productoABorrar.nombre}
+                                                </strong>{' '}
+                                                del catálogo.
+                                            </p>
 
-                            <div className="d-flex gap-2">
-                                <button
-                                    type="button"
-                                    className="btn btn-secundario"
-                                    onClick={() =>
-                                        setProductoABorrar(null)
-                                    }
-                                >
-                                    Cancelar
-                                </button>
+                                            <p className="mb-0">
+                                                Si solo quieres dejar de venderlo
+                                                por un tiempo, usa Desactivar.
+                                            </p>
+                                        </div>
 
-                                <button
-                                    type="button"
-                                    className="btn btn-peligro"
-                                    onClick={confirmarEliminar}
-                                >
-                                    Sí, eliminar
-                                </button>
+                                        <div className="modal-footer">
+                                            <button
+                                                type="button"
+                                                className="btn btn-secundario"
+                                                onClick={() =>
+                                                    setProductoABorrar(null)
+                                                }
+                                            >
+                                                Cancelar
+                                            </button>
+
+                                            <button
+                                                type="button"
+                                                className="btn btn-peligro"
+                                                onClick={confirmarEliminar}
+                                            >
+                                                Sí, eliminar
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                        </section>
+
+                            <div className="modal-backdrop fade show"></div>
+                        </>
                     )}
 
                 </div>

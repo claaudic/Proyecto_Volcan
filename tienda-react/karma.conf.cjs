@@ -11,8 +11,18 @@ module.exports = function (config) {
 
     // Todos los archivos que terminen en .prueba.jsx
     files: [
-      "pruebas/**/*.prueba.jsx"
+      "pruebas/**/*.prueba.jsx",
+      {
+        pattern: "public/img/**/*",
+        watched: false,
+        included: false,
+        served: true
+      }
     ],
+
+    proxies: {
+      "/img/": "/base/public/img/"
+    },
 
     // Antes de ejecutar, webpack traduce el JSX a JavaScript normal
     preprocessors: {

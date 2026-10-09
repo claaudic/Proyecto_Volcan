@@ -100,6 +100,9 @@ Reglas de validación:
 | `/checkout` | Finalizar compra: datos, entrega y pago |
 | `/compra-exitosa` · `/pago-rechazado` | Resultado del pago |
 | `/admin` | Panel de administración (solo administrador) |
+| `/admin/ordenes` | Listado de órdenes (solo administrador) |
+| `/admin/productos` | Gestión de productos (solo administrador) |
+| `/admin/usuarios` | Gestión de usuarios (solo administrador) |
 
 ---
 

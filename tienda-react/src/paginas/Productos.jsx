@@ -135,7 +135,7 @@ function Productos() {
                     nombre={producto.nombre}
                     categoria={producto.categoria}
                     precio={formatearPrecio(producto.precioResidencial)}
-                    imagen={imagenDe(producto.codigo)}
+                    imagen={imagenDe(producto)}
                     stock={producto.stock}
                     alAnadir={() => anadirAlCarrito(producto.codigo)}
                   />

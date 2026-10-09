@@ -49,6 +49,11 @@ describe("Categorías: páginas", () => {
         );
     }
 
+    // Otra prueba pudo dejar productos vistos: cada prueba parte sin ninguno
+    beforeEach(() => {
+        localStorage.removeItem("productosVistos");
+    });
+
     afterEach(() => {
         pantalla.desmontar();
         localStorage.removeItem("productosVistos");

@@ -97,7 +97,8 @@ export function clic(elemento) {
 // Parte con todo limpio y lo limpia al terminar.
 const CLAVES_TIENDA = [
     "carritoVolcan", "productosSistema", "usuarioActivo",
-    "usuariosSistema", "cuentasEliminadas", "pedidos_volcan"
+    "usuariosSistema", "cuentasEliminadas", "pedidos_volcan",
+    "productosVistos"
 ];
 
 export function montarEnRuta(url, rutas, opciones = {}) {

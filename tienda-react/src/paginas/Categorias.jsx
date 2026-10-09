@@ -122,7 +122,7 @@ function ListaProductos({ productos, alAnadir }) {
             nombre={producto.nombre}
             categoria={producto.categoria}
             precio={formatearPrecio(producto.precioResidencial)}
-            imagen={imagenDe(producto.codigo)}
+            imagen={imagenDe(producto)}
             stock={producto.stock}
             alAnadir={() => alAnadir(producto.codigo)}
           />
@@ -140,7 +140,7 @@ function ListaCategorias({ grupos }) {
         <li key={grupo.slug} className="col-12 col-sm-6 col-lg-3">
           <TarjetaCategoria
             nombre={grupo.nombre}
-            imagen={imagenDe(grupo.productos[0].codigo)}
+            imagen={imagenDe(grupo.productos[0])}
             cantidad={grupo.productos.length}
             enlace={"/categorias/" + grupo.slug}
           />

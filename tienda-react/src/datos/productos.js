@@ -240,7 +240,27 @@ export function formatearPrecio(monto) {
     });
 }
 
-// Arma la ruta de la imagen desde el codigo: "CL003" -> "/img/cl003.jpg"
-export function imagenDe(codigo) {
-    return "/img/" + String(codigo).toLowerCase() + ".jpg";
+export const IMAGEN_RESPALDO = "/img/logo.svg";
+
+function normalizarRutaImagen(ruta) {
+    return String(ruta || "")
+        .trim()
+        .replace("../img/", "/img/")
+        .replace(/^img\//, "/img/");
+}
+
+// Prioriza la imagen guardada en el producto. Si no existe, mantiene
+// compatibilidad con las imagenes antiguas basadas en el codigo.
+export function imagenDe(productoOCodigo) {
+    if (productoOCodigo && typeof productoOCodigo === "object") {
+        const imagen = normalizarRutaImagen(productoOCodigo.imagen);
+
+        if (imagen !== "") {
+            return imagen;
+        }
+
+        return imagenDe(productoOCodigo.codigo);
+    }
+
+    return "/img/" + String(productoOCodigo).toLowerCase() + ".jpg";
 }

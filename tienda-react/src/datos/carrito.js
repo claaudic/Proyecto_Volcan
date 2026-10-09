@@ -114,6 +114,7 @@ export function detalleDelCarrito(items, catalogo = PRODUCTOS) {
     lineas.push({
       codigo: producto.codigo,
       nombre: producto.nombre,
+      imagen: producto.imagen || "",
       precio: producto.precioResidencial,
       stock: producto.stock,
       cantidad,

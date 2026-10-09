@@ -1,4 +1,7 @@
 import { describe, it, expect, afterEach } from "vitest";
+import { screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { renderizar } from "../test/renderizar";
 import { act } from "react";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { montar, escribir } from "../test/ayuda";
@@ -65,6 +68,48 @@ describe("Login: paneles por rol", () => {
     it("el administrador tiene panel y los clientes no", () => {
         expect(panelDeRol("ADMINISTRADOR")).toBe("/admin");
         expect(panelDeRol("CLIENTE")).toBeNull();
+    });
+
+});
+
+describe("Login: errores", () => {
+
+    async function entrarCon(user, correo, contrasena) {
+        await user.type(screen.getByLabelText(/Correo/), correo);
+        await user.type(screen.getByLabelText(/Contraseña/), contrasena);
+        await user.click(screen.getByRole("button", { name: /Ingresar|Iniciar sesión|Entrar/ }));
+    }
+
+    it("avisa si la contraseña es incorrecta", async () => {
+        const user = userEvent.setup();
+        renderizar(<Login />);
+
+        await entrarCon(user, "camila@gmail.com", "Mala123");
+
+        expect(screen.getByText("El correo o la contraseña son incorrectos.")).toBeInTheDocument();
+        expect(localStorage.getItem("usuarioActivo")).toBeNull();
+    });
+
+    it("no deja entrar a una cuenta desactivada", async () => {
+        localStorage.setItem("usuariosSistema", JSON.stringify([{
+            nombre: "Camila Rojas", correo: "camila@gmail.com", contrasena: "Clien1234", rol: "CLIENTE", activo: false
+        }]));
+        const user = userEvent.setup();
+        renderizar(<Login />);
+
+        await entrarCon(user, "camila@gmail.com", "Clien1234");
+
+        expect(screen.getByText("Tu cuenta está desactivada. Contacta al administrador.")).toBeInTheDocument();
+    });
+
+    it("propone el correo del equipo si el dominio no está permitido", async () => {
+        const user = userEvent.setup();
+        renderizar(<Login />);
+
+        await user.type(screen.getByLabelText(/Correo/), "admin@gmail.cl");
+        await user.click(screen.getByRole("button", { name: "¿Quisiste decir admin@gaselvolcan.cl?" }));
+
+        expect(screen.getByLabelText(/Correo/)).toHaveValue("admin@gaselvolcan.cl");
     });
 
 });

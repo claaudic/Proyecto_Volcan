@@ -1,4 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { renderizar } from "../test/renderizar";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { montar } from "../test/ayuda";
 import ProveedorCatalogo from "../contexto/ProveedorCatalogo";
@@ -116,6 +119,19 @@ describe("Vistos recientemente", () => {
         ["CL001", "CL002", "CL003", "CL004", "RG001"].forEach(registrarVisto);
 
         expect(leerVistos()).toEqual(["RG001", "CL004", "CL003", "CL002"]);
+    });
+
+});
+
+describe("Categorías: añadir al carrito", () => {
+
+    it("agrega un producto desde la vista de una categoría", async () => {
+        const user = userEvent.setup();
+        renderizar(<Categorias />, { ruta: "/categorias/reguladores", patron: "/categorias/:nombre" });
+
+        await user.click(screen.getAllByRole("button", { name: "Añadir" })[0]);
+
+        expect(JSON.parse(localStorage.getItem("carritoVolcan"))).toEqual([{ codigo: "RG001", cantidad: 1 }]);
     });
 
 });

@@ -139,9 +139,9 @@ npm run test:coverage   # con cobertura
 
 Las pruebas usan **Vitest** y corren en **jsdom**, un navegador simulado: no abren un navegador real. Cada archivo de prueba está junto al código que prueba, con el nombre `*.test.jsx` (por ejemplo `src/utilidades/pasarela.test.jsx`). `src/test/setup.js` limpia `localStorage` antes y después de cada prueba para que no se afecten entre sí.
 
-Hay **107 pruebas en 18 archivos**: renderizado, props, estado, eventos, las funciones CRUD de los datos, las validaciones de los formularios, el panel de administración y el recorrido completo de la compra (pago aprobado y rechazado).
+Hay **168 pruebas en 27 archivos**: renderizado, props, estado, eventos, las funciones CRUD de los datos, las validaciones de los formularios, el panel de administración y el recorrido completo de la compra (pago aprobado y rechazado).
 
-`npm run test:coverage` muestra la tabla en la terminal y genera el informe detallado en `coverage/index.html`. Se mide todo `src/`, excepto `main.jsx`, la configuración de pruebas y las pruebas mismas.
+`npm run test:coverage` muestra la tabla en la terminal y genera el informe detallado en `coverage/index.html`. Se mide todo `src/`, excepto `main.jsx`, la configuración de pruebas y las pruebas mismas. La cobertura total es de **93 % de líneas**, y **cada archivo tiene al menos 80 %**: si alguno baja de ese mínimo, `npm run test:coverage` falla.
 
 ---
 

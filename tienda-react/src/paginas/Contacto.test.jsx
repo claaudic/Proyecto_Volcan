@@ -1,4 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { renderizar } from "../test/renderizar";
 import Contacto from "./Contacto";
 import { montarConRouter, clic } from "../test/ayuda";
 
@@ -35,6 +38,23 @@ describe("Contacto", () => {
         clic(enviar);
 
         expect(erroresVisibles().length).toBe(3);
+    });
+
+});
+
+describe("Contacto: envío", () => {
+
+    it("con datos válidos agradece por el nombre y limpia el formulario", async () => {
+        const user = userEvent.setup();
+        renderizar(<Contacto />);
+
+        await user.type(screen.getByLabelText(/Nombre/), "Camila Rojas");
+        await user.type(screen.getByLabelText(/Correo/), "camila@gmail.com");
+        await user.type(screen.getByLabelText(/Mensaje|Comentario/), "Quiero saber si llegan a Pinto.");
+        await user.click(screen.getByRole("button", { name: /Enviar/ }));
+
+        expect(screen.getByText(/Gracias Camila, recibimos tu mensaje/)).toBeInTheDocument();
+        expect(screen.getByLabelText(/Nombre/)).toHaveValue("");
     });
 
 });

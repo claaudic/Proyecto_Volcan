@@ -1,5 +1,14 @@
 import { describe, it, expect } from 'vitest'
-import { leerPedidos, crearPedido, obtenerSiguienteNumeroPedido } from './pedidos'
+import {
+    actualizarPedido,
+    asignarRepartidorPedido,
+    buscarPedido,
+    cambiarEstadoPedido,
+    crearPedido,
+    eliminarPedido,
+    leerPedidos,
+    obtenerSiguienteNumeroPedido
+} from './pedidos'
 
 // Pruebas de los datos de pedidos: numeracion, estado inicial y datos danados
 
@@ -25,6 +34,23 @@ describe('Pedidos', () => {
     localStorage.setItem('pedidos_volcan', '{ esto no es json')
 
     expect(leerPedidos()).toEqual([])
+  })
+
+  it('actualiza estado, repartidor y elimina un pedido existente', () => {
+    crearPedido({ total: 6500 })
+
+    expect(cambiarEstadoPedido(1, 'En camino').estado).toBe('En camino')
+    expect(asignarRepartidorPedido(1, 'repartidor@gaselvolcan.cl').repartidor)
+      .toBe('repartidor@gaselvolcan.cl')
+
+    const editado = actualizarPedido(1, {
+      total: 7000
+    })
+
+    expect(editado.total).toBe(7000)
+    expect(buscarPedido(1).estado).toBe('En camino')
+    expect(eliminarPedido(1)).toBe(true)
+    expect(buscarPedido(1)).toBeNull()
   })
 
 })

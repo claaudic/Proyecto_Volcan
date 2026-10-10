@@ -307,6 +307,13 @@ function AdminDashboard() {
                                 Gestionar usuarios
                             </Link>
 
+                            <Link
+                                to="/admin/ordenes"
+                                className="btn btn-secundario"
+                            >
+                                Gestionar órdenes
+                            </Link>
+
                         </div>
 
                     </section>

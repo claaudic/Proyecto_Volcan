@@ -37,6 +37,16 @@ describe("Panel de administración: acceso", () => {
         expect(pantalla.querySelector("h1").textContent).toContain("Panel de administración");
     });
 
+    it("el panel tiene acceso directo a órdenes", () => {
+        pantalla = montarEnRuta("/admin", { "/admin": <AdminDashboard /> }, { usuario: ADMIN });
+
+        const enlaceOrdenes = Array.from(pantalla.querySelectorAll("a"))
+            .find((enlace) => enlace.textContent.trim() === "Gestionar órdenes");
+
+        expect(enlaceOrdenes).not.toBeUndefined();
+        expect(enlaceOrdenes.getAttribute("href")).toBe("/admin/ordenes");
+    });
+
 });
 
 describe("Panel de administración: vistas", () => {

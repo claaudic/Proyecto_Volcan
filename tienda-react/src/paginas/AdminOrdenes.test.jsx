@@ -1,7 +1,9 @@
 import { describe, it, expect } from 'vitest'
 import { screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import AdminOrdenes from './AdminOrdenes'
 import AdminDashboard from './AdminDashboard'
+import { leerPedidos } from '../datos/pedidos'
 import { renderizar, ADMIN, CLIENTE, pedidoDeEjemplo } from '../test/renderizar'
 
 // Pruebas de las vistas del administrador que leen los pedidos:
@@ -16,6 +18,10 @@ const PEDIDOS = [
 
 function filas() {
   return screen.getAllByRole('row').slice(1)
+}
+
+function filaConPedido(numero) {
+  return filas().find((fila) => fila.textContent.includes(`#${numero}`))
 }
 
 describe('Órdenes del administrador', () => {
@@ -46,6 +52,75 @@ describe('Órdenes del administrador', () => {
     renderizar(<AdminOrdenes />, { usuario: ADMIN })
 
     expect(screen.getByText(/no hay pedidos|todavía no hay/i)).toBeInTheDocument()
+  })
+
+  it('muestra la boleta con productos, entrega y total', async () => {
+    const user = userEvent.setup()
+    renderizar(<AdminOrdenes />, { usuario: ADMIN, pedidos: PEDIDOS })
+
+    await user.click(
+      within(filaConPedido(3)).getByRole('button', { name: /Ver boleta/ })
+    )
+
+    const boleta = screen.getByRole('dialog', {
+      name: /Boleta del pedido #3/
+    })
+
+    expect(within(boleta).getByRole('heading', { name: /Boleta del pedido #3/ })).toBeInTheDocument()
+    expect(within(boleta).getByText('Pedido')).toBeInTheDocument()
+    expect(within(boleta).getByText('Fecha')).toBeInTheDocument()
+    expect(within(boleta).getByText('Estado')).toBeInTheDocument()
+    expect(within(boleta).getByText('Pendiente')).toHaveClass('estado-pendiente')
+    expect(within(boleta).getByText('Repartidor')).toBeInTheDocument()
+    expect(within(boleta).getByText('Sin asignar')).toBeInTheDocument()
+    expect(within(boleta).getByText('Pago')).toBeInTheDocument()
+    expect(within(boleta).getByText('•••• 1111')).toBeInTheDocument()
+    expect(within(boleta).getByText('Camila Rojas')).toBeInTheDocument()
+    expect(within(boleta).getByText('Libertad 123')).toBeInTheDocument()
+    expect(within(boleta).getByText('Cilindro GLP 5 kg')).toBeInTheDocument()
+    expect(within(boleta).getByText(/Total:/)).toHaveTextContent('$8.990')
+  })
+
+  it('edita estado y asigna repartidor activo', async () => {
+    const user = userEvent.setup()
+    renderizar(<AdminOrdenes />, { usuario: ADMIN, pedidos: PEDIDOS })
+
+    await user.click(
+      within(filaConPedido(3)).getByRole('button', { name: /Editar/ })
+    )
+    await user.selectOptions(screen.getByLabelText('Estado'), 'En camino')
+    await user.selectOptions(
+      screen.getByLabelText('Repartidor'),
+      'repartidor@gaselvolcan.cl'
+    )
+    await user.click(screen.getByRole('button', { name: 'Guardar cambios' }))
+
+    const pedido = leerPedidos().find((uno) => uno.numero === 3)
+
+    expect(pedido.estado).toBe('En camino')
+    expect(pedido.repartidor).toBe('repartidor@gaselvolcan.cl')
+    expect(within(filaConPedido(3)).getByText('En camino')).toHaveClass('estado-camino')
+    expect(within(filaConPedido(3)).getByText('Matías Vera')).toBeInTheDocument()
+  })
+
+  it('elimina una orden solo después de confirmar', async () => {
+    const user = userEvent.setup()
+    renderizar(<AdminOrdenes />, { usuario: ADMIN, pedidos: PEDIDOS })
+
+    await user.click(
+      within(filaConPedido(2)).getByRole('button', { name: /Eliminar/ })
+    )
+    await user.click(screen.getByRole('button', { name: 'Cancelar' }))
+
+    expect(leerPedidos().some((pedido) => pedido.numero === 2)).toBe(true)
+
+    await user.click(
+      within(filaConPedido(2)).getByRole('button', { name: /Eliminar/ })
+    )
+    await user.click(screen.getByRole('button', { name: 'Sí, eliminar' }))
+
+    expect(leerPedidos().some((pedido) => pedido.numero === 2)).toBe(false)
+    expect(screen.queryByText('#2')).not.toBeInTheDocument()
   })
 
 })

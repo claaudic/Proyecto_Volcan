@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import TarjetaProducto from '../components/TarjetaProducto'
 import { formatearPrecio, imagenDe } from '../datos/productos'
+import { ofertaDeProducto, precioProducto } from '../datos/ofertas'
 import { useCatalogo } from '../contexto/catalogoContexto'
 import { useCarrito } from '../contexto/carritoContexto'
 import { abrirPanelCarrito } from '../utilidades/panelCarrito'
@@ -130,15 +131,27 @@ function Productos() {
             <ul className="row g-4 list-unstyled">
               {filtrados.map((producto) => (
                 <li key={producto.codigo} className="col-12 col-sm-6 col-lg-3">
-                  <TarjetaProducto
-                    codigo={producto.codigo}
-                    nombre={producto.nombre}
-                    categoria={producto.categoria}
-                    precio={formatearPrecio(producto.precioResidencial)}
-                    imagen={imagenDe(producto)}
-                    stock={producto.stock}
-                    alAnadir={() => anadirAlCarrito(producto.codigo)}
-                  />
+                  {(() => {
+                    const oferta = ofertaDeProducto(producto.codigo)
+
+                    return (
+                      <TarjetaProducto
+                        codigo={producto.codigo}
+                        nombre={producto.nombre}
+                        categoria={producto.categoria}
+                        precio={formatearPrecio(precioProducto(producto))}
+                        precioAnterior={
+                          oferta
+                            ? formatearPrecio(producto.precioResidencial)
+                            : null
+                        }
+                        etiquetaOferta={oferta?.etiqueta}
+                        imagen={imagenDe(producto)}
+                        stock={producto.stock}
+                        alAnadir={() => anadirAlCarrito(producto.codigo)}
+                      />
+                    )
+                  })()}
                 </li>
               ))}
             </ul>

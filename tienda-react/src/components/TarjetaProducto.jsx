@@ -45,7 +45,18 @@ function TarjetaProducto(props) {
         {/* La etiqueta solo aparece si se le paso el stock */}
         {props.stock !== undefined && <EtiquetaStock stock={props.stock} />}
 
-        <p className="precio">{props.precio}</p>
+        <p className="precio">
+          {props.precioAnterior && (
+            <span className="text-decoration-line-through text-muted me-2">
+              {props.precioAnterior}
+            </span>
+          )}
+          {props.precio}
+        </p>
+
+        {props.etiquetaOferta && (
+          <p className="panel-etiqueta mb-2">{props.etiquetaOferta}</p>
+        )}
 
         {props.alAnadir ? (
           <div className="acciones-producto">

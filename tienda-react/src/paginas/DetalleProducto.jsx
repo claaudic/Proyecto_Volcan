@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import TarjetaProducto from '../components/TarjetaProducto'
 import EtiquetaStock from '../components/EtiquetaStock'
 import { formatearPrecio, imagenDe, IMAGEN_RESPALDO } from '../datos/productos'
+import { ofertaDeProducto, precioProducto } from '../datos/ofertas'
 import { useCatalogo } from '../contexto/catalogoContexto'
 import { useCarrito } from '../contexto/carritoContexto'
 import { abrirPanelCarrito } from '../utilidades/panelCarrito'
@@ -59,6 +60,7 @@ function FichaProducto({ codigo }) {
   }
 
   const sinStock = producto.stock === 0
+  const oferta = ofertaDeProducto(producto.codigo)
 
   // La cantidad nunca baja de 1 ni supera el stock disponible
   function ajustar(valor) {
@@ -119,7 +121,17 @@ function FichaProducto({ codigo }) {
               <p className="categoria">{producto.categoria}</p>
               <h1 id="tituloProducto">{producto.nombre}</h1>
 
-              <p className="detalle-precio">{formatearPrecio(producto.precioResidencial)}</p>
+              <p className="detalle-precio">
+                {oferta && (
+                  <span className="text-decoration-line-through text-muted me-2">
+                    {formatearPrecio(producto.precioResidencial)}
+                  </span>
+                )}
+                {formatearPrecio(precioProducto(producto))}
+              </p>
+              {oferta && (
+                <p className="panel-etiqueta">{oferta.etiqueta}</p>
+              )}
               <EtiquetaStock stock={producto.stock} />
 
               <p className="detalle-descripcion">{producto.descripcion}</p>
@@ -208,7 +220,13 @@ function FichaProducto({ codigo }) {
                       codigo={otro.codigo}
                       nombre={otro.nombre}
                       categoria={otro.categoria}
-                      precio={formatearPrecio(otro.precioResidencial)}
+                      precio={formatearPrecio(precioProducto(otro))}
+                      precioAnterior={
+                        ofertaDeProducto(otro.codigo)
+                          ? formatearPrecio(otro.precioResidencial)
+                          : null
+                      }
+                      etiquetaOferta={ofertaDeProducto(otro.codigo)?.etiqueta}
                       imagen={imagenDe(otro)}
                     />
                   </li>

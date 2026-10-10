@@ -10,8 +10,8 @@ import {
 } from "./carrito";
 
 // Pruebas de la LOGICA del carrito (el CRUD) y de su PERSISTENCIA.
-// Datos reales del catalogo: CL002 = Cilindro 11 kg, $12.000, stock 200.
-//                            AC003 = Detector de gas, $19.990, stock 8.
+// Datos reales del catalogo: CL002 = Cilindro 11 kg, oferta $10.500, stock 200.
+//                            AC003 = Detector de gas, oferta $17.990, stock 8.
 
 describe("Carrito: operaciones", () => {
 
@@ -60,13 +60,13 @@ describe("Carrito: operaciones", () => {
     });
 
     it("calcula el total y las unidades", () => {
-        // 2 × $12.000 + 1 × $19.990 = $43.990, en 3 unidades
+        // 2 × $10.500 + 1 × $17.990 = $38.990, en 3 unidades
         const detalle = detalleDelCarrito([
             { codigo: "CL002", cantidad: 2 },
             { codigo: "AC003", cantidad: 1 }
         ]);
 
-        expect(detalle.total).toBe(43990);
+        expect(detalle.total).toBe(38990);
         expect(detalle.unidades).toBe(3);
     });
 

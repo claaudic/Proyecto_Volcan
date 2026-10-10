@@ -10,6 +10,7 @@
 // de que algo cambio y volver a dibujar.
 
 import { PRODUCTOS } from "./productos";
+import { precioProducto } from "./ofertas";
 
 export const CLAVE_CARRITO = "carritoVolcan";
 
@@ -106,7 +107,8 @@ export function detalleDelCarrito(items, catalogo = PRODUCTOS) {
     }
 
     const cantidad = Math.min(item.cantidad, producto.stock);
-    const subtotal = producto.precioResidencial * cantidad;
+    const precio = precioProducto(producto);
+    const subtotal = precio * cantidad;
 
     total += subtotal;
     unidades += cantidad;
@@ -115,7 +117,7 @@ export function detalleDelCarrito(items, catalogo = PRODUCTOS) {
       codigo: producto.codigo,
       nombre: producto.nombre,
       imagen: producto.imagen || "",
-      precio: producto.precioResidencial,
+      precio,
       stock: producto.stock,
       cantidad,
       subtotal

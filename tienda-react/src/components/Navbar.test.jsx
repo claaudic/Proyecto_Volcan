@@ -33,4 +33,10 @@ describe('Navbar', () => {
     expect(screen.getByRole('link', { name: 'Productos' })).toHaveAttribute('aria-current', 'page')
   })
 
+  it('incluye enlace a ofertas', () => {
+    renderizar(<Navbar />)
+
+    expect(screen.getByRole('link', { name: 'Ofertas' })).toHaveAttribute('href', '/ofertas')
+  })
+
 })

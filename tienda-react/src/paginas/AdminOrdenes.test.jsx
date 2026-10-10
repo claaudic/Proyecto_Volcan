@@ -144,3 +144,76 @@ describe('Inicio del panel de administración', () => {
   })
 
 })
+
+describe('Órdenes: pedidos con otros formatos', () => {
+
+  // Pedido guardado como en el sitio de la EP1: cliente y dirección sueltos
+  // y un solo producto. La vista de órdenes debe poder mostrarlo igual.
+  const PEDIDO_ANTIGUO = {
+    numero: 7,
+    fecha: '2026-10-06T12:00:00.000Z',
+    estado: 'Pendiente',
+    cliente: 'Felipe González',
+    correo: 'felipe@gmail.com',
+    direccion: 'Los Puelches 430',
+    comuna: 'Chillán Viejo',
+    producto: 'Cilindro GLP 11 kg',
+    cantidad: 2,
+    total: 24000,
+    pago: 'Efectivo'
+  }
+
+  it('muestra un pedido guardado con el formato antiguo', async () => {
+    // 1 Preparar
+    const user = userEvent.setup()
+    renderizar(<AdminOrdenes />, { usuario: ADMIN, pedidos: [PEDIDO_ANTIGUO] })
+
+    // 2 Actuar: abrir su boleta
+    expect(filaConPedido(7)).toHaveTextContent('Felipe González')
+    await user.click(within(filaConPedido(7)).getByRole('button', { name: /Ver boleta/ }))
+
+    // 3 Comprobar: los datos sueltos aparecen en su lugar
+    const boleta = screen.getByRole('dialog', { name: /Boleta del pedido #7/ })
+    expect(within(boleta).getByText('felipe@gmail.com')).toBeInTheDocument()
+    expect(within(boleta).getByText('Los Puelches 430')).toBeInTheDocument()
+    expect(within(boleta).getByText('Efectivo')).toBeInTheDocument()
+    expect(within(boleta).getByText('Cilindro GLP 11 kg')).toBeInTheDocument()
+  })
+
+  it('resume varios productos y avisa cuando faltan datos', () => {
+    const conVarios = pedidoDeEjemplo({
+      numero: 8,
+      productos: [
+        { codigo: 'CL001', nombre: 'Cilindro GLP 5 kg', cantidad: 1, precio: 6500, subtotal: 6500 },
+        { codigo: 'RG001', nombre: 'Regulador doméstico estándar', cantidad: 1, precio: 8990, subtotal: 8990 }
+      ]
+    })
+    const sinDatos = { numero: 9, estado: 'Pendiente', total: 0 }
+
+    renderizar(<AdminOrdenes />, { usuario: ADMIN, pedidos: [conVarios, sinDatos] })
+
+    expect(filaConPedido(8)).toHaveTextContent('Cilindro GLP 5 kg y 1 más')
+    expect(filaConPedido(9)).toHaveTextContent('Sin productos')
+    expect(filaConPedido(9)).toHaveTextContent('Sin fecha')
+    expect(filaConPedido(9)).toHaveTextContent('Sin nombre')
+    expect(filaConPedido(9)).toHaveTextContent('Sin comuna')
+  })
+
+  it('las ventanas se cierran sin cambiar nada', async () => {
+    const user = userEvent.setup()
+    renderizar(<AdminOrdenes />, { usuario: ADMIN, pedidos: PEDIDOS })
+
+    // Boleta: abrir y cerrar
+    await user.click(within(filaConPedido(3)).getByRole('button', { name: /Ver boleta/ }))
+    await user.click(within(screen.getByRole('dialog')).getAllByRole('button', { name: /Cerrar/ })[0])
+    expect(screen.queryByRole('dialog')).toBeNull()
+
+    // Eliminar: abrir la confirmación y cerrarla con la X
+    await user.click(within(filaConPedido(3)).getByRole('button', { name: /Eliminar/ }))
+    await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Cerrar' }))
+    expect(screen.queryByRole('dialog')).toBeNull()
+
+    expect(leerPedidos()).toHaveLength(4)
+  })
+
+})

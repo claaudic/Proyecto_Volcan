@@ -314,6 +314,13 @@ function AdminDashboard() {
                                 Gestionar órdenes
                             </Link>
 
+                            <Link
+                                to="/admin/reportes"
+                                className="btn btn-secundario"
+                            >
+                                Ver reportes
+                            </Link>
+
                         </div>
 
                     </section>

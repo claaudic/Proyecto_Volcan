@@ -829,7 +829,9 @@ export function nombreDeRol(rol) {
 // =========================================
 
 export const PANELES = {
-  ADMINISTRADOR: "/admin"
+  ADMINISTRADOR: "/admin",
+  DESPACHADORA: "/despacho",
+  REPARTIDOR: "/repartidor"
 }
 
 export function panelDeRol(rol) {

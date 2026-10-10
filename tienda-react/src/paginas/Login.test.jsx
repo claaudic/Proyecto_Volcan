@@ -67,6 +67,8 @@ describe("Login: paneles por rol", () => {
 
     it("el administrador tiene panel y los clientes no", () => {
         expect(panelDeRol("ADMINISTRADOR")).toBe("/admin");
+        expect(panelDeRol("DESPACHADORA")).toBe("/despacho");
+        expect(panelDeRol("REPARTIDOR")).toBe("/repartidor");
         expect(panelDeRol("CLIENTE")).toBeNull();
     });
 

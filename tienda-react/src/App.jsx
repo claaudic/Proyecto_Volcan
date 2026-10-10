@@ -26,6 +26,8 @@ import AdminProductos from './paginas/AdminProductos'
 import AdminUsuarios from './paginas/AdminUsuarios'
 import AdminOrdenes from './paginas/AdminOrdenes'
 import AdminReportes from './paginas/AdminReportes'
+import Despachadora from './paginas/Despachadora'
+import Repartidor from './paginas/Repartidor'
 import NoEncontrada from './paginas/NoEncontrada'
 function App() {
   return (
@@ -57,6 +59,8 @@ function App() {
           <Route path="/admin/reportes" element={<AdminReportes />} />
           <Route path="/admin/productos" element={<AdminProductos />} />
           <Route path="/admin/usuarios" element={<AdminUsuarios />} />
+          <Route path="/despacho" element={<Despachadora />} />
+          <Route path="/repartidor" element={<Repartidor />} />
 
         {/* Va al final: cualquier direccion que no coincida con las de arriba */}
         <Route path="*" element={<NoEncontrada />} />

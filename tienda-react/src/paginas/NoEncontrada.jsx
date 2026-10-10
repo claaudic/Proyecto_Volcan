@@ -12,7 +12,7 @@ function NoEncontrada() {
       <section className="detalle" aria-labelledby="tituloNoEncontrada">
         <div className="container">
           <div className="detalle-no-encontrado">
-            <p className="carrito-vacio-titulo" id="tituloNoEncontrada">Página no encontrada</p>
+            <h1 className="carrito-vacio-titulo" id="tituloNoEncontrada">Página no encontrada</h1>
             <p>
               No existe ninguna página en <code>{pathname}</code>.
               Puede que la dirección esté mal escrita o que la página ya no exista.

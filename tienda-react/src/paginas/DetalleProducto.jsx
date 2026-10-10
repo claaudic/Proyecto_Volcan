@@ -50,7 +50,7 @@ function FichaProducto({ codigo }) {
         <section className="detalle">
           <div className="container">
             <div className="detalle-no-encontrado">
-              <p className="carrito-vacio-titulo">No encontramos ese producto</p>
+              <h1 className="carrito-vacio-titulo">No encontramos ese producto</h1>
               <p>Puede que el código no exista o que ya no esté disponible.</p>
               <Link className="btn btn-principal" to="/productos">Volver al catálogo</Link>
             </div>

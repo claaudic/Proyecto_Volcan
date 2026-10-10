@@ -2,11 +2,12 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import TarjetaProducto from '../components/TarjetaProducto'
 import EtiquetaStock from '../components/EtiquetaStock'
-import { formatearPrecio, imagenDe, IMAGEN_RESPALDO } from '../datos/productos'
+import { formatearPrecio, imagenDe } from '../datos/productos'
 import { ofertaDeProducto, precioProducto } from '../datos/ofertas'
 import { useCatalogo } from '../contexto/catalogoContexto'
 import { useCarrito } from '../contexto/carritoContexto'
 import { abrirPanelCarrito } from '../utilidades/panelCarrito'
+import { usarImagenRespaldo } from '../utilidades/imagenes'
 import { registrarVisto } from '../datos/vistos'
 
 // Migrado desde detalle-producto.html y js/detalle-producto.js.
@@ -86,14 +87,6 @@ function FichaProducto({ codigo }) {
     } else {
       setAviso(resultado.mensaje)
     }
-  }
-
-  function usarImagenRespaldo(evento) {
-    if (evento.currentTarget.src.endsWith(IMAGEN_RESPALDO)) {
-      return
-    }
-
-    evento.currentTarget.src = IMAGEN_RESPALDO
   }
 
   const relacionados = activos

@@ -2,7 +2,7 @@
 
 Tienda online de la **Distribuidora de Gas El Volcán**, empresa familiar de Chillán, Región de Ñuble. Esta es la versión en **React** del sitio (Evaluación Parcial 2), migrada desde el sitio en HTML de la EP1.
 
-Los clientes revisan el catálogo, consultan si hay reparto en su comuna, compran con una pasarela de pago simulada y siguen sus pedidos desde su perfil. El administrador tiene su panel de trabajo.
+Los clientes revisan el catálogo, consultan si hay reparto en su comuna, compran con una pasarela de pago simulada y siguen sus pedidos desde su perfil. El administrador, la despachadora y los repartidores tienen cada uno su panel de trabajo.
 
 ---
 
@@ -48,9 +48,9 @@ Para cerrar el servidor: **Ctrl + C** en la terminal.
 | Correo | Contraseña | Nombre | Rol | Al iniciar sesión |
 |---|---|---|---|---|
 | `admin@gaselvolcan.cl` | `Admin1234` | Sofía Pérez | Administrador | Panel de administración |
-| `despachadora@gaselvolcan.cl` | `Desp123` | Daniela Fuentes | Despachadora | Tienda |
-| `repartidor@gaselvolcan.cl` | `Repart123` | Matías Vera | Repartidor | Tienda |
-| `repartidor2@gaselvolcan.cl` | `Repart123` | Rodrigo Peña | Repartidor | Tienda |
+| `despachadora@gaselvolcan.cl` | `Desp123` | Daniela Fuentes | Despachadora | Panel de despacho (`/despacho`) |
+| `repartidor@gaselvolcan.cl` | `Repart123` | Matías Vera | Repartidor | Panel de reparto (`/repartidor`) |
+| `repartidor2@gaselvolcan.cl` | `Repart123` | Rodrigo Peña | Repartidor | Panel de reparto (`/repartidor`) |
 | `camila@gmail.com` | `Clien1234` | Camila Rojas | Cliente | Tienda |
 
 También se puede crear una cuenta de cliente nueva desde **Crear cuenta**.
@@ -92,6 +92,7 @@ Reglas de validación:
 | `/` | Inicio |
 | `/productos` | Catálogo con buscador y filtro por categoría |
 | `/producto/:codigo` | Detalle del producto |
+| `/ofertas` | Productos en oferta |
 | `/categorias` | Categorías |
 | `/categorias/:nombre` | Productos de una categoría y vistos recientemente |
 | `/nosotros` | Empresa y buscador de cobertura por comuna |
@@ -103,8 +104,11 @@ Reglas de validación:
 | `/compra-exitosa` · `/pago-rechazado` | Resultado del pago |
 | `/admin` | Panel de administración (solo administrador) |
 | `/admin/ordenes` | Listado de órdenes (solo administrador) |
+| `/admin/reportes` | Reportes del sistema (solo administrador) |
 | `/admin/productos` | Gestión de productos (solo administrador) |
 | `/admin/usuarios` | Gestión de usuarios (solo administrador) |
+| `/despacho` | Pedidos del día y asignación a repartidores (solo despachadora) |
+| `/repartidor` | Pedidos asignados y marcar entregados (solo repartidor) |
 
 ---
 
@@ -139,7 +143,7 @@ npm run test:coverage   # con cobertura
 
 Las pruebas usan **Vitest** y corren en **jsdom**, un navegador simulado: no abren un navegador real. Cada archivo de prueba está junto al código que prueba, con el nombre `*.test.jsx` (por ejemplo `src/utilidades/pasarela.test.jsx`). `src/test/setup.js` limpia `localStorage` antes y después de cada prueba para que no se afecten entre sí.
 
-Hay **168 pruebas en 27 archivos**: renderizado, props, estado, eventos, las funciones CRUD de los datos, las validaciones de los formularios, el panel de administración y el recorrido completo de la compra (pago aprobado y rechazado).
+Hay **193 pruebas en 31 archivos**: renderizado, props, estado, eventos, las funciones CRUD de los datos, las validaciones de los formularios, los paneles de administración, despacho y reparto, y el recorrido completo de la compra (pago aprobado y rechazado).
 
 `npm run test:coverage` muestra la tabla en la terminal y genera el informe detallado en `coverage/index.html`. Se mide todo `src/`, excepto `main.jsx`, la configuración de pruebas y las pruebas mismas. La cobertura total es de **93 % de líneas**, y **cada archivo tiene al menos 80 %**: si alguno baja de ese mínimo, `npm run test:coverage` falla.
 

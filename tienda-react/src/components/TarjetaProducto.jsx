@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import EtiquetaStock from './EtiquetaStock'
-import { IMAGEN_RESPALDO } from '../datos/productos'
+import { usarImagenRespaldo } from '../utilidades/imagenes'
 
 // Tarjeta de un producto. Se usa en el catalogo, en los destacados
 // del inicio y en los relacionados del detalle.
@@ -22,14 +22,6 @@ function TarjetaProducto(props) {
 
     setAviso(resultado && resultado.ok === false ? "Sin stock" : "Agregado")
     setTimeout(() => setAviso(""), 1400)
-  }
-
-  function usarImagenRespaldo(evento) {
-    if (evento.currentTarget.src.endsWith(IMAGEN_RESPALDO)) {
-      return
-    }
-
-    evento.currentTarget.src = IMAGEN_RESPALDO
   }
 
   return (

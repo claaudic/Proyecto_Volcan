@@ -4,9 +4,10 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useSesion } from '../contexto/sesionContexto'
 import { useCarrito } from '../contexto/carritoContexto'
 import { crearPedido } from '../datos/pedidos'
-import { formatearPrecio, imagenDe, IMAGEN_RESPALDO } from '../datos/productos'
+import { formatearPrecio, imagenDe } from '../datos/productos'
 import { buscarUsuario } from '../datos/usuarios'
 import { normalizar } from '../datos/zonas'
+import { usarImagenRespaldo } from '../utilidades/imagenes'
 import {
     validarNombre,
     validarCorreo,
@@ -79,14 +80,6 @@ function Checkout() {
             ...anteriores,
             [name]: ''
         }))
-    }
-
-    function usarImagenRespaldo(evento) {
-        if (evento.currentTarget.src.endsWith(IMAGEN_RESPALDO)) {
-            return
-        }
-
-        evento.currentTarget.src = IMAGEN_RESPALDO
     }
 
     function validarFormulario() {

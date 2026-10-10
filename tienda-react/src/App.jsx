@@ -25,6 +25,7 @@ import AdminDashboard from './paginas/AdminDashboard'
 import AdminProductos from './paginas/AdminProductos'
 import AdminUsuarios from './paginas/AdminUsuarios'
 import AdminOrdenes from './paginas/AdminOrdenes'
+import AdminReportes from './paginas/AdminReportes'
 import NoEncontrada from './paginas/NoEncontrada'
 function App() {
   return (
@@ -53,6 +54,7 @@ function App() {
           <Route path="/categorias/:nombre" element={<Categorias />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/ordenes" element={<AdminOrdenes />} />
+          <Route path="/admin/reportes" element={<AdminReportes />} />
           <Route path="/admin/productos" element={<AdminProductos />} />
           <Route path="/admin/usuarios" element={<AdminUsuarios />} />
 

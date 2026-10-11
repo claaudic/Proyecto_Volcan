@@ -1,4 +1,6 @@
+import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
+import { Carousel } from 'bootstrap'
 import TarjetaProducto from '../components/TarjetaProducto'
 import { formatearPrecio, imagenDe } from '../datos/productos'
 import { useCatalogo } from '../contexto/catalogoContexto'
@@ -9,6 +11,17 @@ const CODIGOS_DESTACADOS = ["CL001", "CL002", "CL003", "CL004", "RG001", "MG004"
 
 function Inicio() {
   const { activos } = useCatalogo()
+  const carrusel = useRef(null)
+
+  // Bootstrap solo activa el avance automatico al cargar la pagina.
+  // Como React vuelve a crear el carrusel al regresar al inicio, se activa aqui
+  // y se libera al salir para no dejar temporizadores andando.
+  useEffect(() => {
+    const instancia = Carousel.getOrCreateInstance(carrusel.current)
+    instancia.cycle()
+
+    return () => instancia.dispose()
+  }, [])
 
   const destacados = CODIGOS_DESTACADOS
     .map((codigo) => activos.find((p) => p.codigo === codigo))
@@ -57,7 +70,7 @@ function Inicio() {
           <div className="hero-imagen">
             <span className="hero-piso" aria-hidden="true"></span>
 
-            <div id="carruselHero" className="carousel slide carousel-fade hero-carrusel" data-bs-ride="carousel" data-bs-interval="6500" data-bs-pause="hover">
+            <div ref={carrusel} id="carruselHero" className="carousel slide carousel-fade hero-carrusel" data-bs-ride="carousel" data-bs-interval="6500" data-bs-pause="hover">
 
               <div className="carousel-indicators">
                 <button type="button" data-bs-target="#carruselHero" data-bs-slide-to="0" className="active" aria-current="true" aria-label="Foto 1 de 3"></button>

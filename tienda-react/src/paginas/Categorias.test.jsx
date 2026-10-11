@@ -89,6 +89,18 @@ describe("Categorías: páginas", () => {
         expect(pantalla.textContent).toContain("No encontramos esa categoría");
     });
 
+    it("muestra el precio de oferta, igual que el que cobra el carrito", () => {
+        abrir("/categorias/cilindros-de-gas");
+
+        // CL002 (Cilindro GLP 11 kg) cuesta $12.000 y esta en oferta a $10.500
+        const tarjeta = Array.from(pantalla.querySelectorAll(".tarjeta-producto"))
+            .find((t) => t.querySelector("h3")?.textContent === "Cilindro GLP 11 kg");
+        const precio = tarjeta.querySelector(".precio");
+
+        expect(precio.textContent).toContain("$10.500");
+        expect(precio.querySelector(".text-decoration-line-through").textContent).toBe("$12.000");
+    });
+
     it("muestra los vistos recientemente solo si hay alguno", () => {
         abrir("/categorias/reguladores");
         expect(pantalla.textContent).not.toContain("Vistos recientemente");

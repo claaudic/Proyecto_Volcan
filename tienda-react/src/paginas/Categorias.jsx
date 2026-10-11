@@ -5,6 +5,7 @@ import { useCarrito } from '../contexto/carritoContexto'
 import { useCatalogo } from '../contexto/catalogoContexto'
 import { formatearPrecio, imagenDe } from '../datos/productos'
 import { agruparPorCategoria } from '../datos/categorias'
+import { ofertaDeProducto, precioProducto } from '../datos/ofertas'
 import { leerVistos } from '../datos/vistos'
 import { abrirPanelCarrito } from '../utilidades/panelCarrito'
 
@@ -115,19 +116,26 @@ function VistaCategoria({ grupos, activos, slug }) {
 function ListaProductos({ productos, alAnadir }) {
   return (
     <ul className="row g-4 list-unstyled">
-      {productos.map((producto) => (
-        <li key={producto.codigo} className="col-12 col-sm-6 col-lg-3">
-          <TarjetaProducto
-            codigo={producto.codigo}
-            nombre={producto.nombre}
-            categoria={producto.categoria}
-            precio={formatearPrecio(producto.precioResidencial)}
-            imagen={imagenDe(producto)}
-            stock={producto.stock}
-            alAnadir={() => alAnadir(producto.codigo)}
-          />
-        </li>
-      ))}
+      {productos.map((producto) => {
+        // Si el producto esta en oferta, se muestra el mismo precio que cobra el carrito
+        const oferta = ofertaDeProducto(producto.codigo)
+
+        return (
+          <li key={producto.codigo} className="col-12 col-sm-6 col-lg-3">
+            <TarjetaProducto
+              codigo={producto.codigo}
+              nombre={producto.nombre}
+              categoria={producto.categoria}
+              precio={formatearPrecio(precioProducto(producto))}
+              precioAnterior={oferta ? formatearPrecio(producto.precioResidencial) : null}
+              etiquetaOferta={oferta?.etiqueta}
+              imagen={imagenDe(producto)}
+              stock={producto.stock}
+              alAnadir={() => alAnadir(producto.codigo)}
+            />
+          </li>
+        )
+      })}
     </ul>
   )
 }

@@ -153,7 +153,7 @@ function Despachadora() {
                     </p>
 
                     <h1 id="titulo-despacho">
-                        Gestión de pedidos del día
+                        Gestión de pedidos
                     </h1>
 
                     <p className="pagina-bajada">
@@ -182,7 +182,7 @@ function Despachadora() {
                         id="titulo-resumen-despacho"
                         className="visually-hidden"
                     >
-                        Resumen del día
+                        Resumen de pedidos
                     </h2>
 
                     <div className="row g-4">
@@ -193,7 +193,7 @@ function Despachadora() {
                                 </div>
                                 <div>
                                     <p className="tarjeta-dato-texto">
-                                        Pedidos del día
+                                        Pedidos registrados
                                     </p>
                                     <p className="tarjeta-dato-numero">
                                         {resumen.total}
@@ -277,7 +277,7 @@ function Despachadora() {
                         <div>
                             <p className="panel-etiqueta">Pedidos</p>
                             <h2 id="titulo-pedidos-despacho">
-                                Pedidos de hoy
+                                Todos los pedidos
                             </h2>
                         </div>
 
@@ -289,7 +289,7 @@ function Despachadora() {
                     {pedidos.length === 0 ? (
                         <div className="panel-vacio">
                             <h3>No hay pedidos registrados</h3>
-                            <p>Los pedidos del día aparecerán aquí.</p>
+                            <p>Los pedidos aparecerán aquí.</p>
                         </div>
                     ) : (
                         <div className="tabla-marco">

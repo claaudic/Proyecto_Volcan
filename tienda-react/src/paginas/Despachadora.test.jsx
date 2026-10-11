@@ -46,8 +46,8 @@ describe('Panel de despachadora', () => {
   it('muestra resumen y pedidos para despacho', () => {
     renderizar(<Despachadora />, { usuario: DESPACHADORA, pedidos: PEDIDOS })
 
-    expect(screen.getByRole('heading', { name: 'Gestión de pedidos del día' })).toBeInTheDocument()
-    expect(valorDeTarjeta('Pedidos del día')).toHaveTextContent('3')
+    expect(screen.getByRole('heading', { name: 'Gestión de pedidos' })).toBeInTheDocument()
+    expect(valorDeTarjeta('Pedidos registrados')).toHaveTextContent('3')
     expect(valorDeTarjeta('Pendientes')).toHaveTextContent('1')
     expect(valorDeTarjeta('En camino')).toHaveTextContent('1')
     expect(valorDeTarjeta('Entregados')).toHaveTextContent('1')

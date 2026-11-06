@@ -7,6 +7,8 @@ import { MemoryRouter, Routes, Route } from "react-router-dom";
 import ProveedorCarrito from "../contexto/ProveedorCarrito";
 import ProveedorCatalogo from "../contexto/ProveedorCatalogo";
 import ProveedorSesion from "../contexto/ProveedorSesion";
+import { CLAVE_SESION } from "../datos/usuarios";
+import { guardarSesionDePrueba } from "./api";
 
 // Le avisa a React que estamos en un entorno de pruebas.
 // Sin esto, act() funciona igual pero imprime una advertencia.
@@ -40,7 +42,7 @@ export function montarConRouter(elemento) {
 export function montarEnTienda(elemento, carritoInicial = null) {
     localStorage.removeItem("carritoVolcan");
     localStorage.removeItem("productosSistema");
-    localStorage.removeItem("usuarioActivo");
+    localStorage.removeItem(CLAVE_SESION);
 
     if (carritoInicial) {
         localStorage.setItem(
@@ -67,7 +69,7 @@ export function montarEnTienda(elemento, carritoInicial = null) {
         desmontarOriginal();
         localStorage.removeItem("carritoVolcan");
         localStorage.removeItem("productosSistema");
-        localStorage.removeItem("usuarioActivo");
+        localStorage.removeItem(CLAVE_SESION);
     };
 
     return contenedor;
@@ -96,7 +98,7 @@ export function clic(elemento) {
 //   opciones.carrito: la pagina parte con ese carrito, por ejemplo [{ codigo: "CL001", cantidad: 2 }]
 // Parte con todo limpio y lo limpia al terminar.
 const CLAVES_TIENDA = [
-    "carritoVolcan", "productosSistema", "usuarioActivo",
+    "carritoVolcan", "productosSistema", CLAVE_SESION,
     "usuariosSistema", "cuentasEliminadas", "pedidos_volcan",
     "productosVistos"
 ];
@@ -105,7 +107,7 @@ export function montarEnRuta(url, rutas, opciones = {}) {
     CLAVES_TIENDA.forEach((clave) => localStorage.removeItem(clave));
 
     if (opciones.usuario) {
-        localStorage.setItem("usuarioActivo", JSON.stringify(opciones.usuario));
+        guardarSesionDePrueba(opciones.usuario);
     }
 
     if (opciones.carrito) {

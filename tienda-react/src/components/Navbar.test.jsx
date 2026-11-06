@@ -3,6 +3,7 @@ import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import Navbar from './Navbar'
 import { renderizar, ADMIN, CLIENTE } from '../test/renderizar'
+import { CLAVE_SESION } from '../datos/usuarios'
 
 // Pruebas de eventos de la barra de navegacion
 
@@ -18,7 +19,7 @@ describe('Navbar', () => {
 
     // 3 Comprobar
     expect(screen.getByRole('link', { name: 'Ingresar' })).toBeInTheDocument()
-    expect(localStorage.getItem('usuarioActivo')).toBeNull()
+    expect(localStorage.getItem(CLAVE_SESION)).toBeNull()
   })
 
   it('al administrador le muestra la insignia que lleva a su panel', () => {

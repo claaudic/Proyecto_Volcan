@@ -1,5 +1,6 @@
 export const CLAVE_USUARIOS = "usuariosSistema"
-export const CLAVE_SESION = "usuarioActivo"
+// La sesion guarda { token, usuario }. Desde la EP3 el token lo entrega ms-usuarios.
+export const CLAVE_SESION = "sesionVolcan"
 
 // Las cuentas base estan escritas en el codigo.
 export const CLAVE_ELIMINADAS = "cuentasEliminadas"
@@ -769,11 +770,11 @@ export function leerSesion() {
   }
 }
 
-export function guardarSesion(usuario) {
-  if (usuario) {
+export function guardarSesion(sesion) {
+  if (sesion) {
     localStorage.setItem(
         CLAVE_SESION,
-        JSON.stringify(usuario)
+        JSON.stringify(sesion)
     )
   } else {
     localStorage.removeItem(

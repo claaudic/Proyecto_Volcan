@@ -3,13 +3,15 @@ import { MemoryRouter } from "react-router-dom";
 import { montar, escribir } from "../test/ayuda";
 import { act } from "react";
 import ProveedorSesion from "../contexto/ProveedorSesion";
+import { guardarSesionDePrueba } from "../test/api";
 import Perfil from "./Perfil";
 import {
     actualizarCuenta,
     eliminarCuenta,
     buscarUsuario,
     buscarCuenta,
-    registrarCliente
+    registrarCliente,
+    CLAVE_SESION
 } from "../datos/usuarios";
 
 // Pruebas del perfil: editar y eliminar la cuenta,
@@ -18,7 +20,7 @@ import {
 function limpiar() {
     localStorage.removeItem("usuariosSistema");
     localStorage.removeItem("cuentasEliminadas");
-    localStorage.removeItem("usuarioActivo");
+    localStorage.removeItem(CLAVE_SESION);
     localStorage.removeItem("pedidos_volcan");
 }
 
@@ -71,9 +73,7 @@ describe("Perfil: página", () => {
 
     // Inicia sesion como Camila antes de montar la pagina
     function montarPerfil() {
-        localStorage.setItem("usuarioActivo", JSON.stringify({
-            nombre: "Camila Rojas", correo: "camila@gmail.com", rol: "CLIENTE"
-        }));
+        guardarSesionDePrueba({ nombre: "Camila Rojas", correo: "camila@gmail.com", rol: "CLIENTE" });
 
         contenedor = montar(
             <MemoryRouter>
@@ -125,7 +125,7 @@ describe("Perfil: página", () => {
 
         expect(contenedor.querySelector(".mensaje-exito").textContent).toBe("Tus datos quedaron guardados.");
         expect(buscarUsuario("camila@gmail.com").nombre).toBe("Camila Rojas Díaz");
-        expect(JSON.parse(localStorage.getItem("usuarioActivo")).nombre).toBe("Camila Rojas Díaz");
+        expect(JSON.parse(localStorage.getItem(CLAVE_SESION)).usuario.nombre).toBe("Camila Rojas Díaz");
     });
 
     it("no guarda si falta la dirección de despacho", () => {

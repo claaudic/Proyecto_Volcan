@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { act } from "react";
 import { MemoryRouter } from "react-router-dom";
 import { montar, montarEnRuta, escribir } from "../test/ayuda";
@@ -10,7 +10,8 @@ import Inicio from "./Inicio";
 import DetalleProducto from "./DetalleProducto";
 import Registro from "./Registro";
 import Navbar from "../components/Navbar";
-import { buscarCuenta } from "../datos/usuarios";
+import { CLAVE_SESION } from "../datos/usuarios";
+import { simularApi, respuestaLogin } from "../test/api";
 
 // Pruebas de las paginas de la tienda que no tenian pruebas:
 // Inicio, Detalle del producto, Registro y la barra de navegacion.
@@ -85,7 +86,13 @@ describe("Registro", () => {
         expect(pantalla.querySelector("#paginaInicio")).toBeNull();
     });
 
-    it("con datos válidos crea la cuenta y lleva al inicio", () => {
+    it("con datos válidos crea la cuenta en ms-usuarios y lleva al inicio", async () => {
+        const ana = { id: 6, nombre: "Ana", apellidos: "Soto", correo: "ana.soto@gmail.com", rol: "CLIENTE", activo: true };
+        const api = simularApi({
+            "POST /auth/registro": () => [201, ana],
+            "POST /auth/login": () => [200, respuestaLogin(ana)]
+        });
+
         escribir(pantalla.querySelector("#nombre"), "Ana");
         escribir(pantalla.querySelector("#apellidos"), "Soto");
         escribir(pantalla.querySelector("#correo"), "ana.soto@gmail.com");
@@ -93,8 +100,27 @@ describe("Registro", () => {
         escribir(pantalla.querySelector("#repetir"), "Ana1234");
         enviar();
 
-        expect(pantalla.querySelector("#paginaInicio")).not.toBeNull();
-        expect(buscarCuenta("ana.soto@gmail.com", "Ana1234")).not.toBeNull();
+        await vi.waitFor(() => expect(pantalla.querySelector("#paginaInicio")).not.toBeNull());
+        // Se envio el registro y despues se inicio sesion con la cuenta nueva
+        expect(JSON.parse(api.mock.calls[0][1].body).correo).toBe("ana.soto@gmail.com");
+        expect(JSON.parse(localStorage.getItem(CLAVE_SESION)).usuario.nombre).toBe("Ana Soto");
+    });
+
+    it("avisa si el correo ya tiene una cuenta", async () => {
+        simularApi({
+            "POST /auth/registro": () => [400, { estado: 400, mensaje: "Ya existe un usuario con ese correo." }]
+        });
+
+        escribir(pantalla.querySelector("#nombre"), "Camila");
+        escribir(pantalla.querySelector("#apellidos"), "Rojas");
+        escribir(pantalla.querySelector("#correo"), "camila@gmail.com");
+        escribir(pantalla.querySelector("#contrasena"), "Clien1234");
+        escribir(pantalla.querySelector("#repetir"), "Clien1234");
+        enviar();
+
+        await vi.waitFor(() =>
+            expect(pantalla.querySelector("[role=alert]").textContent).toBe("Ya existe un usuario con ese correo."));
+        expect(pantalla.querySelector("#paginaInicio")).toBeNull();
     });
 
 });
@@ -144,7 +170,7 @@ describe("Página no encontrada (404)", () => {
 
     // Se monta la App completa para probar su ruta "*" de verdad
     function abrirApp(url) {
-        localStorage.removeItem("usuarioActivo");
+        localStorage.removeItem(CLAVE_SESION);
         pantalla = montar(
             <MemoryRouter initialEntries={[url]}>
                 <ProveedorSesion>

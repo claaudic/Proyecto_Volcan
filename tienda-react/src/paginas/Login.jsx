@@ -27,6 +27,8 @@ function Login() {
   const [errores, setErrores] = useState({ correo: "", contrasena: "" })
   const [mostrar, setMostrar] = useState(false)
   const [mensaje, setMensaje] = useState("")
+  // Mientras se espera al backend, el boton queda desactivado
+  const [enviando, setEnviando] = useState(false)
 
   const { iniciarSesion } = useSesion()
   const navegar = useNavigate()
@@ -45,7 +47,7 @@ function Login() {
     setErrores({ ...errores, contrasena: validarContrasena(valor) })
   }
 
-  function enviar(evento) {
+  async function enviar(evento) {
     evento.preventDefault()
 
     const nuevos = {
@@ -59,7 +61,10 @@ function Login() {
       return
     }
 
-    const resultado = iniciarSesion(correo, contrasena)
+    // Se pregunta a ms-usuarios (POST /api/v1/auth/login)
+    setEnviando(true)
+    const resultado = await iniciarSesion(correo, contrasena)
+    setEnviando(false)
 
     if (!resultado.ok) {
       setMensaje(resultado.mensaje)
@@ -160,7 +165,9 @@ function Login() {
                 <div className="mensaje-login" role="alert">{mensaje}</div>
               )}
 
-              <button type="submit" className="btn btn-principal boton-login">Iniciar sesión</button>
+              <button type="submit" className="btn btn-principal boton-login" disabled={enviando}>
+                {enviando ? "Ingresando…" : "Iniciar sesión"}
+              </button>
             </form>
 
             <p className="login-registro">

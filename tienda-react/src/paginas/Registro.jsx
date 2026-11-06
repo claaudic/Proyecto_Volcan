@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useSesion } from '../contexto/sesionContexto'
-import { correoRegistrado, registrarCliente } from '../datos/usuarios'
+import { pedir } from '../utilidades/api'
 import { buscarZona } from '../datos/zonas'
 import { claseCampo } from '../utilidades/formularios'
 import {
@@ -43,6 +43,7 @@ function Registro() {
   const [errores, setErrores] = useState({})
   const [mostrar, setMostrar] = useState(false)
   const [mensaje, setMensaje] = useState("")
+  const [enviando, setEnviando] = useState(false)
 
   const { iniciarSesion } = useSesion()
   const navegar = useNavigate()
@@ -72,7 +73,7 @@ function Registro() {
     setErrores({ ...errores, ...cambiosDeError })
   }
 
-  function enviar(evento) {
+  async function enviar(evento) {
     evento.preventDefault()
 
     // Al enviar se revisan todos los campos, por si alguno no se toco
@@ -89,17 +90,38 @@ function Registro() {
       return
     }
 
-    if (correoRegistrado(datos.correo)) {
-      setMensaje("Ese correo ya tiene una cuenta. Inicia sesión o usa otro.")
-      setErrores({ ...nuevos, correo: "Este correo ya está registrado." })
-      evento.target.elements.correo.focus()
+    setEnviando(true)
+
+    // ms-usuarios crea la cuenta, siempre como CLIENTE (POST /api/v1/auth/registro).
+    // Si el correo ya existe, responde 400 con el mensaje.
+    try {
+      await pedir("/auth/registro", {
+        metodo: "POST",
+        cuerpo: {
+          nombre: datos.nombre.trim(),
+          apellidos: datos.apellidos.trim(),
+          correo: datos.correo.trim(),
+          contrasena: datos.contrasena,
+          telefono: datos.telefono.trim(),
+          comuna: datos.comuna.trim(),
+          direccion: datos.direccion.trim()
+        }
+      })
+    } catch (error) {
+      setEnviando(false)
+      setMensaje(error.message)
       return
     }
 
-    registrarCliente(datos)
-
     // La cuenta nueva queda con la sesion iniciada
-    iniciarSesion(datos.correo, datos.contrasena)
+    const resultado = await iniciarSesion(datos.correo, datos.contrasena)
+    setEnviando(false)
+
+    if (!resultado.ok) {
+      setMensaje(resultado.mensaje)
+      return
+    }
+
     navegar("/")
   }
 
@@ -251,7 +273,9 @@ function Registro() {
 
               {mensaje && <div className="mensaje-login" role="alert">{mensaje}</div>}
 
-              <button type="submit" className="btn btn-principal boton-login">Crear mi cuenta</button>
+              <button type="submit" className="btn btn-principal boton-login" disabled={enviando}>
+                {enviando ? "Creando tu cuenta…" : "Crear mi cuenta"}
+              </button>
             </form>
 
             <p className="login-registro">

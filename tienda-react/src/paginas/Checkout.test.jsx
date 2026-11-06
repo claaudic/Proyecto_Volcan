@@ -2,6 +2,8 @@ import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import Checkout from "./Checkout";
 import { MemoryRouter } from "react-router-dom";
 import { montarEnTienda, montar, clic } from "../test/ayuda";
+import { guardarSesionDePrueba } from "../test/api";
+import { CLAVE_SESION } from "../datos/usuarios";
 import ProveedorSesion from "../contexto/ProveedorSesion";
 import ProveedorCatalogo from "../contexto/ProveedorCatalogo";
 import ProveedorCarrito from "../contexto/ProveedorCarrito";
@@ -49,7 +51,7 @@ describe("Checkout con sesión iniciada", () => {
 
     afterEach(() => {
         pantalla.desmontar();
-        localStorage.removeItem("usuarioActivo");
+        localStorage.removeItem(CLAVE_SESION);
         localStorage.removeItem("usuariosSistema");
     });
 
@@ -59,9 +61,7 @@ describe("Checkout con sesión iniciada", () => {
             nombre: "Camila Rojas", correo: "camila@gmail.com", contrasena: "Clien1234",
             rol: "CLIENTE", direccion: "Libertad 123", comuna: "chillan viejo"
         }]));
-        localStorage.setItem("usuarioActivo", JSON.stringify({
-            nombre: "Camila Rojas", correo: "camila@gmail.com", rol: "CLIENTE"
-        }));
+        guardarSesionDePrueba({ nombre: "Camila Rojas", correo: "camila@gmail.com", rol: "CLIENTE" });
 
         pantalla = montar(
             <MemoryRouter>

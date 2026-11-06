@@ -1,11 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
 import { useSesion } from '../contexto/sesionContexto'
 import { useCarrito } from '../contexto/carritoContexto'
 import { crearPedido } from '../datos/pedidos'
 import { formatearPrecio, imagenDe } from '../datos/productos'
-import { buscarUsuario } from '../datos/usuarios'
 import { normalizar } from '../datos/zonas'
 import { usarImagenRespaldo } from '../utilidades/imagenes'
 import {
@@ -24,36 +23,31 @@ import {
     ultimosCuatro
 } from '../utilidades/pasarela'
 
+const COMUNAS = [
+    'Chillán',
+    'Chillán Viejo',
+    'El Carmen',
+    'Pinto',
+    'San Ignacio',
+    'Bulnes',
+    'Quillón'
+]
+
 function Checkout() {
     const navigate = useNavigate()
     const { detalle, vaciar } = useCarrito()
-    const { usuario } = useSesion()
+    const { usuario, llamarApi } = useSesion()
     const { descontar } = useCatalogo()
-
-    const comunas = [
-        'Chillán',
-        'Chillán Viejo',
-        'El Carmen',
-        'Pinto',
-        'San Ignacio',
-        'Bulnes',
-        'Quillón'
-    ]
 
     // Si hay sesion, los datos de la cuenta se rellenan solos
     // (lo pide la Figura 6 de las instrucciones de la EP2).
-    // La comuna se busca en la lista sin importar tildes ni mayusculas.
-    const cuenta = usuario ? buscarUsuario(usuario.correo) : null
-    const comunaCuenta = comunas.find(
-        (c) => normalizar(c) === normalizar(cuenta?.comuna || '')
-    )
-
+    // El nombre y el correo ya estan en la sesion; el resto se pide al backend.
     const [formulario, setFormulario] = useState({
-        nombre: cuenta?.nombre || '',
-        correo: cuenta?.correo || '',
-        telefono: cuenta?.telefono || '',
-        direccion: cuenta?.direccion || '',
-        comuna: comunaCuenta || '',
+        nombre: usuario?.nombre || '',
+        correo: usuario?.correo || '',
+        telefono: '',
+        direccion: '',
+        comuna: '',
         indicaciones: '',
         // Datos de la tarjeta: viven solo en este estado, nunca se guardan
         numeroTarjeta: '',
@@ -67,6 +61,45 @@ function Checkout() {
     const [procesando, setProcesando] = useState(false)
 
     const [errores, setErrores] = useState({})
+
+    // GET /usuarios/yo: telefono, direccion y comuna guardados en el perfil.
+    // Solo rellena los campos vacios, para no borrar lo que ya se escribio.
+    // Si falla, no pasa nada: el cliente escribe sus datos a mano.
+    const correoSesion = usuario?.correo
+    useEffect(() => {
+        if (!correoSesion) {
+            return
+        }
+
+        let vigente = true
+
+        llamarApi('/usuarios/yo')
+            .then((cuenta) => {
+                if (!vigente) {
+                    return
+                }
+
+                // La comuna se busca en la lista sin importar tildes ni mayusculas
+                const deLaCuenta = {
+                    telefono: cuenta.telefono || '',
+                    direccion: cuenta.direccion || '',
+                    comuna: COMUNAS.find((c) => normalizar(c) === normalizar(cuenta.comuna || '')) || ''
+                }
+
+                setFormulario((actual) => {
+                    const relleno = { ...actual }
+                    Object.keys(deLaCuenta).forEach((campo) => {
+                        if (relleno[campo] === '') {
+                            relleno[campo] = deLaCuenta[campo]
+                        }
+                    })
+                    return relleno
+                })
+            })
+            .catch(() => {})
+
+        return () => { vigente = false }
+    }, [correoSesion, llamarApi])
 
     function manejarCambio(e) {
         const { name, value } = e.target
@@ -301,7 +334,7 @@ function Checkout() {
                                                     onChange={manejarCambio}
                                                 >
                                                     <option value="">Selecciona una comuna</option>
-                                                    {comunas.map((comuna) => (
+                                                    {COMUNAS.map((comuna) => (
                                                         <option key={comuna} value={comuna}>{comuna}</option>
                                                     ))}
                                                 </select>

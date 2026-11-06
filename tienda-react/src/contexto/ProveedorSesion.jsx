@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { SesionContexto } from "./sesionContexto";
 import { leerSesion, guardarSesion } from "../datos/usuarios";
 import { pedir, msHastaVencer } from "../utilidades/api";
@@ -88,20 +88,23 @@ function ProveedorSesion({ children }) {
 
   // Para las pantallas que llaman a rutas protegidas: agrega el token.
   // Si el backend responde 401 (token vencido o invalido), se cierra la sesion.
-  async function llamarApi(ruta, opciones = {}) {
+  // useCallback: la funcion solo cambia cuando cambia el token, asi las
+  // pantallas que la usan en un useEffect no piden los datos una y otra vez.
+  const token = sesion?.token;
+  const llamarApi = useCallback(async (ruta, opciones = {}) => {
     try {
-      return await pedir(ruta, { ...opciones, token: sesion?.token });
+      return await pedir(ruta, { ...opciones, token });
     } catch (error) {
       if (error.estado === 401) {
         setSesion(null);
       }
       throw error;
     }
-  }
+  }, [token]);
 
   const valor = {
     usuario: sesion?.usuario ?? null,
-    token: sesion?.token ?? null,
+    token: token ?? null,
     iniciarSesion,
     cerrarSesion,
     actualizarUsuario,

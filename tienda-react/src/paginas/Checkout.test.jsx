@@ -2,8 +2,8 @@ import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import Checkout from "./Checkout";
 import { MemoryRouter } from "react-router-dom";
 import { montarEnTienda, montar, clic } from "../test/ayuda";
-import { guardarSesionDePrueba } from "../test/api";
-import { CLAVE_SESION } from "../datos/usuarios";
+import { waitFor } from "@testing-library/react";
+import { guardarSesionDePrueba, simularApi, simularApiApagada, CUENTAS } from "../test/api";
 import ProveedorSesion from "../contexto/ProveedorSesion";
 import ProveedorCatalogo from "../contexto/ProveedorCatalogo";
 import ProveedorCarrito from "../contexto/ProveedorCarrito";
@@ -51,16 +51,9 @@ describe("Checkout con sesión iniciada", () => {
 
     afterEach(() => {
         pantalla.desmontar();
-        localStorage.removeItem(CLAVE_SESION);
-        localStorage.removeItem("usuariosSistema");
     });
 
-    it("rellena los datos con los de la cuenta", () => {
-        // Camila guardo su direccion y comuna en el perfil
-        localStorage.setItem("usuariosSistema", JSON.stringify([{
-            nombre: "Camila Rojas", correo: "camila@gmail.com", contrasena: "Clien1234",
-            rol: "CLIENTE", direccion: "Libertad 123", comuna: "chillan viejo"
-        }]));
+    function abrirCheckout() {
         guardarSesionDePrueba({ nombre: "Camila Rojas", correo: "camila@gmail.com", rol: "CLIENTE" });
 
         pantalla = montar(
@@ -74,11 +67,32 @@ describe("Checkout con sesión iniciada", () => {
                 </ProveedorSesion>
             </MemoryRouter>
         );
+    }
 
+    it("rellena los datos con los de la cuenta (GET /usuarios/yo)", async () => {
+        // Camila guardo su direccion y comuna en el perfil (la comuna sin tilde)
+        simularApi({
+            "GET /usuarios/yo": () => [200, { ...CUENTAS.camila, telefono: "+56 9 1234 5678", direccion: "Libertad 123", comuna: "chillan viejo" }]
+        });
+        abrirCheckout();
+
+        // El nombre y el correo salen de la sesion, sin esperar al backend
         expect(pantalla.querySelector("#nombre").value).toBe("Camila Rojas");
-        expect(pantalla.querySelector("#direccion").value).toBe("Libertad 123");
+        expect(pantalla.querySelector("#correo").value).toBe("camila@gmail.com");
+
+        await waitFor(() => expect(pantalla.querySelector("#direccion").value).toBe("Libertad 123"));
+        expect(pantalla.querySelector("#telefono").value).toBe("+56 9 1234 5678");
         // Escrita sin tilde en la cuenta, igual se reconoce
         expect(pantalla.querySelector("#comuna").value).toBe("Chillán Viejo");
+    });
+
+    it("si el backend no responde, el cliente igual puede escribir sus datos", async () => {
+        const api = simularApiApagada();
+        abrirCheckout();
+
+        await waitFor(() => expect(api).toHaveBeenCalled());
+        expect(pantalla.querySelector("#nombre").value).toBe("Camila Rojas");
+        expect(pantalla.querySelector("#direccion").value).toBe("");
     });
 
 });

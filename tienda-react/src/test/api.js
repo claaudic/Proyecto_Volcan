@@ -18,6 +18,7 @@ export const CUENTAS = {
   admin: { id: 1, nombre: 'Sofía', apellidos: 'Pérez', correo: 'admin@gaselvolcan.cl', rol: 'ADMINISTRADOR', activo: true },
   despachadora: { id: 2, nombre: 'Daniela', apellidos: 'Fuentes', correo: 'despachadora@gaselvolcan.cl', rol: 'DESPACHADORA', activo: true },
   repartidor: { id: 3, nombre: 'Matías', apellidos: 'Vera', correo: 'repartidor@gaselvolcan.cl', rol: 'REPARTIDOR', activo: true },
+  repartidor2: { id: 4, nombre: 'Rodrigo', apellidos: 'Peña', correo: 'repartidor2@gaselvolcan.cl', rol: 'REPARTIDOR', activo: true },
   camila: { id: 5, nombre: 'Camila', apellidos: 'Rojas', correo: 'camila@gmail.com', rol: 'CLIENTE', activo: true }
 }
 
@@ -33,6 +34,14 @@ export function simularApi(rutas) {
     const cuerpo = opciones.body ? JSON.parse(opciones.body) : undefined
     const [estado, datos] = await manejador(cuerpo, opciones.headers || {})
     return responder(estado, datos)
+  })
+}
+
+// Las listas de cuentas que piden los paneles (las 5 cuentas de la EP2)
+export function simularApiDeUsuarios() {
+  return simularApi({
+    'GET /usuarios': () => [200, Object.values(CUENTAS)],
+    'GET /usuarios/repartidores': () => [200, [CUENTAS.repartidor, CUENTAS.repartidor2]]
   })
 }
 

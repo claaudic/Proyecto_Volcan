@@ -1,10 +1,11 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import AdminOrdenes from './AdminOrdenes'
 import AdminDashboard from './AdminDashboard'
 import { leerPedidos } from '../datos/pedidos'
 import { renderizar, ADMIN, CLIENTE, pedidoDeEjemplo } from '../test/renderizar'
+import { simularApiDeUsuarios, simularApiApagada } from '../test/api'
 
 // Pruebas de las vistas del administrador que leen los pedidos:
 // Ordenes y el inicio del panel.
@@ -23,6 +24,11 @@ function filas() {
 function filaConPedido(numero) {
   return filas().find((fila) => fila.textContent.includes(`#${numero}`))
 }
+
+// Los repartidores llegan de ms-usuarios (simulado)
+beforeEach(() => {
+  simularApiDeUsuarios()
+})
 
 describe('Órdenes del administrador', () => {
 
@@ -89,6 +95,7 @@ describe('Órdenes del administrador', () => {
       within(filaConPedido(3)).getByRole('button', { name: /Editar/ })
     )
     await user.selectOptions(screen.getByLabelText('Estado'), 'En camino')
+    await screen.findByRole('option', { name: /Matías Vera/ })
     await user.selectOptions(
       screen.getByLabelText('Repartidor'),
       'repartidor@gaselvolcan.cl'
@@ -101,6 +108,14 @@ describe('Órdenes del administrador', () => {
     expect(pedido.repartidor).toBe('repartidor@gaselvolcan.cl')
     expect(within(filaConPedido(3)).getByText('En camino')).toHaveClass('estado-camino')
     expect(within(filaConPedido(3)).getByText('Matías Vera')).toBeInTheDocument()
+  })
+
+  it('si el backend no responde, avisa que faltan los repartidores', async () => {
+    simularApiApagada()
+    renderizar(<AdminOrdenes />, { usuario: ADMIN, pedidos: PEDIDOS })
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('No se pudo cargar la lista de repartidores.')
+    expect(filas()).toHaveLength(4)
   })
 
   it('elimina una orden solo después de confirmar', async () => {

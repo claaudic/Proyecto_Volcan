@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { SesionContexto } from "./sesionContexto";
-import { leerSesion, guardarSesion } from "../datos/usuarios";
+import { leerSesion, guardarSesion, nombreCompleto } from "../datos/usuarios";
 import { pedir, msHastaVencer } from "../utilidades/api";
 
 // Envuelve a la aplicacion y le dice quien tiene la sesion iniciada.
@@ -23,7 +23,7 @@ function desdeRespuesta({ token, usuario }) {
     token,
     usuario: {
       id: usuario.id,
-      nombre: (usuario.nombre + " " + usuario.apellidos).trim(),
+      nombre: nombreCompleto(usuario),
       correo: usuario.correo,
       rol: usuario.rol
     }

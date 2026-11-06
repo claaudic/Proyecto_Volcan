@@ -1,10 +1,11 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import Despachadora from './Despachadora'
 import { leerPedidos } from '../datos/pedidos'
 import { renderizar, CLIENTE, pedidoDeEjemplo } from '../test/renderizar'
+import { simularApiDeUsuarios, simularApiApagada } from '../test/api'
 
 const DESPACHADORA = {
   nombre: 'Daniela Fuentes',
@@ -37,6 +38,11 @@ function valorDeTarjeta(etiqueta) {
 
 describe('Panel de despachadora', () => {
 
+  // Los repartidores llegan de ms-usuarios (simulado)
+  beforeEach(() => {
+    simularApiDeUsuarios()
+  })
+
   it('un cliente no puede entrar', () => {
     renderizar(<Despachadora />, { usuario: CLIENTE })
 
@@ -58,6 +64,8 @@ describe('Panel de despachadora', () => {
     const user = userEvent.setup()
     renderizar(<Despachadora />, { usuario: DESPACHADORA, pedidos: PEDIDOS })
 
+    // Espera a que lleguen los repartidores del backend
+    await within(filaConPedido(3)).findByRole('option', { name: 'Matías Vera' })
     await user.selectOptions(
       within(filaConPedido(3)).getByLabelText('Asignar repartidor al pedido 3'),
       'repartidor@gaselvolcan.cl'
@@ -73,6 +81,15 @@ describe('Panel de despachadora', () => {
     expect(pedido.estado).toBe('En camino')
     expect(valorDeTarjeta('Pendientes')).toHaveTextContent('0')
     expect(valorDeTarjeta('En camino')).toHaveTextContent('2')
+  })
+
+  it('si el backend no responde, avisa que faltan los repartidores', async () => {
+    simularApiApagada()
+    renderizar(<Despachadora />, { usuario: DESPACHADORA, pedidos: PEDIDOS })
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('No se pudo cargar la lista de repartidores.')
+    // Los pedidos se siguen viendo
+    expect(filas()).toHaveLength(3)
   })
 
   it('avisa si no hay pedidos', () => {

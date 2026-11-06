@@ -1,12 +1,13 @@
-import { startTransition, useEffect, useState } from 'react'
+import { startTransition, useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useSesion } from '../contexto/sesionContexto'
-import { nombreDeRol, panelDeRol } from '../datos/usuarios'
+import { nombreCompleto, nombreDeRol, panelDeRol } from '../datos/usuarios'
 import { leerPedidos } from '../datos/pedidos'
 import { formatearPrecio } from '../datos/productos'
 import { buscarZona } from '../datos/zonas'
 import { claseCampo } from '../utilidades/formularios'
 import { validarTexto, validarTelefono, validarDireccion } from '../utilidades/validaciones'
+import { useApi } from '../utilidades/useApi'
 
 // Migrado desde perfil.html y js/perfil.js.
 
@@ -25,20 +26,7 @@ function Perfil() {
 // Pide los datos de la cuenta a ms-usuarios (GET /usuarios/yo) y,
 // cuando llegan, muestra la ficha. El backend sabe quien es por el token.
 function CargaPerfil({ usuario }) {
-  const { llamarApi } = useSesion()
-  const [cuenta, setCuenta] = useState(null)
-  const [error, setError] = useState("")
-
-  useEffect(() => {
-    // Si se sale de la pagina antes de que responda, no se toca el estado
-    let vigente = true
-
-    llamarApi("/usuarios/yo")
-      .then((datos) => vigente && setCuenta(datos))
-      .catch((falla) => vigente && setError(falla.message))
-
-    return () => { vigente = false }
-  }, [llamarApi])
+  const { datos: cuenta, error } = useApi("/usuarios/yo")
 
   if (!cuenta) {
     return (
@@ -154,7 +142,7 @@ function FichaPerfil({ usuario, cuenta }) {
       })
 
       // Asi el navbar muestra las iniciales nuevas
-      actualizarUsuario({ nombre: (editada.nombre + " " + editada.apellidos).trim() })
+      actualizarUsuario({ nombre: nombreCompleto(editada) })
       setGuardado("Tus datos quedaron guardados.")
     } catch (error) {
       // El mensaje viene del backend, por ejemplo una validacion

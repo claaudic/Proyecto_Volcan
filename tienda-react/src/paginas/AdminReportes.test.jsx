@@ -1,9 +1,10 @@
-import { describe, it, expect, vi } from 'vitest'
-import { screen, within } from '@testing-library/react'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { screen, within, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import AdminReportes from './AdminReportes'
 import { renderizar, ADMIN, CLIENTE, pedidoDeEjemplo } from '../test/renderizar'
+import { simularApiDeUsuarios, simularApiApagada } from '../test/api'
 
 const PEDIDOS = [
   pedidoDeEjemplo({ numero: 1, estado: 'Pendiente', total: 6500 }),
@@ -24,27 +25,32 @@ function filaCon(texto) {
 
 describe('Reportes del administrador', () => {
 
+  // Las cuentas llegan de ms-usuarios (simulado)
+  beforeEach(() => {
+    simularApiDeUsuarios()
+  })
+
   it('un cliente no puede entrar', () => {
     renderizar(<AdminReportes />, { usuario: CLIENTE })
 
     expect(screen.getByRole('heading', { name: 'Página de login' })).toBeInTheDocument()
   })
 
-  it('muestra resumen de usuarios y pedidos', () => {
+  it('muestra resumen de usuarios y pedidos', async () => {
     renderizar(<AdminReportes />, { usuario: ADMIN, pedidos: PEDIDOS })
 
     expect(screen.getByRole('heading', { name: 'Reportes del sistema' })).toBeInTheDocument()
-    expect(valorDeTarjeta('Usuarios registrados')).toHaveTextContent('5')
+    await waitFor(() => expect(valorDeTarjeta('Usuarios registrados')).toHaveTextContent('5'))
     expect(valorDeTarjeta('Usuarios activos')).toHaveTextContent('5')
     expect(valorDeTarjeta('Pedidos registrados')).toHaveTextContent('4')
     expect(valorDeTarjeta('Pedidos entregados')).toHaveTextContent('1')
     expect(screen.getByText('$27.490')).toBeInTheDocument()
   })
 
-  it('agrupa usuarios por rol y pedidos por estado', () => {
+  it('agrupa usuarios por rol y pedidos por estado', async () => {
     renderizar(<AdminReportes />, { usuario: ADMIN, pedidos: PEDIDOS })
 
-    expect(within(filaCon('Administradores')).getByText('1')).toBeInTheDocument()
+    expect(await within(filaCon('Administradores')).findByText('1')).toBeInTheDocument()
     expect(within(filaCon('Despachadoras')).getByText('1')).toBeInTheDocument()
     expect(within(filaCon('Repartidores')).getByText('2')).toBeInTheDocument()
     expect(within(filaCon('Clientes')).getByText('1')).toBeInTheDocument()
@@ -53,6 +59,14 @@ describe('Reportes del administrador', () => {
     expect(within(filaCon('En camino')).getByText('1')).toBeInTheDocument()
     expect(within(filaCon('Cancelado')).getByText('1')).toBeInTheDocument()
     expect(within(filaCon('Entregado')).getByText('1')).toBeInTheDocument()
+  })
+
+  it('si el backend no responde, avisa y muestra los pedidos igual', async () => {
+    simularApiApagada()
+    renderizar(<AdminReportes />, { usuario: ADMIN, pedidos: PEDIDOS })
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('No se pudo cargar la lista de usuarios.')
+    expect(valorDeTarjeta('Pedidos registrados')).toHaveTextContent('4')
   })
 
   it('descarga un reporte CSV', async () => {

@@ -784,6 +784,19 @@ export function guardarSesion(sesion) {
 }
 
 // =========================================
+// NOMBRE COMPLETO
+// =========================================
+
+// ms-usuarios manda nombre y apellidos por separado:
+// { nombre: "Camila", apellidos: "Rojas" } -> "Camila Rojas"
+export function nombreCompleto(cuenta) {
+  return [cuenta?.nombre, cuenta?.apellidos]
+      .filter(Boolean)
+      .join(" ")
+      .trim()
+}
+
+// =========================================
 // INICIALES
 // =========================================
 

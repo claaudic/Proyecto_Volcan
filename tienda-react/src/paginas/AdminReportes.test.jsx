@@ -3,7 +3,7 @@ import { screen, within, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import AdminReportes from './AdminReportes'
-import { renderizar, ADMIN, CLIENTE, pedidoDeEjemplo } from '../test/renderizar'
+import { renderizar, ADMIN, pedidoDeEjemplo } from '../test/renderizar'
 import { simularApiDeUsuarios, simularApiApagada } from '../test/api'
 
 const PEDIDOS = [
@@ -28,12 +28,6 @@ describe('Reportes del administrador', () => {
   // Las cuentas llegan de ms-usuarios (simulado)
   beforeEach(() => {
     simularApiDeUsuarios()
-  })
-
-  it('un cliente no puede entrar', () => {
-    renderizar(<AdminReportes />, { usuario: CLIENTE })
-
-    expect(screen.getByRole('heading', { name: 'Página de login' })).toBeInTheDocument()
   })
 
   it('muestra resumen de usuarios y pedidos', async () => {

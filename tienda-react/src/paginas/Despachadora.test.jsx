@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event'
 
 import Despachadora from './Despachadora'
 import { leerPedidos } from '../datos/pedidos'
-import { renderizar, CLIENTE, pedidoDeEjemplo } from '../test/renderizar'
+import { renderizar, pedidoDeEjemplo } from '../test/renderizar'
 import { simularApiDeUsuarios, simularApiApagada } from '../test/api'
 
 const DESPACHADORA = {
@@ -41,12 +41,6 @@ describe('Panel de despachadora', () => {
   // Los repartidores llegan de ms-usuarios (simulado)
   beforeEach(() => {
     simularApiDeUsuarios()
-  })
-
-  it('un cliente no puede entrar', () => {
-    renderizar(<Despachadora />, { usuario: CLIENTE })
-
-    expect(screen.getByRole('heading', { name: 'Página de login' })).toBeInTheDocument()
   })
 
   it('muestra resumen y pedidos para despacho', () => {

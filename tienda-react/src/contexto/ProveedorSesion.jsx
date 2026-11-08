@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { SesionContexto } from "./sesionContexto";
 import { leerSesion, guardarSesion, nombreCompleto } from "../datos/usuarios";
-import { pedir, msHastaVencer } from "../utilidades/api";
+import { pedir, msHastaVencer, leerToken } from "../utilidades/api";
 
 // Envuelve a la aplicacion y le dice quien tiene la sesion iniciada.
 // Desde la EP3 la sesion es { token, usuario } y la entrega ms-usuarios.
@@ -33,6 +33,27 @@ function desdeRespuesta({ token, usuario }) {
 function ProveedorSesion({ children }) {
   // null significa que nadie ha iniciado sesion
   const [sesion, setSesion] = useState(sesionVigente);
+  // El token con que se abrio la app (para confirmarlo una sola vez con el backend)
+  const [tokenAlAbrir] = useState(() => sesion?.token);
+
+  // Al abrir la app con una sesion guardada, se confirma con ms-usuarios.
+  // Si alguien altero el token o la cuenta ya no existe, responde 401 y se cierra.
+  // Si no hay conexion, se mantiene (llamarApi la cerrara si despues llega un 401).
+  useEffect(() => {
+    if (!tokenAlAbrir) {
+      return;
+    }
+
+    pedir("/usuarios/yo", { token: tokenAlAbrir })
+      .then((cuenta) => setSesion((actual) => actual?.token === tokenAlAbrir
+        ? { ...actual, usuario: { ...actual.usuario, nombre: nombreCompleto(cuenta) } }
+        : actual))
+      .catch((error) => {
+        if (error.estado === 401) {
+          setSesion((actual) => actual?.token === tokenAlAbrir ? null : actual);
+        }
+      });
+  }, [tokenAlAbrir]);
 
   // Cada vez que cambia la sesion, se guarda (o se borra si es null)
   useEffect(() => {
@@ -102,8 +123,16 @@ function ProveedorSesion({ children }) {
     }
   }, [token]);
 
+  // El rol, el correo y el id se leen del TOKEN (firmado por ms-usuarios), no del dato
+  // guardado: cambiar "rol" en el localStorage no da permisos, y cambiar el token
+  // rompe su firma, asi que el backend lo rechaza (401) y la sesion se cierra.
+  const datosToken = token ? leerToken(token) : null;
+  const usuario = sesion && datosToken
+    ? { ...sesion.usuario, correo: datosToken.sub, rol: datosToken.rol, id: datosToken.id ?? sesion.usuario?.id }
+    : null;
+
   const valor = {
-    usuario: sesion?.usuario ?? null,
+    usuario,
     token: token ?? null,
     iniciarSesion,
     cerrarSesion,

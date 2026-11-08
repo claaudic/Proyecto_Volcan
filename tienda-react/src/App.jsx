@@ -30,6 +30,12 @@ import AdminReportes from './paginas/AdminReportes'
 import Despachadora from './paginas/Despachadora'
 import Repartidor from './paginas/Repartidor'
 import NoEncontrada from './paginas/NoEncontrada'
+import RutaProtegida from './components/RutaProtegida'
+
+// Quien puede entrar a cada panel (el backend repite estas reglas)
+const SOLO_ADMIN = ['ADMINISTRADOR']
+const SOLO_DESPACHADORA = ['DESPACHADORA']
+const SOLO_REPARTIDOR = ['REPARTIDOR']
 function App() {
   return (
     <>
@@ -50,19 +56,19 @@ function App() {
         <Route path="/contacto" element={<Contacto />} />
         <Route path="/login" element={<Login />} />
         <Route path="/registro" element={<Registro />} />
-        <Route path="/perfil" element={<Perfil />} />
+        <Route path="/perfil" element={<RutaProtegida><Perfil /></RutaProtegida>} />
         <Route path="/checkout" element={<Checkout />} />
           <Route path="/compra-exitosa" element={<CompraExitosa />} />
           <Route path="/pago-rechazado" element={<PagoRechazado />} />
           <Route path="/categorias" element={<Categorias />} />
           <Route path="/categorias/:nombre" element={<Categorias />} />
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/admin/ordenes" element={<AdminOrdenes />} />
-          <Route path="/admin/reportes" element={<AdminReportes />} />
-          <Route path="/admin/productos" element={<AdminProductos />} />
-          <Route path="/admin/usuarios" element={<AdminUsuarios />} />
-          <Route path="/despacho" element={<Despachadora />} />
-          <Route path="/repartidor" element={<Repartidor />} />
+          <Route path="/admin" element={<RutaProtegida roles={SOLO_ADMIN}><AdminDashboard /></RutaProtegida>} />
+          <Route path="/admin/ordenes" element={<RutaProtegida roles={SOLO_ADMIN}><AdminOrdenes /></RutaProtegida>} />
+          <Route path="/admin/reportes" element={<RutaProtegida roles={SOLO_ADMIN}><AdminReportes /></RutaProtegida>} />
+          <Route path="/admin/productos" element={<RutaProtegida roles={SOLO_ADMIN}><AdminProductos /></RutaProtegida>} />
+          <Route path="/admin/usuarios" element={<RutaProtegida roles={SOLO_ADMIN}><AdminUsuarios /></RutaProtegida>} />
+          <Route path="/despacho" element={<RutaProtegida roles={SOLO_DESPACHADORA}><Despachadora /></RutaProtegida>} />
+          <Route path="/repartidor" element={<RutaProtegida roles={SOLO_REPARTIDOR}><Repartidor /></RutaProtegida>} />
 
         {/* Va al final: cualquier direccion que no coincida con las de arriba */}
         <Route path="*" element={<NoEncontrada />} />

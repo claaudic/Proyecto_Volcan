@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event'
 import AdminOrdenes from './AdminOrdenes'
 import AdminDashboard from './AdminDashboard'
 import { leerPedidos } from '../datos/pedidos'
-import { renderizar, ADMIN, CLIENTE, pedidoDeEjemplo } from '../test/renderizar'
+import { renderizar, ADMIN, pedidoDeEjemplo } from '../test/renderizar'
 import { simularApiDeUsuarios, simularApiApagada } from '../test/api'
 
 // Pruebas de las vistas del administrador que leen los pedidos:
@@ -31,12 +31,6 @@ beforeEach(() => {
 })
 
 describe('Órdenes del administrador', () => {
-
-  it('un cliente no puede entrar', () => {
-    renderizar(<AdminOrdenes />, { usuario: CLIENTE })
-
-    expect(screen.getByRole('heading', { name: 'Página de login' })).toBeInTheDocument()
-  })
 
   it('lista todos los pedidos, del más reciente al más antiguo', () => {
     renderizar(<AdminOrdenes />, { usuario: ADMIN, pedidos: PEDIDOS })

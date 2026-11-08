@@ -1,6 +1,4 @@
 import { useState } from 'react'
-import { Navigate } from 'react-router-dom'
-import { useSesion } from '../contexto/sesionContexto'
 import { useCatalogo } from '../contexto/catalogoContexto'
 import { formatearPrecio } from '../datos/productos'
 
@@ -18,7 +16,6 @@ const FORMULARIO_VACIO = {
 }
 
 function AdminProductos() {
-    const { usuario } = useSesion()
 
     const {
         productos,
@@ -32,10 +29,6 @@ function AdminProductos() {
     const [mostrarFormulario, setMostrarFormulario] = useState(false)
     const [productoABorrar, setProductoABorrar] = useState(null)
     const [errores, setErrores] = useState({})
-
-    if (!usuario || usuario.rol !== 'ADMINISTRADOR') {
-        return <Navigate to="/login" replace />
-    }
 
     const totalProductos = productos.length
 

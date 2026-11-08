@@ -10,7 +10,6 @@ import AdminUsuarios from "./AdminUsuarios";
 // y que cada vista muestre los datos del sistema.
 
 const ADMIN = { nombre: "Sofía Pérez", correo: "admin@gaselvolcan.cl", rol: "ADMINISTRADOR" };
-const CLIENTE = { nombre: "Camila Rojas", correo: "camila@gmail.com", rol: "CLIENTE" };
 
 describe("Panel de administración: acceso", () => {
 
@@ -18,18 +17,6 @@ describe("Panel de administración: acceso", () => {
 
     afterEach(() => {
         pantalla.desmontar();
-    });
-
-    it("sin sesión manda al login", () => {
-        pantalla = montarEnRuta("/admin", { "/admin": <AdminDashboard /> });
-
-        expect(pantalla.querySelector("#paginaLogin")).not.toBeNull();
-    });
-
-    it("un cliente tampoco puede entrar", () => {
-        pantalla = montarEnRuta("/admin/productos", { "/admin/productos": <AdminProductos /> }, { usuario: CLIENTE });
-
-        expect(pantalla.querySelector("#paginaLogin")).not.toBeNull();
     });
 
     it("el administrador ve su panel", () => {

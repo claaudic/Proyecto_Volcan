@@ -5,6 +5,7 @@ import { renderizar, CLIENTE, pedidoDeEjemplo } from "../test/renderizar";
 import { simularApi, simularApiApagada, CUENTAS } from "../test/api";
 import { SIN_CONEXION } from "../utilidades/api";
 import Perfil from "./Perfil";
+import RutaProtegida from "../components/RutaProtegida";
 import { CLAVE_SESION } from "../datos/usuarios";
 
 // Pruebas del perfil: los datos se leen, guardan y eliminan en ms-usuarios
@@ -15,8 +16,9 @@ describe("Perfil: página conectada a ms-usuarios", () => {
     // Camila ya guardo su telefono y su direccion en la base
     const CAMILA_EN_BASE = { ...CUENTAS.camila, telefono: "+56 9 1234 5678", comuna: "Chillán", direccion: "Libertad 123" };
 
+    // Como en App.jsx: el perfil va dentro de RutaProtegida (sin sesion → login)
     function abrirPerfil() {
-        renderizar(<Perfil />, { usuario: CLIENTE });
+        renderizar(<RutaProtegida><Perfil /></RutaProtegida>, { usuario: CLIENTE });
     }
 
     it("carga los datos de la cuenta con GET /usuarios/yo y el token", async () => {
@@ -83,7 +85,7 @@ describe("Perfil: página conectada a ms-usuarios", () => {
         await user.click(await screen.findByRole("button", { name: "Guardar cambios" }));
 
         expect(screen.getByText("Ingresa tu dirección de despacho.")).toBeInTheDocument();
-        expect(api).toHaveBeenCalledTimes(1);
+        expect(api.mock.calls.some(([, opciones]) => opciones.method === "PUT")).toBe(false);
     });
 
     it("elimina la cuenta con DELETE /usuarios/yo y cierra la sesión", async () => {

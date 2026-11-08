@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event'
 
 import Repartidor from './Repartidor'
 import { leerPedidos } from '../datos/pedidos'
-import { renderizar, CLIENTE, pedidoDeEjemplo } from '../test/renderizar'
+import { renderizar, pedidoDeEjemplo } from '../test/renderizar'
 
 const REPARTIDOR = {
   nombre: 'Matías Vera',
@@ -38,12 +38,6 @@ function valorDeTarjeta(etiqueta) {
 }
 
 describe('Panel de repartidor', () => {
-
-  it('un cliente no puede entrar', () => {
-    renderizar(<Repartidor />, { usuario: CLIENTE })
-
-    expect(screen.getByRole('heading', { name: 'Página de login' })).toBeInTheDocument()
-  })
 
   it('muestra solo los pedidos asignados al repartidor', () => {
     renderizar(<Repartidor />, { usuario: REPARTIDOR, pedidos: PEDIDOS })

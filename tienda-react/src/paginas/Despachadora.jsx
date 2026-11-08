@@ -1,7 +1,5 @@
 import { useState } from 'react'
-import { Navigate } from 'react-router-dom'
 
-import { useSesion } from '../contexto/sesionContexto'
 import {
     actualizarPedido,
     leerPedidos
@@ -77,17 +75,10 @@ function comunaEntrega(pedido) {
 }
 
 function Despachadora() {
-    const { usuario } = useSesion()
     const [pedidos, setPedidos] = useState(() => ordenarPorFecha(leerPedidos()))
 
     // ms-usuarios entrega solo los repartidores activos
-    const lista = useApi(
-        usuario?.rol === 'DESPACHADORA' ? '/usuarios/repartidores' : null
-    )
-
-    if (!usuario || usuario.rol !== 'DESPACHADORA') {
-        return <Navigate to="/login" replace />
-    }
+    const lista = useApi('/usuarios/repartidores')
 
     const repartidores = lista.datos || []
 

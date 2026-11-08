@@ -1,19 +1,12 @@
-import { Link, Navigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
-import { useSesion } from '../contexto/sesionContexto'
 import { useCatalogo } from '../contexto/catalogoContexto'
 
 import { leerPedidos } from '../datos/pedidos'
 import { formatearPrecio } from '../datos/productos'
 
 function AdminDashboard() {
-    const { usuario } = useSesion()
     const { productos } = useCatalogo()
-
-    // Solo puede entrar el administrador
-    if (!usuario || usuario.rol !== 'ADMINISTRADOR') {
-        return <Navigate to="/login" replace />
-    }
 
     const pedidos = leerPedidos()
 

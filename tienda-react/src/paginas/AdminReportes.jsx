@@ -1,7 +1,6 @@
 import { useState } from 'react'
-import { Link, Navigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
-import { useSesion } from '../contexto/sesionContexto'
 import { leerPedidos } from '../datos/pedidos'
 import { formatearPrecio } from '../datos/productos'
 import { nombreCompleto } from '../datos/usuarios'
@@ -202,17 +201,10 @@ function armarReporteCsv(usuarios, pedidos, nombreRepartidor) {
 }
 
 function AdminReportes() {
-    const { usuario } = useSesion()
     const [avisoDescarga, setAvisoDescarga] = useState('')
 
     // Todas las cuentas de ms-usuarios (activas e inactivas)
-    const lista = useApi(
-        usuario?.rol === 'ADMINISTRADOR' ? '/usuarios' : null
-    )
-
-    if (!usuario || usuario.rol !== 'ADMINISTRADOR') {
-        return <Navigate to="/login" replace />
-    }
+    const lista = useApi('/usuarios')
 
     const usuarios = lista.datos || []
     const pedidos = leerPedidos()

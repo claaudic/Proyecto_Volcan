@@ -1,14 +1,13 @@
-import { describe, it, expect, afterEach } from "vitest";
+import { describe, it, expect } from "vitest";
 import {
     validarCorreoCliente,
     validarRepeticion,
     validarTelefono
 } from "../utilidades/validaciones";
 import { buscarZona } from "../datos/zonas";
-import { registrarCliente, correoRegistrado, buscarCuenta } from "../datos/usuarios";
 
-// Pruebas del registro de clientes: sus reglas de validacion,
-// el aviso de cobertura y que la cuenta nueva quede guardada.
+// Pruebas del registro de clientes: sus reglas de validacion y el aviso de cobertura.
+// El registro contra ms-usuarios se prueba en Tienda.test.jsx.
 
 describe("Registro: validaciones", () => {
 
@@ -41,31 +40,6 @@ describe("Registro: zonas de reparto", () => {
 
     it("devuelve null si no repartimos en esa comuna", () => {
         expect(buscarZona("Concepción")).toBeNull();
-    });
-
-});
-
-describe("Registro: cuenta nueva", () => {
-
-    afterEach(() => {
-        localStorage.removeItem("usuariosSistema");
-    });
-
-    it("guarda la cuenta como cliente y permite iniciar sesión con ella", () => {
-        expect(correoRegistrado("nueva@gmail.com")).toBe(false);
-
-        registrarCliente({
-            nombre: "Ana",
-            apellidos: "Soto",
-            correo: "Nueva@Gmail.com",
-            contrasena: "Ana1234"
-        });
-
-        expect(correoRegistrado("nueva@gmail.com")).toBe(true);
-
-        const cuenta = buscarCuenta("nueva@gmail.com", "Ana1234");
-        expect(cuenta.nombre).toBe("Ana Soto");
-        expect(cuenta.rol).toBe("CLIENTE");
     });
 
 });

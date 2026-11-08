@@ -1,72 +1,14 @@
-import { describe, it, expect, afterEach } from "vitest";
+import { describe, it, expect } from "vitest";
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { renderizar, CLIENTE, pedidoDeEjemplo } from "../test/renderizar";
 import { simularApi, simularApiApagada, CUENTAS } from "../test/api";
 import { SIN_CONEXION } from "../utilidades/api";
 import Perfil from "./Perfil";
-import {
-    actualizarCuenta,
-    eliminarCuenta,
-    buscarUsuario,
-    buscarCuenta,
-    registrarCliente,
-    CLAVE_SESION
-} from "../datos/usuarios";
+import { CLAVE_SESION } from "../datos/usuarios";
 
 // Pruebas del perfil: los datos se leen, guardan y eliminan en ms-usuarios
 // (simulado con un fetch falso), y cada cliente ve solo sus propios pedidos.
-// El primer grupo prueba las funciones locales que aun usa Admin Usuarios.
-
-function limpiar() {
-    localStorage.removeItem("usuariosSistema");
-    localStorage.removeItem("cuentasEliminadas");
-    localStorage.removeItem(CLAVE_SESION);
-    localStorage.removeItem("pedidos_volcan");
-}
-
-describe("Perfil: datos de la cuenta", () => {
-
-    afterEach(limpiar);
-
-    it("actualiza una cuenta base sin cambiar su correo ni su rol", () => {
-        actualizarCuenta("camila@gmail.com", {
-            nombre: "Camila Rojas Díaz",
-            telefono: "+56 9 1234 5678",
-            correo: "otro@gmail.com",
-            rol: "ADMINISTRADOR"
-        });
-
-        const cuenta = buscarUsuario("camila@gmail.com");
-        expect(cuenta.nombre).toBe("Camila Rojas Díaz");
-        expect(cuenta.telefono).toBe("+56 9 1234 5678");
-        expect(cuenta.rol).toBe("CLIENTE");
-        expect(buscarUsuario("otro@gmail.com")).toBeNull();
-
-        // La contrasena original sigue sirviendo para entrar
-        expect(buscarCuenta("camila@gmail.com", "Clien1234")).not.toBeNull();
-    });
-
-    it("una cuenta eliminada ya no puede iniciar sesión", () => {
-        eliminarCuenta("camila@gmail.com");
-
-        expect(buscarCuenta("camila@gmail.com", "Clien1234")).toBeNull();
-    });
-
-    it("un correo eliminado se puede volver a registrar", () => {
-        eliminarCuenta("camila@gmail.com");
-
-        registrarCliente({
-            nombre: "Camila",
-            apellidos: "Rojas",
-            correo: "camila@gmail.com",
-            contrasena: "Nueva123"
-        });
-
-        expect(buscarCuenta("camila@gmail.com", "Nueva123")).not.toBeNull();
-    });
-
-});
 
 describe("Perfil: página conectada a ms-usuarios", () => {
 

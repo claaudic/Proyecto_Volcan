@@ -1,5 +1,7 @@
 import { describe, it, expect, afterEach } from "vitest";
 import { montarEnRuta, clic } from "../test/ayuda";
+import { waitFor } from "@testing-library/react";
+import { simularBackendDeUsuarios } from "../test/api";
 import AdminDashboard from "./AdminDashboard";
 import AdminProductos from "./AdminProductos";
 import AdminUsuarios from "./AdminUsuarios";
@@ -73,14 +75,18 @@ describe("Panel de administración: vistas", () => {
         expect(pantalla.querySelectorAll(".tabla-panel tbody tr").length).toBe(14);
     });
 
-    it("Usuarios lista las 5 cuentas del sistema", () => {
+    // Las cuentas llegan de ms-usuarios (simulado)
+    it("Usuarios lista las 5 cuentas del sistema", async () => {
+        simularBackendDeUsuarios();
         pantalla = montarEnRuta("/admin/usuarios", { "/admin/usuarios": <AdminUsuarios /> }, { usuario: ADMIN });
 
-        expect(pantalla.querySelectorAll(".tabla-panel tbody tr").length).toBe(5);
+        await waitFor(() => expect(pantalla.querySelectorAll(".tabla-panel tbody tr").length).toBe(5));
     });
 
-    it("no deja que el administrador elimine su propia cuenta", () => {
+    it("no deja que el administrador elimine su propia cuenta", async () => {
+        simularBackendDeUsuarios();
         pantalla = montarEnRuta("/admin/usuarios", { "/admin/usuarios": <AdminUsuarios /> }, { usuario: ADMIN });
+        await waitFor(() => expect(pantalla.textContent).toContain("admin@gaselvolcan.cl"));
 
         const filaAdmin = Array.from(pantalla.querySelectorAll(".tabla-panel tbody tr"))
             .find((fila) => fila.textContent.includes("admin@gaselvolcan.cl"));

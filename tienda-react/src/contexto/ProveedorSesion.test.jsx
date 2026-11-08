@@ -5,7 +5,7 @@ import ProveedorSesion from "./ProveedorSesion";
 import { useSesion } from "./sesionContexto";
 import { CLAVE_SESION } from "../datos/usuarios";
 import { simularApi, respuestaLogin, guardarSesionDePrueba, CUENTAS } from "../test/api";
-import { leerToken, msHastaVencer } from "../utilidades/api";
+import { leerToken, msHastaVencer, API_URL } from "../utilidades/api";
 
 // Pruebas de la sesion con token: se recupera al recargar, se renueva sola
 // antes de vencer y se cierra si el token ya no sirve.
@@ -132,6 +132,22 @@ describe("Sesión: llamadas protegidas y logout", () => {
         const guardada = JSON.parse(localStorage.getItem(CLAVE_SESION));
         expect(guardada.usuario.nombre).toBe("Camila Rojas Díaz");
         expect(guardada.token).not.toBeNull();
+    });
+
+});
+
+describe("Dirección del backend", () => {
+
+    it("React llama solo al API Gateway (8080), nunca directo a los microservicios", async () => {
+        guardarSesionDePrueba(CAMILA);
+        const api = simularApi({ "GET /usuarios/yo": () => [200, CUENTAS.camila] });
+        montar();
+
+        await act(() => sesion.llamarApi("/usuarios/yo"));
+
+        expect(API_URL).toBe("http://localhost:8080/api/v1");
+        expect(api.mock.calls[0][0]).toBe("http://localhost:8080/api/v1/usuarios/yo");
+        expect(api.mock.calls[0][0]).not.toMatch(/:808[123]\//);
     });
 
 });

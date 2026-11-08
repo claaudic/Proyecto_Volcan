@@ -99,7 +99,7 @@ export function clic(elemento) {
 // Parte con todo limpio y lo limpia al terminar.
 const CLAVES_TIENDA = [
     "carritoVolcan", "productosSistema", CLAVE_SESION,
-    "usuariosSistema", "cuentasEliminadas", "pedidos_volcan",
+    "pedidos_volcan",
     "productosVistos"
 ];
 

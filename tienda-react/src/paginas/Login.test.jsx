@@ -57,7 +57,8 @@ describe("Login: redirección por rol", () => {
         await entrarCon(user, "admin@gaselvolcan.cl", "Admin1234");
 
         expect(await screen.findByText("Panel admin")).toBeInTheDocument();
-        expect(api).toHaveBeenCalledWith("http://localhost:8081/api/v1/auth/login", expect.objectContaining({ method: "POST" }));
+        // Por el API Gateway (8080), nunca directo a ms-usuarios (8081)
+        expect(api).toHaveBeenCalledWith("http://localhost:8080/api/v1/auth/login", expect.objectContaining({ method: "POST" }));
 
         const sesion = JSON.parse(localStorage.getItem(CLAVE_SESION));
         expect(sesion.token.split(".")).toHaveLength(3);

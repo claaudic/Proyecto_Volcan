@@ -1,9 +1,11 @@
-// Conexion con el backend (ms-usuarios).
+// Conexion con el backend.
 // Todas las llamadas pasan por pedir(): arma la peticion, agrega el token
 // y convierte los errores del backend en un mensaje que se puede mostrar.
 
-// Direccion de ms-usuarios. Se puede cambiar con VITE_API_USUARIOS en un archivo .env
-export const API_USUARIOS = import.meta.env.VITE_API_USUARIOS || "http://localhost:8081/api/v1"
+// React habla SOLO con el API Gateway (8080); el Gateway reparte cada ruta
+// a ms-usuarios, ms-catalogo o ms-pedidos. Nunca se llama directo a 8081, 8082 u 8083.
+// Se puede cambiar con VITE_API_URL en un archivo .env (por ejemplo, al desplegar).
+export const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api/v1"
 
 export const SIN_CONEXION = "No pudimos conectar con el servidor. Revisa tu conexión e intenta de nuevo."
 const ERROR_GENERAL = "Ocurrió un error inesperado. Intenta de nuevo."
@@ -31,7 +33,7 @@ export async function pedir(ruta, { metodo = "GET", cuerpo, token } = {}) {
 
   let respuesta
   try {
-    respuesta = await fetch(API_USUARIOS + ruta, {
+    respuesta = await fetch(API_URL + ruta, {
       method: metodo,
       headers: encabezados,
       body: cuerpo === undefined ? undefined : JSON.stringify(cuerpo)

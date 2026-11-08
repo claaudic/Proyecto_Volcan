@@ -1,8 +1,8 @@
 import { vi } from 'vitest'
-import { API_USUARIOS } from '../utilidades/api'
+import { API_URL } from '../utilidades/api'
 import { CLAVE_SESION } from '../datos/usuarios'
 
-// Ayuda para probar las pantallas que llaman a ms-usuarios sin encender el backend.
+// Ayuda para probar las pantallas que llaman al backend sin encenderlo.
 // Reemplaza fetch por un backend de mentira que responde lo que le indicamos:
 //
 //   simularApi({
@@ -24,7 +24,7 @@ export const CUENTAS = {
 
 export function simularApi(rutas) {
   return vi.spyOn(globalThis, 'fetch').mockImplementation(async (url, opciones = {}) => {
-    const ruta = (opciones.method || 'GET') + ' ' + String(url).replace(API_USUARIOS, '')
+    const ruta = (opciones.method || 'GET') + ' ' + String(url).replace(API_URL, '')
     const manejador = rutas[ruta]
 
     if (!manejador) {
@@ -43,6 +43,48 @@ export function simularApiDeUsuarios() {
     'GET /usuarios': () => [200, Object.values(CUENTAS)],
     'GET /usuarios/repartidores': () => [200, [CUENTAS.repartidor, CUENTAS.repartidor2]]
   })
+}
+
+// Un ms-usuarios de mentira CON MEMORIA, para Admin Usuarios:
+// parte con las 5 cuentas de la EP2 y responde GET, POST, PUT y DELETE /usuarios.
+// Devuelve { api, cuentas } para revisar qué quedó "guardado".
+export function simularBackendDeUsuarios() {
+  let cuentas = Object.values(CUENTAS).map((cuenta) => ({ ...cuenta }))
+  let siguienteId = 100
+  const existe = (correo, salvoId) => cuentas.some((c) => c.correo === correo && c.id !== salvoId)
+  const repetido = [400, { estado: 400, mensaje: 'Ya existe un usuario con ese correo.' }]
+
+  const api = vi.spyOn(globalThis, 'fetch').mockImplementation(async (url, opciones = {}) => {
+    const metodo = opciones.method || 'GET'
+    const ruta = String(url).replace(API_URL, '')
+    const cuerpo = opciones.body ? JSON.parse(opciones.body) : undefined
+    const id = Number(ruta.split('/')[2])
+
+    if (metodo === 'GET' && ruta === '/usuarios') {
+      return responder(200, cuentas)
+    }
+    if (metodo === 'POST' && ruta === '/usuarios') {
+      if (existe(cuerpo.correo)) return responder(...repetido)
+      const nueva = { ...cuerpo, id: siguienteId++, activo: true }
+      delete nueva.contrasena
+      cuentas.push(nueva)
+      return responder(201, nueva)
+    }
+    if (metodo === 'PUT' && cuentas.some((c) => c.id === id)) {
+      if (existe(cuerpo.correo, id)) return responder(...repetido)
+      cuentas = cuentas.map((c) => c.id === id
+        ? { ...c, ...cuerpo, contrasena: undefined, activo: cuerpo.activo ?? c.activo }
+        : c)
+      return responder(200, cuentas.find((c) => c.id === id))
+    }
+    if (metodo === 'DELETE' && cuentas.some((c) => c.id === id)) {
+      cuentas = cuentas.filter((c) => c.id !== id)
+      return responder(204)
+    }
+    return responder(404, { estado: 404, mensaje: 'La ruta no existe.' })
+  })
+
+  return { api, cuentas: () => cuentas }
 }
 
 // El backend apagado: fetch falla sin respuesta

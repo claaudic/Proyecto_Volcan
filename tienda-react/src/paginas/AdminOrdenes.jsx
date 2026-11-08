@@ -8,7 +8,8 @@ import {
     leerPedidos
 } from '../datos/pedidos'
 import { formatearPrecio } from '../datos/productos'
-import { leerUsuarios, nombreDeRol } from '../datos/usuarios'
+import { nombreCompleto, nombreDeRol } from '../datos/usuarios'
+import { useApi } from '../utilidades/useApi'
 
 const ESTADOS_PEDIDO = [
     'Pendiente',
@@ -145,15 +146,16 @@ function AdminOrdenes() {
         repartidor: ''
     })
 
+    // ms-usuarios entrega solo los repartidores activos
+    const lista = useApi(
+        usuario?.rol === 'ADMINISTRADOR' ? '/usuarios/repartidores' : null
+    )
+
     if (!usuario || usuario.rol !== 'ADMINISTRADOR') {
         return <Navigate to="/login" replace />
     }
 
-    const repartidores = leerUsuarios().filter(
-        (cuenta) =>
-            cuenta.rol === 'REPARTIDOR' &&
-            cuenta.activo !== false
-    )
+    const repartidores = lista.datos || []
 
     function refrescarPedidos() {
         setPedidos(ordenarPorFecha(leerPedidos()))
@@ -197,7 +199,7 @@ function AdminOrdenes() {
                 String(correo).toLowerCase()
         )
 
-        return repartidor ? repartidor.nombre : correo
+        return repartidor ? nombreCompleto(repartidor) : correo
     }
 
     function abrirEditar(pedido) {
@@ -302,6 +304,12 @@ function AdminOrdenes() {
                                 <h2 id="titulo-ordenes">Todas las órdenes</h2>
                             </div>
                         </div>
+
+                        {lista.error && (
+                            <div className="alert alert-warning" role="alert">
+                                No se pudo cargar la lista de repartidores. {lista.error}
+                            </div>
+                        )}
 
                         <div className="tabla-marco table-responsive">
                             <table className="tabla-panel">
@@ -684,7 +692,7 @@ function AdminOrdenes() {
                                                             key={repartidor.correo}
                                                             value={repartidor.correo}
                                                         >
-                                                            {repartidor.nombre} -{' '}
+                                                            {nombreCompleto(repartidor)} -{' '}
                                                             {nombreDeRol(
                                                                 repartidor.rol
                                                             )}

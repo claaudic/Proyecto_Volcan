@@ -9,6 +9,7 @@ import { CLAVE_CATALOGO } from "../datos/catalogo";
 import { CLAVE_SESION } from "../datos/usuarios";
 import { imagenDe } from "../datos/productos";
 import { clic, escribir, montar } from "../test/ayuda";
+import { guardarSesionDePrueba } from "../test/api";
 
 function seleccionar(campo, valor) {
     const asignar = Object.getOwnPropertyDescriptor(
@@ -24,14 +25,11 @@ function seleccionar(campo, valor) {
 
 function montarAdminProductos() {
     localStorage.removeItem(CLAVE_CATALOGO);
-    localStorage.setItem(
-        CLAVE_SESION,
-        JSON.stringify({
-            nombre: "Sofía Pérez",
-            correo: "admin@gaselvolcan.cl",
-            rol: "ADMINISTRADOR"
-        })
-    );
+    guardarSesionDePrueba({
+        nombre: "Sofía Pérez",
+        correo: "admin@gaselvolcan.cl",
+        rol: "ADMINISTRADOR"
+    });
 
     const pantalla = montar(
         <MemoryRouter>

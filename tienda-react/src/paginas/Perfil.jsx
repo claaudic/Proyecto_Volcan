@@ -1,12 +1,13 @@
 import { startTransition, useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useSesion } from '../contexto/sesionContexto'
-import { buscarUsuario, actualizarCuenta, eliminarCuenta, nombreDeRol, panelDeRol } from '../datos/usuarios'
+import { nombreCompleto, nombreDeRol, panelDeRol } from '../datos/usuarios'
 import { leerPedidos } from '../datos/pedidos'
 import { formatearPrecio } from '../datos/productos'
 import { buscarZona } from '../datos/zonas'
 import { claseCampo } from '../utilidades/formularios'
 import { validarTexto, validarTelefono, validarDireccion } from '../utilidades/validaciones'
+import { useApi } from '../utilidades/useApi'
 
 // Migrado desde perfil.html y js/perfil.js.
 
@@ -19,7 +20,29 @@ function Perfil() {
     return <Navigate to="/login" replace />
   }
 
-  return <FichaPerfil key={usuario.correo} usuario={usuario} />
+  return <CargaPerfil key={usuario.correo} usuario={usuario} />
+}
+
+// Pide los datos de la cuenta a ms-usuarios (GET /usuarios/yo) y,
+// cuando llegan, muestra la ficha. El backend sabe quien es por el token.
+function CargaPerfil({ usuario }) {
+  const { datos: cuenta, error } = useApi("/usuarios/yo")
+
+  if (!cuenta) {
+    return (
+      <main>
+        <section className="perfil">
+          <div className="container">
+            {error
+              ? <div className="mensaje-login" role="alert">{error}</div>
+              : <p role="status">Cargando tus datos…</p>}
+          </div>
+        </section>
+      </main>
+    )
+  }
+
+  return <FichaPerfil usuario={usuario} cuenta={cuenta} />
 }
 
 const COMUNAS = ["Chillán", "Chillán Viejo", "El Carmen", "Pinto", "San Ignacio", "Bulnes", "Quillón"]
@@ -32,25 +55,28 @@ const CLASE_ESTADO = {
   "Cancelado": "estado-cancelado"
 }
 
-function FichaPerfil({ usuario }) {
-  const { cerrarSesion, actualizarUsuario } = useSesion()
+function FichaPerfil({ usuario, cuenta }) {
+  const { cerrarSesion, actualizarUsuario, llamarApi } = useSesion()
   const navegar = useNavigate()
 
   const esCliente = usuario.rol === "CLIENTE"
-  const cuenta = buscarUsuario(usuario.correo) || usuario
 
-  // El nombre se guarda completo; aqui se separa en nombre y apellidos
-  const partes = String(cuenta.nombre).trim().split(/\s+/)
+  // El nombre para el saludo (el navbar guarda el nombre completo)
+  const primerNombre = String(usuario.nombre).trim().split(/\s+/)[0]
 
+  // El backend ya manda nombre y apellidos por separado
   const [datos, setDatos] = useState({
-    nombre: partes[0] || "",
-    apellidos: partes.slice(1).join(" "),
+    nombre: cuenta.nombre || "",
+    apellidos: cuenta.apellidos || "",
     telefono: cuenta.telefono || "",
     direccion: cuenta.direccion || "",
     comuna: cuenta.comuna || ""
   })
   const [errores, setErrores] = useState({})
   const [guardado, setGuardado] = useState("")
+  // Error que manda el backend (por ejemplo, sin conexion)
+  const [mensaje, setMensaje] = useState("")
+  const [enviando, setEnviando] = useState(false)
   const [confirmandoBaja, setConfirmandoBaja] = useState(false)
 
   // La direccion solo es obligatoria para los clientes, que reciben pedidos
@@ -76,13 +102,14 @@ function FichaPerfil({ usuario }) {
 
     setDatos(nuevos)
     setGuardado("")
+    setMensaje("")
 
     if (reglas[name]) {
       setErrores({ ...errores, [name]: reglas[name](nuevos) })
     }
   }
 
-  function guardar(evento) {
+  async function guardar(evento) {
     evento.preventDefault()
 
     const nuevos = {}
@@ -98,22 +125,43 @@ function FichaPerfil({ usuario }) {
       return
     }
 
-    const nombreCompleto = datos.nombre.trim() + " " + datos.apellidos.trim()
+    setEnviando(true)
+    setMensaje("")
 
-    actualizarCuenta(usuario.correo, {
-      nombre: nombreCompleto,
-      telefono: datos.telefono.trim(),
-      direccion: datos.direccion.trim(),
-      comuna: datos.comuna.trim()
-    })
+    try {
+      // PUT /usuarios/yo: el correo y el rol no se envian, no se cambian aqui
+      const editada = await llamarApi("/usuarios/yo", {
+        metodo: "PUT",
+        cuerpo: {
+          nombre: datos.nombre.trim(),
+          apellidos: datos.apellidos.trim(),
+          telefono: datos.telefono.trim(),
+          comuna: datos.comuna.trim(),
+          direccion: datos.direccion.trim()
+        }
+      })
 
-    // Asi el navbar muestra las iniciales nuevas
-    actualizarUsuario({ nombre: nombreCompleto })
-    setGuardado("Tus datos quedaron guardados.")
+      // Asi el navbar muestra las iniciales nuevas
+      actualizarUsuario({ nombre: nombreCompleto(editada) })
+      setGuardado("Tus datos quedaron guardados.")
+    } catch (error) {
+      // El mensaje viene del backend, por ejemplo una validacion
+      setMensaje(error.message)
+    } finally {
+      setEnviando(false)
+    }
   }
 
-  function eliminar() {
-    eliminarCuenta(usuario.correo)
+  async function eliminar() {
+    setEnviando(true)
+
+    try {
+      await llamarApi("/usuarios/yo", { metodo: "DELETE" })
+    } catch (error) {
+      setMensaje(error.message)
+      setEnviando(false)
+      return
+    }
 
     // Cerrar la sesion y navegar van juntos en una transicion (React Router
     // navega asi). Si no, el perfil se dibuja sin usuario y manda al login.
@@ -135,7 +183,7 @@ function FichaPerfil({ usuario }) {
         <div className="container">
           <h1 id="titulo-perfil">Mi perfil</h1>
           <p className="pagina-bajada">
-            Hola, {partes[0]}. {esCliente
+            Hola, {primerNombre}. {esCliente
               ? "Revisa tus datos y el historial de tus pedidos."
               : "Revisa y actualiza tus datos de contacto."}
           </p>
@@ -224,8 +272,11 @@ function FichaPerfil({ usuario }) {
               )}
 
               {guardado && <div className="mensaje-exito" role="alert">{guardado}</div>}
+              {mensaje && <div className="mensaje-login" role="alert">{mensaje}</div>}
 
-              <button type="submit" className="btn btn-principal">Guardar cambios</button>
+              <button type="submit" className="btn btn-principal" disabled={enviando}>
+                {enviando ? "Guardando…" : "Guardar cambios"}
+              </button>
             </form>
 
             {/* Solo los clientes pueden eliminar su cuenta. Se pide confirmar antes. */}
@@ -236,7 +287,7 @@ function FichaPerfil({ usuario }) {
 
                 {confirmandoBaja ? (
                   <div className="d-flex flex-wrap gap-2">
-                    <button type="button" className="btn btn-peligro" onClick={eliminar}>
+                    <button type="button" className="btn btn-peligro" onClick={eliminar} disabled={enviando}>
                       Sí, eliminar mi cuenta
                     </button>
                     <button type="button" className="btn btn-secundario" onClick={() => setConfirmandoBaja(false)}>

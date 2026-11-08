@@ -6,7 +6,8 @@ import {
     actualizarPedido,
     leerPedidos
 } from '../datos/pedidos'
-import { leerUsuarios } from '../datos/usuarios'
+import { nombreCompleto } from '../datos/usuarios'
+import { useApi } from '../utilidades/useApi'
 
 const ESTADOS_PEDIDO = [
     'Pendiente',
@@ -79,15 +80,16 @@ function Despachadora() {
     const { usuario } = useSesion()
     const [pedidos, setPedidos] = useState(() => ordenarPorFecha(leerPedidos()))
 
+    // ms-usuarios entrega solo los repartidores activos
+    const lista = useApi(
+        usuario?.rol === 'DESPACHADORA' ? '/usuarios/repartidores' : null
+    )
+
     if (!usuario || usuario.rol !== 'DESPACHADORA') {
         return <Navigate to="/login" replace />
     }
 
-    const repartidores = leerUsuarios().filter(
-        (cuenta) =>
-            cuenta.rol === 'REPARTIDOR' &&
-            cuenta.activo !== false
-    )
+    const repartidores = lista.datos || []
 
     const resumen = pedidos.reduce(
         (totales, pedido) => {
@@ -273,6 +275,12 @@ function Despachadora() {
                     className="container panel-seccion"
                     aria-labelledby="titulo-pedidos-despacho"
                 >
+                    {lista.error && (
+                        <div className="alert alert-warning" role="alert">
+                            No se pudo cargar la lista de repartidores. {lista.error}
+                        </div>
+                    )}
+
                     <div className="panel-titulo">
                         <div>
                             <p className="panel-etiqueta">Pedidos</p>
@@ -345,7 +353,7 @@ function Despachadora() {
                                                                 key={repartidor.correo}
                                                                 value={repartidor.correo}
                                                             >
-                                                                {repartidor.nombre}
+                                                                {nombreCompleto(repartidor)}
                                                             </option>
                                                         )
                                                     )}

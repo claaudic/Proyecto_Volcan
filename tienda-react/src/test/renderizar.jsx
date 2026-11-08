@@ -3,6 +3,7 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import ProveedorSesion from '../contexto/ProveedorSesion'
 import ProveedorCatalogo from '../contexto/ProveedorCatalogo'
 import ProveedorCarrito from '../contexto/ProveedorCarrito'
+import { guardarSesionDePrueba } from './api'
 
 // Ayuda para las pruebas con Testing Library, como en la guia GameTech.
 // Monta una pagina con la sesion, el catalogo, el carrito y el router.
@@ -23,7 +24,7 @@ export function renderizar(elemento, opciones = {}) {
   const { ruta = '/', patron = '*', usuario, carrito, pedidos } = opciones
 
   if (usuario) {
-    localStorage.setItem('usuarioActivo', JSON.stringify(usuario))
+    guardarSesionDePrueba(usuario)
   }
   if (carrito) {
     localStorage.setItem('carritoVolcan', JSON.stringify(carrito))

@@ -4,7 +4,8 @@ import { Link, Navigate } from 'react-router-dom'
 import { useSesion } from '../contexto/sesionContexto'
 import { leerPedidos } from '../datos/pedidos'
 import { formatearPrecio } from '../datos/productos'
-import { leerUsuarios } from '../datos/usuarios'
+import { nombreCompleto } from '../datos/usuarios'
+import { useApi } from '../utilidades/useApi'
 
 const ROLES_REPORTE = [
     ['ADMINISTRADOR', 'Administradores'],
@@ -204,11 +205,16 @@ function AdminReportes() {
     const { usuario } = useSesion()
     const [avisoDescarga, setAvisoDescarga] = useState('')
 
+    // Todas las cuentas de ms-usuarios (activas e inactivas)
+    const lista = useApi(
+        usuario?.rol === 'ADMINISTRADOR' ? '/usuarios' : null
+    )
+
     if (!usuario || usuario.rol !== 'ADMINISTRADOR') {
         return <Navigate to="/login" replace />
     }
 
-    const usuarios = leerUsuarios()
+    const usuarios = lista.datos || []
     const pedidos = leerPedidos()
 
     const usuariosActivos = usuarios.filter(
@@ -244,7 +250,7 @@ function AdminReportes() {
                 String(correo).toLowerCase()
         )
 
-        return repartidor ? repartidor.nombre : correo
+        return repartidor ? nombreCompleto(repartidor) : correo
     }
 
     function descargarReporte() {
@@ -347,6 +353,12 @@ function AdminReportes() {
                                 </h2>
                             </div>
                         </div>
+
+                        {lista.error && (
+                            <div className="alert alert-warning" role="alert">
+                                No se pudo cargar la lista de usuarios. {lista.error}
+                            </div>
+                        )}
 
                         <div className="row g-4">
                             <div className="col-12 col-md-6 col-xl-3">

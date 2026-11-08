@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { screen, within } from '@testing-library/react'
+import { screen, within, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import AdminProductos from './AdminProductos'
 import AdminUsuarios from './AdminUsuarios'
 import { renderizar, ADMIN } from '../test/renderizar'
-import { buscarUsuario, buscarCuenta } from '../datos/usuarios'
+import { simularBackendDeUsuarios, simularApiApagada } from '../test/api'
 import { CLAVE_CATALOGO } from '../datos/catalogo'
 
 // Pruebas de los formularios del administrador:
@@ -95,7 +95,21 @@ describe('Gestión de productos', () => {
 
 })
 
-describe('Gestión de usuarios', () => {
+describe('Gestión de usuarios (con ms-usuarios simulado)', () => {
+
+  let backend
+
+  beforeEach(() => {
+    backend = simularBackendDeUsuarios()
+  })
+
+  const cuenta = (correo) => backend.cuentas().find((c) => c.correo === correo)
+
+  async function abrirAdmin() {
+    renderizar(<AdminUsuarios />, { usuario: ADMIN })
+    // Espera a que llegue la lista del backend
+    await screen.findByText('camila@gmail.com')
+  }
 
   async function abrirCrear(user) {
     await user.click(screen.getByRole('button', { name: /Crear usuario/ }))
@@ -124,36 +138,47 @@ describe('Gestión de usuarios', () => {
     rolUsuarioForm: 'REPARTIDOR'
   }
 
-  it('crea un repartidor con RUN válido y puede iniciar sesión', async () => {
+  it('lista las 5 cuentas que entrega el backend, con nombre completo', async () => {
+    await abrirAdmin()
+
+    expect(screen.getAllByRole('row')).toHaveLength(6)
+    expect(screen.getByText('Camila Rojas')).toBeInTheDocument()
+  })
+
+  it('crea un repartidor con POST /usuarios y aparece en la tabla', async () => {
     // 1 Preparar
     const user = userEvent.setup()
-    renderizar(<AdminUsuarios />, { usuario: ADMIN })
+    await abrirAdmin()
 
     // 2 Actuar
     await abrirCrear(user)
     await llenar(user, NUEVO)
     await user.click(screen.getByRole('button', { name: 'Guardar usuario' }))
 
-    // 3 Comprobar: aparece en la tabla y su cuenta funciona
-    expect(filaCon('pedro.soto@gaselvolcan.cl')).toBeDefined()
-    expect(buscarCuenta('pedro.soto@gaselvolcan.cl', 'Pedro123').nombre).toBe('Pedro Soto Díaz')
+    // 3 Comprobar: el backend lo recibió con el token y aparece en la tabla
+    expect(await screen.findByText('pedro.soto@gaselvolcan.cl')).toBeInTheDocument()
+    expect(cuenta('pedro.soto@gaselvolcan.cl')).toMatchObject({
+      run: '190110222', nombre: 'Pedro', apellidos: 'Soto Díaz', rol: 'REPARTIDOR', comuna: 'Chillán', region: 'Ñuble'
+    })
+    const envio = backend.api.mock.calls.find(([, opciones]) => opciones.method === 'POST')
+    expect(envio[1].headers.Authorization).toMatch(/^Bearer /)
   })
 
-  it('rechaza un RUN con dígito verificador incorrecto', async () => {
+  it('rechaza un RUN con dígito verificador incorrecto sin llamar al backend', async () => {
     const user = userEvent.setup()
-    renderizar(<AdminUsuarios />, { usuario: ADMIN })
+    await abrirAdmin()
 
     await abrirCrear(user)
     await llenar(user, { ...NUEVO, runUsuario: '190110221' })
     await user.click(screen.getByRole('button', { name: 'Guardar usuario' }))
 
     expect(screen.getByText('Ese RUN no es válido. Revisa el dígito verificador.')).toBeInTheDocument()
-    expect(buscarUsuario('pedro.soto@gaselvolcan.cl')).toBeNull()
+    expect(cuenta('pedro.soto@gaselvolcan.cl')).toBeUndefined()
   })
 
   it('marca todos los errores si se envía vacío', async () => {
     const user = userEvent.setup()
-    renderizar(<AdminUsuarios />, { usuario: ADMIN })
+    await abrirAdmin()
 
     await abrirCrear(user)
     await user.click(screen.getByRole('button', { name: 'Guardar usuario' }))
@@ -164,20 +189,33 @@ describe('Gestión de usuarios', () => {
     expect(screen.getByText('Selecciona un rol.')).toBeInTheDocument()
   })
 
-  it('no deja repetir un correo que ya existe', async () => {
+  it('no acepta una fecha de nacimiento futura', async () => {
     const user = userEvent.setup()
-    renderizar(<AdminUsuarios />, { usuario: ADMIN })
+    await abrirAdmin()
+
+    await abrirCrear(user)
+    await llenar(user, { ...NUEVO, nacimientoUsuario: '2999-01-01' })
+    await user.click(screen.getByRole('button', { name: 'Guardar usuario' }))
+
+    expect(screen.getByText('La fecha de nacimiento no puede ser una fecha futura.')).toBeInTheDocument()
+    expect(cuenta('pedro.soto@gaselvolcan.cl')).toBeUndefined()
+  })
+
+  it('muestra el mensaje del backend si el correo ya existe', async () => {
+    const user = userEvent.setup()
+    await abrirAdmin()
 
     await abrirCrear(user)
     await llenar(user, { ...NUEVO, correoUsuario: 'camila@gmail.com' })
     await user.click(screen.getByRole('button', { name: 'Guardar usuario' }))
 
-    expect(screen.getAllByRole('alert').some((a) => a.textContent.includes('Ya existe un usuario con ese correo.'))).toBe(true)
+    expect((await screen.findAllByRole('alert')).some((a) => a.textContent.includes('Ya existe un usuario con ese correo.'))).toBe(true)
   })
 
-  it('edita el nombre de una cuenta', async () => {
+  it('edita los apellidos con PUT /usuarios/{id}, sin perder el teléfono', async () => {
+    backend.cuentas().find((c) => c.correo === 'camila@gmail.com').telefono = '+56 9 1234 5678'
     const user = userEvent.setup()
-    renderizar(<AdminUsuarios />, { usuario: ADMIN })
+    await abrirAdmin()
 
     await user.click(within(filaCon('camila@gmail.com')).getByRole('button', { name: 'Editar' }))
     expect(porId('nombreUsuario')).toHaveValue('Camila')
@@ -186,12 +224,13 @@ describe('Gestión de usuarios', () => {
     await llenar(user, { apellidosUsuario: 'Rojas Díaz' })
     await user.click(screen.getByRole('button', { name: 'Guardar cambios' }))
 
-    expect(buscarUsuario('camila@gmail.com').nombre).toBe('Camila Rojas Díaz')
+    expect(await screen.findByText('Camila Rojas Díaz')).toBeInTheDocument()
+    expect(cuenta('camila@gmail.com').telefono).toBe('+56 9 1234 5678')
   })
 
   it('al editar su propia cuenta, el administrador no puede cambiar su correo ni su rol', async () => {
     const user = userEvent.setup()
-    renderizar(<AdminUsuarios />, { usuario: ADMIN })
+    await abrirAdmin()
 
     await user.click(within(filaCon('admin@gaselvolcan.cl')).getByRole('button', { name: 'Editar' }))
 
@@ -199,39 +238,51 @@ describe('Gestión de usuarios', () => {
     expect(porId('rolUsuarioForm')).toBeDisabled()
   })
 
-  it('desactiva una cuenta, que ya no puede entrar, y la vuelve a activar', async () => {
+  it('desactiva una cuenta y la vuelve a activar', async () => {
     const user = userEvent.setup()
-    renderizar(<AdminUsuarios />, { usuario: ADMIN })
+    await abrirAdmin()
 
     await user.click(within(filaCon('camila@gmail.com')).getByRole('button', { name: 'Desactivar' }))
-    expect(buscarUsuario('camila@gmail.com').activo).toBe(false)
+    expect(await within(filaCon('camila@gmail.com')).findByText('Inactivo')).toBeInTheDocument()
+    expect(cuenta('camila@gmail.com').activo).toBe(false)
 
     await user.click(within(filaCon('camila@gmail.com')).getByRole('button', { name: 'Activar' }))
-    expect(buscarUsuario('camila@gmail.com').activo).toBe(true)
+    expect(await within(filaCon('camila@gmail.com')).findByText('Activo')).toBeInTheDocument()
+    expect(cuenta('camila@gmail.com').activo).toBe(true)
   })
 
-  it('elimina una cuenta solo después de confirmar', async () => {
+  it('elimina una cuenta con DELETE solo después de confirmar', async () => {
     const user = userEvent.setup()
-    renderizar(<AdminUsuarios />, { usuario: ADMIN })
+    await abrirAdmin()
 
     // Cancelar no borra nada
     await user.click(within(filaCon('repartidor2@gaselvolcan.cl')).getByRole('button', { name: 'Eliminar' }))
     await user.click(screen.getAllByRole('button', { name: 'Cancelar' }).at(-1))
-    expect(buscarUsuario('repartidor2@gaselvolcan.cl')).not.toBeNull()
+    expect(cuenta('repartidor2@gaselvolcan.cl')).toBeDefined()
 
-    // Confirmar si
+    // Confirmar sí
     await user.click(within(filaCon('repartidor2@gaselvolcan.cl')).getByRole('button', { name: 'Eliminar' }))
     await user.click(screen.getByRole('button', { name: 'Sí, eliminar' }))
-    expect(buscarUsuario('repartidor2@gaselvolcan.cl')).toBeNull()
+    await waitFor(() => expect(screen.queryByText('repartidor2@gaselvolcan.cl')).toBeNull())
+    expect(cuenta('repartidor2@gaselvolcan.cl')).toBeUndefined()
   })
 
-  it('no deja desactivar la propia cuenta', async () => {
+  it('no deja desactivar ni eliminar la propia cuenta', async () => {
     const user = userEvent.setup()
-    renderizar(<AdminUsuarios />, { usuario: ADMIN })
+    await abrirAdmin()
 
     await user.click(within(filaCon('admin@gaselvolcan.cl')).getByRole('button', { name: 'Desactivar' }))
-
     expect(screen.getByRole('alert')).toHaveTextContent('No puedes desactivar tu propia cuenta.')
+
+    await user.click(within(filaCon('admin@gaselvolcan.cl')).getByRole('button', { name: 'Eliminar' }))
+    expect(screen.getByRole('alert')).toHaveTextContent('No puedes eliminar tu propia cuenta.')
+  })
+
+  it('si el backend no responde, lo avisa', async () => {
+    simularApiApagada()
+    renderizar(<AdminUsuarios />, { usuario: ADMIN })
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('No se pudo cargar la lista de usuarios.')
   })
 
 })

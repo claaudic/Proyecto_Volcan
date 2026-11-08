@@ -185,7 +185,8 @@ function AdminUsuarios() {
         const nombre = formulario.nombre.trim()
         const apellidos = formulario.apellidos.trim()
         const correo = formulario.correo.trim().toLowerCase()
-        const contrasena = formulario.contrasena.trim()
+        // La contraseña no se recorta: se guarda tal cual, igual que en el registro y el backend
+        const contrasena = formulario.contrasena
         const direccion = formulario.direccion.trim()
 
         // Al crear todo es obligatorio; al editar una cuenta antigua,
@@ -272,7 +273,7 @@ function AdminUsuarios() {
             nombre: formulario.nombre.trim(),
             apellidos: formulario.apellidos.trim(),
             correo: editandoCuentaPropia ? cuentaEditando.correo : formulario.correo.trim().toLowerCase(),
-            contrasena: formulario.contrasena.trim() || null,
+            contrasena: formulario.contrasena || null,
             rol: editandoCuentaPropia ? usuario.rol : formulario.rol,
             telefono: cuentaEditando?.telefono || null,
             comuna: formulario.comuna || null,
@@ -355,7 +356,8 @@ function AdminUsuarios() {
                         <p>Desde aquí puedes crear, editar, desactivar usuarios y asignar roles.</p>
                     </section>
 
-                    {mensaje && <div className="alert alert-warning mt-3" role="alert">{mensaje}</div>}
+                    {/* Con la ventana abierta, el mensaje se muestra solo dentro de ella */}
+                    {mensaje && !mostrarFormulario && <div className="alert alert-warning mt-3" role="alert">{mensaje}</div>}
                     {lista.error && (
                         <div className="alert alert-warning mt-3" role="alert">
                             No se pudo cargar la lista de usuarios. {lista.error}

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useSesion } from '../contexto/sesionContexto'
 import { panelDeRol } from '../datos/usuarios'
 import { validarCorreo, validarContrasena } from '../utilidades/validaciones'
@@ -22,7 +22,9 @@ function sugerenciaPara(correo) {
 }
 
 function Login() {
-  const [correo, setCorreo] = useState("")
+  // Si viene del registro, trae un aviso y el correo ya escrito
+  const { state } = useLocation()
+  const [correo, setCorreo] = useState(state?.correo || "")
   const [contrasena, setContrasena] = useState("")
   const [errores, setErrores] = useState({ correo: "", contrasena: "" })
   const [mostrar, setMostrar] = useState(false)
@@ -160,6 +162,10 @@ function Login() {
                 <small className="mensaje-ayuda">Entre 4 y 10 caracteres</small>
                 <small className="mensaje-error-campo" role="status">{errores.contrasena}</small>
               </div>
+
+              {state?.aviso && !mensaje && (
+                <div className="mensaje-exito" role="status">{state.aviso}</div>
+              )}
 
               {mensaje && (
                 <div className="mensaje-login" role="alert">{mensaje}</div>

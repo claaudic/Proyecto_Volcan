@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useSesion } from "../contexto/sesionContexto"
 
 // Pide datos a ms-usuarios apenas se abre la pantalla, con el token de la sesion.
@@ -29,6 +29,9 @@ export function useApi(ruta) {
     return () => { vigente = false }
   }, [ruta, llamarApi, version])
 
+  // useCallback: la funcion no cambia en cada render, asi se puede usar sin riesgo en un efecto
+  const recargar = useCallback(() => setVersion((actual) => actual + 1), [])
+
   // La respuesta guardada sirve solo si es de esta misma ruta
   const llego = respuesta.ruta === ruta
 
@@ -36,6 +39,6 @@ export function useApi(ruta) {
     datos: llego ? respuesta.datos : null,
     error: llego ? respuesta.error : "",
     cargando: Boolean(ruta) && !llego,
-    recargar: () => setVersion((actual) => actual + 1)
+    recargar
   }
 }

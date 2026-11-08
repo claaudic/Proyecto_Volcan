@@ -117,8 +117,12 @@ function Registro() {
     const resultado = await iniciarSesion(datos.correo, datos.contrasena)
     setEnviando(false)
 
+    // La cuenta YA se creo: si el login falla, no se muestra error aqui (al reintentar
+    // diria "ya existe ese correo"), sino que se lleva al login con un aviso.
     if (!resultado.ok) {
-      setMensaje(resultado.mensaje)
+      navegar("/login", {
+        state: { aviso: "Tu cuenta fue creada. Inicia sesión con tu correo y contraseña.", correo: datos.correo.trim() }
+      })
       return
     }
 

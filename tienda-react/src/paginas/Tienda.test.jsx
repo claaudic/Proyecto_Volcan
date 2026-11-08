@@ -9,6 +9,7 @@ import ProveedorCarrito from "../contexto/ProveedorCarrito";
 import Inicio from "./Inicio";
 import DetalleProducto from "./DetalleProducto";
 import Registro from "./Registro";
+import Login from "./Login";
 import Navbar from "../components/Navbar";
 import { CLAVE_SESION } from "../datos/usuarios";
 import { simularApi, respuestaLogin } from "../test/api";
@@ -61,6 +62,7 @@ describe("Registro", () => {
     beforeEach(() => {
         pantalla = montarEnRuta("/registro", {
             "/registro": <Registro />,
+            "/login": <Login />,
             "/": <p id="paginaInicio">Inicio</p>
         });
     });
@@ -104,6 +106,28 @@ describe("Registro", () => {
         // Se envio el registro y despues se inicio sesion con la cuenta nueva
         expect(JSON.parse(api.mock.calls[0][1].body).correo).toBe("ana.soto@gmail.com");
         expect(JSON.parse(localStorage.getItem(CLAVE_SESION)).usuario.nombre).toBe("Ana Soto");
+    });
+
+    it("si la cuenta se crea pero el login falla, lleva al login con un aviso y el correo escrito", async () => {
+        const ana = { id: 6, nombre: "Ana", apellidos: "Soto", correo: "ana.soto@gmail.com", rol: "CLIENTE", activo: true };
+        simularApi({
+            "POST /auth/registro": () => [201, ana],
+            "POST /auth/login": () => [500, { estado: 500, mensaje: "Ocurrió un error inesperado." }]
+        });
+
+        escribir(pantalla.querySelector("#nombre"), "Ana");
+        escribir(pantalla.querySelector("#apellidos"), "Soto");
+        escribir(pantalla.querySelector("#correo"), "ana.soto@gmail.com");
+        escribir(pantalla.querySelector("#contrasena"), "Ana1234");
+        escribir(pantalla.querySelector("#repetir"), "Ana1234");
+        enviar();
+
+        // No se queda en el registro (reintentar diría "ya existe ese correo")
+        await vi.waitFor(() =>
+            expect(pantalla.querySelector("[role=status].mensaje-exito").textContent)
+                .toBe("Tu cuenta fue creada. Inicia sesión con tu correo y contraseña."));
+        expect(pantalla.querySelector("#formRegistro")).toBeNull();
+        expect(pantalla.querySelector("input[type=email]").value).toBe("ana.soto@gmail.com");
     });
 
     it("avisa si el correo ya tiene una cuenta", async () => {

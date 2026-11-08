@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { Navigate } from 'react-router-dom'
 
 import { useSesion } from '../contexto/sesionContexto'
 import {
@@ -117,10 +116,6 @@ function resumenProductos(pedido) {
 function Repartidor() {
     const { usuario } = useSesion()
     const [pedidos, setPedidos] = useState(() => ordenarPorFecha(leerPedidos()))
-
-    if (!usuario || usuario.rol !== 'REPARTIDOR') {
-        return <Navigate to="/login" replace />
-    }
 
     const pedidosAsignados = pedidos.filter((pedido) => {
         return (

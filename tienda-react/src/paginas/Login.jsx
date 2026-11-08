@@ -74,7 +74,8 @@ function Login() {
     }
 
     // El equipo va a su panel de trabajo; los clientes vuelven a la tienda
-    navegar(panelDeRol(resultado.rol) || "/")
+    // Si venia de una pagina protegida, vuelve a ella; si no, a su panel o al inicio
+    navegar(state?.desde || panelDeRol(resultado.rol) || "/")
   }
 
   return (

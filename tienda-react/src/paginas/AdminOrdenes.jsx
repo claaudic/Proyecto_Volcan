@@ -1,7 +1,6 @@
 import { useState } from 'react'
-import { Link, Navigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
-import { useSesion } from '../contexto/sesionContexto'
 import {
     actualizarPedido,
     eliminarPedido,
@@ -136,7 +135,6 @@ function resumenProductos(pedido) {
 }
 
 function AdminOrdenes() {
-    const { usuario } = useSesion()
     const [pedidos, setPedidos] = useState(() => ordenarPorFecha(leerPedidos()))
     const [pedidoDetalle, setPedidoDetalle] = useState(null)
     const [pedidoEditando, setPedidoEditando] = useState(null)
@@ -147,13 +145,7 @@ function AdminOrdenes() {
     })
 
     // ms-usuarios entrega solo los repartidores activos
-    const lista = useApi(
-        usuario?.rol === 'ADMINISTRADOR' ? '/usuarios/repartidores' : null
-    )
-
-    if (!usuario || usuario.rol !== 'ADMINISTRADOR') {
-        return <Navigate to="/login" replace />
-    }
+    const lista = useApi('/usuarios/repartidores')
 
     const repartidores = lista.datos || []
 

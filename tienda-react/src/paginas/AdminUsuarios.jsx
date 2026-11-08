@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { Navigate } from 'react-router-dom'
 
 import { useSesion } from '../contexto/sesionContexto'
 import { validarCorreo, runValido } from '../utilidades/validaciones'
@@ -92,7 +91,7 @@ function datosDeCuenta(cuenta) {
 function AdminUsuarios() {
     const { usuario, llamarApi } = useSesion()
 
-    const lista = useApi(usuario?.rol === 'ADMINISTRADOR' ? '/usuarios' : null)
+    const lista = useApi('/usuarios')
     const [formulario, setFormulario] = useState(FORMULARIO_VACIO)
     const [idEditando, setIdEditando] = useState(null)
     const [mostrarFormulario, setMostrarFormulario] = useState(false)
@@ -101,10 +100,6 @@ function AdminUsuarios() {
     const [mensaje, setMensaje] = useState('')
     // Mientras el backend responde, los botones quedan desactivados
     const [enviando, setEnviando] = useState(false)
-
-    if (!usuario || usuario.rol !== 'ADMINISTRADOR') {
-        return <Navigate to="/login" replace />
-    }
 
     const usuarios = lista.datos || []
     const editando = idEditando !== null

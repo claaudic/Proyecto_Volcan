@@ -1,5 +1,5 @@
 import { startTransition, useState } from 'react'
-import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useSesion } from '../contexto/sesionContexto'
 import { nombreCompleto, nombreDeRol, panelDeRol } from '../datos/usuarios'
 import { leerPedidos } from '../datos/pedidos'
@@ -11,14 +11,10 @@ import { useApi } from '../utilidades/useApi'
 
 // Migrado desde perfil.html y js/perfil.js.
 
-// Sin sesion no hay perfil: se manda al login, como hacia el sitio en HTML.
+// Solo con sesion: RutaProtegida (App.jsx) manda al login a quien no la tiene.
 // La key reinicia la ficha si cambia la cuenta.
 function Perfil() {
   const { usuario } = useSesion()
-
-  if (!usuario) {
-    return <Navigate to="/login" replace />
-  }
 
   return <CargaPerfil key={usuario.correo} usuario={usuario} />
 }

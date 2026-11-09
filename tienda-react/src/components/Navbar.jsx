@@ -9,12 +9,15 @@ function Navbar() {
   const { usuario, cerrarSesion } = useSesion()
   const navegar = useNavigate()
 
-  // Juntos en una transicion, igual que en Perfil: si se sale desde una
-  // pagina protegida, no alcanza a mandar al login antes de ir al inicio.
+  // Juntos en una transicion, igual que en Perfil: si se sale desde una pagina
+  // protegida, RutaProtegida no alcanza a mandar al login sin el aviso.
+  // Lleva al login con un aviso (el mismo recuadro que usa el registro) para
+  // que se note que la sesion se cerro. El nombre se toma antes de cerrarla.
   function salir() {
+    const nombre = usuario.nombre.split(" ")[0]
     startTransition(() => {
       cerrarSesion()
-      navegar("/")
+      navegar("/login", { state: { aviso: `Cerraste sesión. ¡Hasta pronto, ${nombre}!` } })
     })
   }
 

@@ -118,7 +118,7 @@ function ListaProductos({ productos, alAnadir }) {
     <ul className="row g-4 list-unstyled">
       {productos.map((producto) => {
         // Si el producto esta en oferta, se muestra el mismo precio que cobra el carrito
-        const oferta = ofertaDeProducto(producto.codigo)
+        const oferta = ofertaDeProducto(producto)
 
         return (
           <li key={producto.codigo} className="col-12 col-sm-6 col-lg-3">

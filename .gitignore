@@ -14,3 +14,8 @@ img/familia.png
 # Node / Vite
 node_modules/
 dist/
+
+# Configuración privada de entorno
+.env
+.env.*
+!.env.example

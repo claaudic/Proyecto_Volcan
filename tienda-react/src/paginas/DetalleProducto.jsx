@@ -61,7 +61,7 @@ function FichaProducto({ codigo }) {
   }
 
   const sinStock = producto.stock === 0
-  const oferta = ofertaDeProducto(producto.codigo)
+  const oferta = ofertaDeProducto(producto)
 
   // La cantidad nunca baja de 1 ni supera el stock disponible
   function ajustar(valor) {
@@ -215,11 +215,11 @@ function FichaProducto({ codigo }) {
                       categoria={otro.categoria}
                       precio={formatearPrecio(precioProducto(otro))}
                       precioAnterior={
-                        ofertaDeProducto(otro.codigo)
+                        ofertaDeProducto(otro)
                           ? formatearPrecio(otro.precioResidencial)
                           : null
                       }
-                      etiquetaOferta={ofertaDeProducto(otro.codigo)?.etiqueta}
+                      etiquetaOferta={ofertaDeProducto(otro)?.etiqueta}
                       imagen={imagenDe(otro)}
                     />
                   </li>

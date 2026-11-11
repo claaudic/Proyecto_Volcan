@@ -74,7 +74,7 @@ function Ofertas() {
           ) : (
             <ul className="row g-4 list-unstyled">
               {ofertas.map((producto) => {
-                const oferta = ofertaDeProducto(producto.codigo)
+                const oferta = ofertaDeProducto(producto)
 
                 return (
                   <li key={producto.codigo} className="col-12 col-sm-6 col-lg-3">

@@ -6,9 +6,9 @@ import {
   guardarCarrito,
   agregarItem,
   cambiarCantidadItem,
-  quitarItem,
-  detalleDelCarrito
+  quitarItem
 } from "../datos/carrito";
+import { estadoDelCarrito } from "../datos/estadoCarrito";
 
 // Envuelve a toda la aplicacion y le entrega el carrito.
 // Cualquier componente de adentro puede leerlo con useCarrito().
@@ -18,7 +18,8 @@ function ProveedorCarrito({ children }) {
   const [items, setItems] = useState(leerCarrito);
 
   // Precios y stock salen del catalogo vivo. Solo se venden los activos.
-  const { activos } = useCatalogo();
+  const { activos, cargando = false, error = '', recargar } = useCatalogo();
+  const disponibilidad = estadoDelCarrito(items, activos, { cargando, error });
 
   // Cada vez que el carrito cambia, se guarda
   useEffect(() => {
@@ -26,12 +27,16 @@ function ProveedorCarrito({ children }) {
   }, [items]);
 
   function agregar(codigo, cantidad) {
+    if (cargando || error) {
+      return { ok: false, mensaje: 'El catalogo no esta disponible. Intenta nuevamente.' };
+    }
     const resultado = agregarItem(items, codigo, cantidad, activos);
     setItems(resultado.items);
     return resultado;
   }
 
   function cambiarCantidad(codigo, cantidad) {
+    if (cargando || error) return;
     setItems(cambiarCantidadItem(items, codigo, cantidad, activos));
   }
 
@@ -45,7 +50,9 @@ function ProveedorCarrito({ children }) {
 
   const valor = {
     items,
-    detalle: detalleDelCarrito(items, activos),
+    ...disponibilidad,
+    errorCatalogo: typeof error === 'string' ? error : error?.message || '',
+    recargarCatalogo: recargar,
     agregar,
     cambiarCantidad,
     quitar,

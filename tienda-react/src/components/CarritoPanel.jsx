@@ -9,8 +9,9 @@ import { cerrarPanelCarrito } from "../utilidades/panelCarrito";
 // lo abre con data-bs-target="#panelCarrito".
 
 function CarritoPanel() {
-  const { detalle, cambiarCantidad, quitar, vaciar } = useCarrito();
-  const vacio = detalle.lineas.length === 0;
+  const { detalle, items, estado, puedeConfirmar, errorCatalogo, recargarCatalogo, cambiarCantidad, quitar, vaciar } = useCarrito();
+  const vacio = items.length === 0;
+  const pendiente = estado === 'cargando' || estado === 'error' || estado === 'no-disponible';
 
   return (
     <div
@@ -25,7 +26,35 @@ function CarritoPanel() {
       </div>
 
       <div className="offcanvas-body panel-cuerpo">
-        {vacio ? (
+        {pendiente ? (
+          <div>
+            {estado === 'cargando' ? (
+              <p role="status">Comprobando precios y stock del carrito...</p>
+            ) : (
+              <div role="alert">
+                <p>{estado === 'error'
+                  ? 'No pudimos consultar el catalogo. Tus articulos siguen guardados.'
+                  : 'Hay articulos sin disponibilidad suficiente o datos verificables. Revisa el carrito.'}</p>
+                {errorCatalogo && <p>{errorCatalogo}</p>}
+              </div>
+            )}
+            {items.length > 0 && (
+              <ul aria-label="Articulos guardados pendientes de validar">
+                {items.map((item) => (
+                  <li key={item.codigo}>
+                    {item.codigo}: {item.cantidad} unidades{' '}
+                    <button type="button" onClick={() => quitar(item.codigo)} aria-label={'Quitar ' + item.codigo}>Quitar</button>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <button type="button" className="btn btn-principal" disabled>Pagar</button>
+            {estado !== 'cargando' && typeof recargarCatalogo === 'function' && (
+              <button type="button" className="btn btn-secundario" onClick={recargarCatalogo}>Reintentar catalogo</button>
+            )}
+            {!vacio && <button type="button" className="enlace-vaciar" onClick={vaciar}>Vaciar carrito</button>}
+          </div>
+        ) : vacio ? (
           <div className="panel-vacio">
             <p className="panel-vacio-titulo">Tu carrito está vacío</p>
             <p>Agrega productos desde el catálogo.</p>
@@ -79,7 +108,7 @@ function CarritoPanel() {
         )}
       </div>
 
-      {!vacio && (
+      {!vacio && puedeConfirmar && (
         <div className="panel-pie">
           <p className="panel-total">
             <span>Total</span>

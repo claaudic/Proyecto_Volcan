@@ -1,9 +1,12 @@
-import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 
 import { useSesion } from '../contexto/sesionContexto'
 import { useCarrito } from '../contexto/carritoContexto'
-import { crearPedido } from '../datos/pedidos'
+import { estadoDelCarrito } from '../datos/estadoCarrito'
+import { useCatalogoCheckout } from '../utilidades/useCatalogoCheckout'
+import { useCompraCheckout } from '../utilidades/useCompraCheckout'
+import { obtenerCatalogo } from '../datos/catalogoApi'
 import { formatearPrecio, imagenDe } from '../datos/productos'
 import { normalizar } from '../datos/zonas'
 import { usarImagenRespaldo } from '../utilidades/imagenes'
@@ -13,15 +16,6 @@ import {
     validarDireccion,
     validarTelefonoObligatorio
 } from '../utilidades/validaciones'
-import { useCatalogo } from '../contexto/catalogoContexto'
-import {
-    validarNumeroTarjeta,
-    validarTitular,
-    validarVencimiento,
-    validarCvv,
-    procesarPago,
-    ultimosCuatro
-} from '../utilidades/pasarela'
 
 const COMUNAS = [
     'Chillán',
@@ -34,10 +28,21 @@ const COMUNAS = [
 ]
 
 function Checkout() {
-    const navigate = useNavigate()
-    const { detalle, vaciar } = useCarrito()
+    const { items } = useCarrito()
     const { usuario, llamarApi } = useSesion()
-    const { descontar } = useCatalogo()
+    const catalogo = useCatalogoCheckout()
+    const compra = useCompraCheckout({ usuario, llamarApi })
+    const [revisionCatalogo, setRevisionCatalogo] = useState(null)
+    const [comprobando, setComprobando] = useState(false)
+    const bloqueo = useRef(false)
+    const montado = useRef(false)
+    const vigencia = useRef({ firma: '', revision: 0 })
+    const catalogoActual = revisionCatalogo ?? catalogo
+    const disponibilidad = estadoDelCarrito(items, catalogoActual.productos, catalogoActual)
+    const { detalle } = disponibilidad
+    const identidadValida = usuario == null || (Number.isSafeInteger(usuario.id) && usuario.id > 0 && usuario.rol === 'CLIENTE')
+    const ocupado = comprobando || compra.enviando
+    const puedeRegistrar = compra.puedePreparar && identidadValida && disponibilidad.puedeConfirmar
 
     // Si hay sesion, los datos de la cuenta se rellenan solos
     // (lo pide la Figura 6 de las instrucciones de la EP2).
@@ -48,19 +53,25 @@ function Checkout() {
         telefono: '',
         direccion: '',
         comuna: '',
-        indicaciones: '',
-        // Datos de la tarjeta: viven solo en este estado, nunca se guardan
-        numeroTarjeta: '',
-        titular: '',
-        vencimiento: '',
-        cvv: ''
+        indicaciones: ''
     })
 
-    // Mientras la pasarela "responde", el boton queda desactivado
-    // para que un doble clic no pague dos veces
-    const [procesando, setProcesando] = useState(false)
-
     const [errores, setErrores] = useState({})
+
+    const firma = JSON.stringify({ items, formulario, identidad: usuario == null ? null
+        : { id: usuario.id, rol: usuario.rol, correo: usuario.correo } })
+    useLayoutEffect(() => {
+        if (vigencia.current.firma !== firma) {
+            vigencia.current = { firma, revision: vigencia.current.revision + 1 }
+        }
+    }, [firma])
+    useLayoutEffect(() => {
+        montado.current = true
+        return () => {
+            montado.current = false
+            vigencia.current = { ...vigencia.current, revision: vigencia.current.revision + 1 }
+        }
+    }, [])
 
     // GET /usuarios/yo: telefono, direccion y comuna guardados en el perfil.
     // Solo rellena los campos vacios, para no borrar lo que ya se escribio.
@@ -115,6 +126,11 @@ function Checkout() {
         }))
     }
 
+    function actualizarCatalogo() {
+        setRevisionCatalogo(null)
+        catalogo.recargar()
+    }
+
     function validarFormulario() {
         const nuevosErrores = {}
 
@@ -151,80 +167,65 @@ function Checkout() {
                 'Las indicaciones no pueden superar los 300 caracteres.'
         }
 
-        // Datos de pago: misma idea, cada regla devuelve "" si esta bien
-        const reglasPago = {
-            numeroTarjeta: validarNumeroTarjeta(formulario.numeroTarjeta),
-            titular: validarTitular(formulario.titular),
-            vencimiento: validarVencimiento(formulario.vencimiento),
-            cvv: validarCvv(formulario.cvv)
-        }
-
-        Object.keys(reglasPago).forEach((campo) => {
-            if (reglasPago[campo]) {
-                nuevosErrores[campo] = reglasPago[campo]
-            }
-        })
-
         setErrores(nuevosErrores)
 
         return Object.keys(nuevosErrores).length === 0
     }
 
-    function confirmarCompra(e) {
+    async function confirmarCompra(e) {
         e.preventDefault()
-
-        if (detalle.lineas.length === 0) {
-            setErrores({
-                carrito: 'No puedes confirmar una compra con el carrito vacío.'
-            })
-            return
-        }
-
-        if (!validarFormulario()) {
-            return
-        }
-
-        setProcesando(true)
-
-        // Simula el tiempo que tarda el banco en responder
-        setTimeout(() => {
-            const respuesta = procesarPago(formulario.numeroTarjeta)
-
-            // Rechazado: no se crea pedido y el carrito queda intacto
-            if (!respuesta.aprobado) {
-                navigate('/pago-rechazado', {
-                    state: { motivo: respuesta.motivo }
-                })
+        if (bloqueo.current || ocupado || compra.estadoIntento === 'confirmado') return
+        bloqueo.current = true
+        const revision = vigencia.current.revision
+        const vigente = () => montado.current && vigencia.current.revision === revision
+        try {
+            // Recuperar no reconstruye el cuerpo con los datos actuales.
+            if (compra.puedeEnviar) {
+                setErrores({})
+                await compra.enviar()
                 return
             }
-
-            const pedido = crearPedido({
-                cliente: {
-                    nombre: formulario.nombre.trim(),
-                    correo: formulario.correo.trim(),
-                    telefono: formulario.telefono.trim()
-                },
-                entrega: {
-                    direccion: formulario.direccion.trim(),
-                    comuna: formulario.comuna,
-                    indicaciones: formulario.indicaciones.trim()
-                },
-                productos: detalle.lineas,
-                total: detalle.total,
-                // De la tarjeta solo se guardan los ultimos 4 digitos
-                pago: {
-                    tarjeta: '•••• ' + ultimosCuatro(formulario.numeroTarjeta)
-                }
+            if (!compra.puedePreparar) return
+            const valido = validarFormulario()
+            if (!identidadValida || !disponibilidad.puedeConfirmar) {
+                setErrores(actual => ({ ...actual, carrito: identidadValida
+                    ? 'Revisa el carrito y el catálogo oficial antes de registrar.'
+                    : 'Necesitas una cuenta de cliente con identidad válida.' }))
+                return
+            }
+            if (!valido) return
+            setComprobando(true)
+            const actualizado = await obtenerCatalogo()
+            if (!vigente()) {
+                if (montado.current) setErrores({ carrito: 'Los datos cambiaron. Revisa el resumen y confirma nuevamente.' })
+                return
+            }
+            setRevisionCatalogo({ ...actualizado, cargando: false, error: '' })
+            const disponible = estadoDelCarrito(items, actualizado.productos)
+            if (!disponible.puedeConfirmar) {
+                setErrores({ carrito: 'El catálogo actualizado no permite registrar estos productos. Revisa disponibilidad y stock.' })
+                return
+            }
+            const cambiaron = items.some(item => {
+                const anterior = catalogoActual.productos.find(p => p.codigo === item.codigo)
+                const nuevo = actualizado.productos.find(p => p.codigo === item.codigo)
+                return !anterior || !nuevo || ['id', 'precioResidencial', 'precioComercial', 'precioOferta']
+                    .some(campo => anterior[campo] !== nuevo[campo])
             })
-            descontar(detalle.lineas)
-            vaciar()
-
-            navigate('/compra-exitosa', {
-                state: {
-                    pedido
-                }
-            })
-        }, 1200)
+            if (cambiaron) {
+                setErrores({ carrito: 'Los precios o productos cambiaron. Revisa el resumen actualizado y confirma nuevamente.' })
+                return
+            }
+            compra.preparar({ items, productos: actualizado.productos,
+                entrega: { direccion: formulario.direccion.trim(), comuna: formulario.comuna },
+                invitado: { nombre: formulario.nombre.trim(), correo: formulario.correo.trim(), telefono: formulario.telefono.trim() } })
+            await compra.enviar()
+        } catch (error) {
+            if (vigente()) setErrores(actual => ({ ...actual, carrito: error.message }))
+        } finally {
+            bloqueo.current = false
+            if (montado.current) setComprobando(false)
+        }
     }
 
     // Borde rojo solo en los campos con error
@@ -254,6 +255,7 @@ function Checkout() {
                 className={clase(nombre)}
                 value={formulario[nombre]}
                 onChange={manejarCambio}
+                disabled={!compra.puedePreparar}
                 {...opciones}
             />
         )
@@ -279,8 +281,8 @@ function Checkout() {
                     <h1 id="titulo-checkout">Finalizar compra</h1>
                     <p className="pagina-bajada">
                         {usuario
-                            ? 'Revisamos tus datos de la cuenta. Confirma la entrega y el pago.'
-                            : 'Completa tus datos, la dirección de entrega y el pago.'}
+                            ? 'Revisamos tus datos de la cuenta. Confirma la entrega y registra tu boleta.'
+                            : 'Completa tus datos y la dirección de entrega para registrar tu boleta.'}
                     </p>
                 </div>
 
@@ -332,6 +334,7 @@ function Checkout() {
                                                     className={clase('comuna')}
                                                     value={formulario.comuna}
                                                     onChange={manejarCambio}
+                                                    disabled={!compra.puedePreparar}
                                                 >
                                                     <option value="">Selecciona una comuna</option>
                                                     {COMUNAS.map((comuna) => (
@@ -341,12 +344,14 @@ function Checkout() {
                                             ))}
                                         </div>
                                     </div>
+                                    <p className="panel-bajada">Las indicaciones adicionales aún no están disponibles.</p>
                                     {campo('indicaciones', 'Indicaciones para la entrega (opcional)', (
                                         <textarea
                                             id="indicaciones"
                                             name="indicaciones"
                                             className={`checkout-indicaciones ${clase('indicaciones')}`}
                                             rows="3"
+                                            disabled
                                             maxLength={300}
                                             placeholder="Ej.: casa con reja verde, tocar el timbre"
                                             value={formulario.indicaciones}
@@ -356,20 +361,8 @@ function Checkout() {
                                 </div>
 
                                 <div className="tarjeta-panel checkout-paso">
-                                    <h2><span className="paso-numero">3</span> Pago</h2>
-                                    <p className="panel-bajada">No guardamos los datos de tu tarjeta.</p>
-                                    {campo('numeroTarjeta', 'Número de la tarjeta', entrada('numeroTarjeta', { inputMode: 'numeric', autoComplete: 'cc-number', maxLength: 19, placeholder: '1234 5678 9012 3456' }))}
-                                    <div className="row g-3">
-                                        <div className="col-sm-6">
-                                            {campo('titular', 'Nombre del titular', entrada('titular', { autoComplete: 'cc-name', maxLength: 50, placeholder: 'Como aparece en la tarjeta' }))}
-                                        </div>
-                                        <div className="col-6 col-sm-3">
-                                            {campo('vencimiento', 'Vencimiento', entrada('vencimiento', { inputMode: 'numeric', autoComplete: 'cc-exp', maxLength: 5, placeholder: 'MM/AA' }))}
-                                        </div>
-                                        <div className="col-6 col-sm-3">
-                                            {campo('cvv', 'CVV', entrada('cvv', { inputMode: 'numeric', autoComplete: 'cc-csc', maxLength: 3, placeholder: '123' }))}
-                                        </div>
-                                    </div>
+                                    <h2><span className="paso-numero">3</span> Registro de boleta</h2>
+                                    <p className="panel-bajada">Registrar una boleta no acredita un pago bancario. No solicitamos datos de tarjeta.</p>
                                 </div>
                             </form>
                         </div>
@@ -379,7 +372,58 @@ function Checkout() {
                             <aside className="tarjeta-panel checkout-lateral" aria-labelledby="titulo-resumen">
                                 <h2 id="titulo-resumen">Resumen del pedido</h2>
 
-                                {detalle.lineas.length === 0 ? (
+                                <p className="mensaje-error-campo" role="status">El carrito se conservará después del registro.</p>
+                                {!identidadValida && <p role="alert">Necesitas una cuenta de cliente con identidad válida.</p>}
+                                {compra.error && <p role="alert">{compra.error}</p>}
+                                {compra.intento && compra.estadoIntento !== 'confirmado' && (
+                                    <p role="status">Se conserva un intento {compra.estadoIntento}. Reintenta con los datos originales.</p>
+                                )}
+                                {ocupado && <p role="status">{comprobando && !compra.enviando ? 'Comprobando catálogo oficial…' : 'Registrando boleta…'}</p>}
+                                {compra.estadoIntento === 'confirmado' && !ocupado && (
+                                    <p role="status">Boleta registrada N.º {compra.boletaId}. Esto no confirma un pago bancario. Tu carrito se conserva.</p>
+                                )}
+                                {compra.boleta && !ocupado && (
+                                    <section aria-label="Resumen de la boleta registrada">
+                                        <h3>Datos confirmados por el servidor</h3>
+                                        <ul>{compra.boleta.detalles.map(linea => (
+                                            <li key={linea.id}>Producto {linea.productoId}: {linea.cantidad} × {formatearPrecio(linea.precio)}</li>
+                                        ))}</ul>
+                                        <div className="checkout-total">
+                                            <span>Total boleta</span>
+                                            <strong>{formatearPrecio(compra.boleta.total)}</strong>
+                                        </div>
+                                    </section>
+                                )}
+                                {compra.intento && (
+                                    <section aria-label="Datos del intento guardado">
+                                        <h3>Datos del registro guardado</h3>
+                                        <p>{compra.intento.cuerpo.direccion}, {compra.intento.cuerpo.comuna}</p>
+                                        <ul>{compra.intento.cuerpo.detalles.map((linea, indice) => (
+                                            <li key={indice}>Producto {linea.productoId} × {linea.cantidad}</li>
+                                        ))}</ul>
+                                        <p>Al reintentar se enviarán estos mismos datos. Los cambios del carrito se conservan para después.</p>
+                                    </section>
+                                )}
+                                {catalogoActual.cargando && <p role="status">Cargando catálogo oficial…</p>}
+                                {catalogoActual.error && (
+                                    <div role="alert">
+                                        <p>No se pudo consultar el catálogo oficial: {catalogoActual.error}</p>
+                                        <button type="button" className="btn btn-outline-secondary" disabled={ocupado} onClick={actualizarCatalogo}>Reintentar</button>
+                                    </div>
+                                )}
+                                {compra.puedePreparar && !catalogoActual.cargando && !catalogoActual.error && (
+                                    <button type="button" className="btn btn-outline-secondary" disabled={ocupado} onClick={actualizarCatalogo}>Actualizar catálogo</button>
+                                )}
+                                {disponibilidad.estado === 'no-disponible' && (
+                                    <p role="alert">Hay productos inválidos, inactivos o sin stock suficiente. Revisa tu carrito.</p>
+                                )}
+                                {items.length > 0 && !disponibilidad.puedeConfirmar && (
+                                    <ul aria-label="Artículos conservados">
+                                        {items.map((item, indice) => <li key={item.codigo + '-' + indice}>{item.codigo} × {item.cantidad}</li>)}
+                                    </ul>
+                                )}
+
+                                {items.length === 0 ? (
                                     <p className="panel-bajada">
                                         No hay productos en el carrito.{' '}
                                         <Link to="/productos">Ver el catálogo</Link>
@@ -400,8 +444,8 @@ function Checkout() {
                                 )}
 
                                 <div className="checkout-total">
-                                    <span>Total</span>
-                                    <strong>{formatearPrecio(detalle.total)}</strong>
+                                    <span>Total estimado del carrito</span>
+                                    <strong>{detalle.total === null ? 'No disponible' : formatearPrecio(detalle.total)}</strong>
                                 </div>
 
                                 {errores.carrito && (
@@ -413,11 +457,10 @@ function Checkout() {
                                     type="submit"
                                     form="formCheckout"
                                     className="btn btn-principal w-100"
-                                    disabled={detalle.lineas.length === 0 || procesando}
+                                    disabled={ocupado || !(puedeRegistrar || compra.puedeEnviar)}
                                 >
-                                    {procesando
-                                        ? 'Procesando pago…'
-                                        : 'Pagar ' + formatearPrecio(detalle.total)}
+                                    {ocupado ? 'Procesando registro…' : compra.estadoIntento === 'confirmado'
+                                        ? 'Boleta registrada' : compra.puedeEnviar ? 'Reintentar registro' : 'Registrar boleta'}
                                 </button>
                             </aside>
                         </div>

@@ -21,8 +21,13 @@ export class ErrorApi extends Error {
 
 //   pedir("/auth/login", { metodo: "POST", cuerpo: { correo, contrasena } })
 //   pedir("/usuarios/yo", { token })
-export async function pedir(ruta, { metodo = "GET", cuerpo, token } = {}) {
+export async function pedir(ruta, { metodo = "GET", cuerpo, token, encabezados: adicionales = {}, estadoEsperado } = {}) {
   const encabezados = {}
+  for (const [nombre, valor] of new Headers(adicionales).entries()) {
+    // La identidad sigue dependiendo exclusivamente del token administrado por sesion.
+    if (nombre === 'authorization') throw new Error('Authorization debe enviarse mediante token, no como encabezado adicional.')
+    if (nombre !== 'content-type' || cuerpo === undefined) encabezados[nombre] = valor
+  }
 
   if (cuerpo !== undefined) {
     encabezados["Content-Type"] = "application/json"
@@ -40,6 +45,10 @@ export async function pedir(ruta, { metodo = "GET", cuerpo, token } = {}) {
     })
   } catch {
     throw new ErrorApi(0, SIN_CONEXION)
+  }
+
+  if (respuesta.ok && estadoEsperado !== undefined && respuesta.status !== estadoEsperado) {
+    throw new ErrorApi(respuesta.status, 'El servidor devolvio un estado HTTP inesperado.')
   }
 
   // 204 = salio bien, pero no trae datos (por ejemplo, al eliminar)

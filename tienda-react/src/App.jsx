@@ -23,7 +23,7 @@ import CompraExitosa from './paginas/CompraExitosa'
 import PagoRechazado from './paginas/PagoRechazado'
 import Categorias from './paginas/Categorias'
 import AdminDashboard from './paginas/AdminDashboard'
-import AdminProductos from './paginas/AdminProductos'
+import AdminProductosHttp from './paginas/AdminProductosHttp'
 import AdminUsuarios from './paginas/AdminUsuarios'
 import AdminOrdenes from './paginas/AdminOrdenes'
 import AdminReportes from './paginas/AdminReportes'
@@ -65,7 +65,7 @@ function App() {
           <Route path="/admin" element={<RutaProtegida roles={SOLO_ADMIN}><AdminDashboard /></RutaProtegida>} />
           <Route path="/admin/ordenes" element={<RutaProtegida roles={SOLO_ADMIN}><AdminOrdenes /></RutaProtegida>} />
           <Route path="/admin/reportes" element={<RutaProtegida roles={SOLO_ADMIN}><AdminReportes /></RutaProtegida>} />
-          <Route path="/admin/productos" element={<RutaProtegida roles={SOLO_ADMIN}><AdminProductos /></RutaProtegida>} />
+          <Route path="/admin/productos" element={<RutaProtegida roles={SOLO_ADMIN}><AdminProductosHttp /></RutaProtegida>} />
           <Route path="/admin/usuarios" element={<RutaProtegida roles={SOLO_ADMIN}><AdminUsuarios /></RutaProtegida>} />
           <Route path="/despacho" element={<RutaProtegida roles={SOLO_DESPACHADORA}><Despachadora /></RutaProtegida>} />
           <Route path="/repartidor" element={<RutaProtegida roles={SOLO_REPARTIDOR}><Repartidor /></RutaProtegida>} />

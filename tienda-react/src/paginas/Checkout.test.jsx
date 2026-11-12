@@ -12,7 +12,15 @@ describe("Checkout", () => {
 
     let pantalla;
 
-    beforeEach(() => {
+    beforeEach(async () => {
+        sessionStorage.clear();
+        const categoria = { id: 91, nombre: 'Categoría de prueba' };
+        simularApi({
+            'GET /productos': () => [200, [{ id: 901, codigo: 'CL002', nombre: 'Producto de prueba',
+                precioResidencial: 220, precioComercial: 200, precioOferta: null,
+                activo: true, stock: 3, unidad: 'Unidad', categoria }]],
+            'GET /categorias': () => [200, [categoria]]
+        });
         pantalla = montarEnTienda(
             <Checkout />,
             [
@@ -22,6 +30,7 @@ describe("Checkout", () => {
                 }
             ]
         );
+        await waitFor(() => expect(pantalla.textContent).toContain('Producto de prueba'));
     });
 
     afterEach(() => {

@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 
 import TarjetaProducto from '../components/TarjetaProducto'
+import EstadoCatalogo from '../components/EstadoCatalogo'
 import { useCarrito } from '../contexto/carritoContexto'
 import { useCatalogo } from '../contexto/catalogoContexto'
 import { formatearPrecio, imagenDe } from '../datos/productos'
@@ -61,6 +62,7 @@ function Ofertas() {
             <h2 id="titulo-listado-ofertas">Productos en oferta</h2>
           </div>
 
+          <EstadoCatalogo recuperacion={<Link className="btn btn-secundario" to="/productos">Ver catálogo</Link>}>
           {ofertas.length === 0 ? (
             <div className="sin-resultados">
               <p className="sin-resultados-titulo">
@@ -74,7 +76,7 @@ function Ofertas() {
           ) : (
             <ul className="row g-4 list-unstyled">
               {ofertas.map((producto) => {
-                const oferta = ofertaDeProducto(producto.codigo)
+                const oferta = ofertaDeProducto(producto)
 
                 return (
                   <li key={producto.codigo} className="col-12 col-sm-6 col-lg-3">
@@ -94,6 +96,7 @@ function Ofertas() {
               })}
             </ul>
           )}
+          </EstadoCatalogo>
         </div>
       </section>
     </main>

@@ -10,7 +10,8 @@ import './index.css'
 import App from './App.jsx'
 import ProveedorCarrito from './contexto/ProveedorCarrito'
 import ProveedorSesion from './contexto/ProveedorSesion'
-import ProveedorCatalogo from './contexto/ProveedorCatalogo'
+import { ProveedorCatalogoHttp } from './contexto/ProveedorCatalogo'
+import RefrescarCatalogoPublico from './components/RefrescarCatalogoPublico'
 
 
 createRoot(document.getElementById('root')).render(
@@ -18,11 +19,12 @@ createRoot(document.getElementById('root')).render(
     <BrowserRouter>
       <ProveedorSesion>
         {/* El catalogo va por fuera del carrito, porque el carrito lo usa */}
-        <ProveedorCatalogo>
+        <ProveedorCatalogoHttp>
+          <RefrescarCatalogoPublico />
           <ProveedorCarrito>
             <App />
           </ProveedorCarrito>
-        </ProveedorCatalogo>
+        </ProveedorCatalogoHttp>
       </ProveedorSesion>
     </BrowserRouter>
   </StrictMode>,

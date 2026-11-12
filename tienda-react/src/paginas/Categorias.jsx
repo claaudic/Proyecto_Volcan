@@ -1,6 +1,7 @@
 import { Link, useParams } from 'react-router-dom'
 import TarjetaProducto from '../components/TarjetaProducto'
 import TarjetaCategoria from '../components/TarjetaCategoria'
+import EstadoCatalogo from '../components/EstadoCatalogo'
 import { useCarrito } from '../contexto/carritoContexto'
 import { useCatalogo } from '../contexto/catalogoContexto'
 import { formatearPrecio, imagenDe } from '../datos/productos'
@@ -17,10 +18,25 @@ import { abrirPanelCarrito } from '../utilidades/panelCarrito'
 function Categorias() {
   // Si la URL trae el nombre de una categoria, se muestra esa categoria
   const { nombre } = useParams()
-  const { activos } = useCatalogo()
+  const { activos, cargando, error } = useCatalogo()
 
   // Solo productos activos: los desactivados no se muestran en la tienda
   const grupos = agruparPorCategoria(activos)
+
+  if (cargando || error) {
+    return (
+      <main>
+        <Encabezado titulo="Categorías" bajada="Elige una categoría para ver sus productos.">
+          <span aria-current="page">Categorías</span>
+        </Encabezado>
+        <section className="catalogo" aria-label="Categorías de productos">
+          <div className="container">
+            <EstadoCatalogo recuperacion={nombre && <Link className="btn btn-secundario" to="/categorias">Ver todas las categorías</Link>} />
+          </div>
+        </section>
+      </main>
+    )
+  }
 
   if (nombre) {
     return <VistaCategoria grupos={grupos} activos={activos} slug={nombre} />
@@ -34,7 +50,9 @@ function Categorias() {
 
       <section className="catalogo" aria-label="Categorías de productos">
         <div className="container">
-          <ListaCategorias grupos={grupos} />
+          <EstadoCatalogo>
+            <ListaCategorias grupos={grupos} />
+          </EstadoCatalogo>
         </div>
       </section>
     </main>
@@ -118,7 +136,7 @@ function ListaProductos({ productos, alAnadir }) {
     <ul className="row g-4 list-unstyled">
       {productos.map((producto) => {
         // Si el producto esta en oferta, se muestra el mismo precio que cobra el carrito
-        const oferta = ofertaDeProducto(producto.codigo)
+        const oferta = ofertaDeProducto(producto)
 
         return (
           <li key={producto.codigo} className="col-12 col-sm-6 col-lg-3">

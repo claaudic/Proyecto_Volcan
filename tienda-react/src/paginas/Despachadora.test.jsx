@@ -1,11 +1,11 @@
-import { describe, it, expect, beforeEach } from 'vitest'
-import { screen, within } from '@testing-library/react'
+import { describe, it, expect } from 'vitest'
+import { screen, within, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import Despachadora from './Despachadora'
 import { leerPedidos } from '../datos/pedidos'
-import { renderizar, pedidoDeEjemplo } from '../test/renderizar'
-import { simularApiDeUsuarios, simularApiApagada } from '../test/api'
+import { pedidoDeEjemplo } from '../test/renderizar'
+import { abrirPedidos as renderizar } from '../test/pedidosHttp'
 
 const DESPACHADORA = {
   nombre: 'Daniela Fuentes',
@@ -38,13 +38,8 @@ function valorDeTarjeta(etiqueta) {
 
 describe('Panel de despachadora', () => {
 
-  // Los repartidores llegan de ms-usuarios (simulado)
-  beforeEach(() => {
-    simularApiDeUsuarios()
-  })
-
-  it('muestra resumen y pedidos para despacho', () => {
-    renderizar(<Despachadora />, { usuario: DESPACHADORA, pedidos: PEDIDOS })
+  it('muestra resumen y pedidos para despacho', async () => {
+    await renderizar(<Despachadora />, { usuario: DESPACHADORA, pedidos: PEDIDOS })
 
     expect(screen.getByRole('heading', { name: 'Gestión de pedidos' })).toBeInTheDocument()
     expect(valorDeTarjeta('Pedidos registrados')).toHaveTextContent('3')
@@ -54,40 +49,56 @@ describe('Panel de despachadora', () => {
     expect(filaConPedido(3)).toBeDefined()
   })
 
+  it('cancela un pedido pendiente por /anulacion', async () => {
+    const user = userEvent.setup()
+    const vista = await renderizar(<Despachadora />, { usuario: DESPACHADORA, pedidos: PEDIDOS })
+
+    await user.selectOptions(within(filaConPedido(3)).getByLabelText('Cambiar estado del pedido 3'), 'Cancelado')
+
+    await waitFor(() => expect(within(filaConPedido(3)).getAllByText('Cancelado').length).toBeGreaterThan(0))
+    const rutas = vista.escrituras().map(([url]) => String(url))
+    expect(rutas.some((url) => url.endsWith('/boletas/3/anulacion'))).toBe(true)
+    expect(rutas.some((url) => url.endsWith('/boletas/3/estado'))).toBe(false)
+  })
+
   it('asigna repartidor y cambia estado de un pedido', async () => {
     const user = userEvent.setup()
-    renderizar(<Despachadora />, { usuario: DESPACHADORA, pedidos: PEDIDOS })
+    const vista = await renderizar(<Despachadora />, { usuario: DESPACHADORA, pedidos: PEDIDOS })
 
     // Espera a que lleguen los repartidores del backend
     await within(filaConPedido(3)).findByRole('option', { name: 'Matías Vera' })
     await user.selectOptions(
       within(filaConPedido(3)).getByLabelText('Asignar repartidor al pedido 3'),
-      'repartidor@gaselvolcan.cl'
+      '3'
     )
+    await waitFor(() => expect(within(filaConPedido(3)).getByLabelText('Cambiar estado del pedido 3')).toBeEnabled())
     await user.selectOptions(
       within(filaConPedido(3)).getByLabelText('Cambiar estado del pedido 3'),
       'En camino'
     )
 
-    const pedido = leerPedidos().find((uno) => uno.numero === 3)
+    await waitFor(() => expect(vista.gestiones.find(p => p.boleta.id === 3).boleta.estado).toBe('EN_CAMINO'))
+    await waitFor(() => expect(valorDeTarjeta('Pendientes')).toHaveTextContent('0'))
+    const pedido = vista.gestiones.find((uno) => uno.boleta.id === 3).boleta
 
-    expect(pedido.repartidor).toBe('repartidor@gaselvolcan.cl')
-    expect(pedido.estado).toBe('En camino')
+    expect(pedido.repartidorId).toBe(3)
+    expect(pedido.estado).toBe('EN_CAMINO')
+    expect(leerPedidos()).toEqual(PEDIDOS)
     expect(valorDeTarjeta('Pendientes')).toHaveTextContent('0')
     expect(valorDeTarjeta('En camino')).toHaveTextContent('2')
   })
 
   it('si el backend no responde, avisa que faltan los repartidores', async () => {
-    simularApiApagada()
-    renderizar(<Despachadora />, { usuario: DESPACHADORA, pedidos: PEDIDOS })
+    await renderizar(<Despachadora />, { usuario: DESPACHADORA, pedidos: PEDIDOS,
+      rutas: { 'GET /usuarios/repartidores': () => [503, { mensaje: 'Sin conexión' }] } })
 
     expect(await screen.findByRole('alert')).toHaveTextContent('No se pudo cargar la lista de repartidores.')
     // Los pedidos se siguen viendo
     expect(filas()).toHaveLength(3)
   })
 
-  it('avisa si no hay pedidos', () => {
-    renderizar(<Despachadora />, { usuario: DESPACHADORA })
+  it('avisa si no hay pedidos', async () => {
+    await renderizar(<Despachadora />, { usuario: DESPACHADORA })
 
     expect(screen.getByText('No hay pedidos registrados')).toBeInTheDocument()
   })

@@ -114,6 +114,8 @@ export function detalleDelCarrito(items, catalogo = PRODUCTOS) {
     unidades += cantidad;
 
     lineas.push({
+      // id real del producto en ms-catalogo: es lo que pide POST /boletas
+      id: producto.id,
       codigo: producto.codigo,
       nombre: producto.nombre,
       imagen: producto.imagen || "",

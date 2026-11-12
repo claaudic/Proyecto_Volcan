@@ -1,11 +1,8 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
-import {
-    actualizarPedido,
-    eliminarPedido,
-    leerPedidos
-} from '../datos/pedidos'
+import { usePedidosHttp } from '../utilidades/usePedidosHttp'
+import { puedeCambiarEstado } from '../datos/pedidosGestionApi'
 import { formatearPrecio } from '../datos/productos'
 import { nombreCompleto, nombreDeRol } from '../datos/usuarios'
 import { useApi } from '../utilidades/useApi'
@@ -17,104 +14,38 @@ const ESTADOS_PEDIDO = [
     'Cancelado'
 ]
 
-function ordenarPorFecha(pedidos) {
-    return [...pedidos].sort((a, b) => {
-        const fechaA = new Date(a.fecha).getTime()
-        const fechaB = new Date(b.fecha).getTime()
-
-        if (Number.isNaN(fechaA) && Number.isNaN(fechaB)) {
-            return 0
-        }
-
-        if (Number.isNaN(fechaA)) {
-            return 1
-        }
-
-        if (Number.isNaN(fechaB)) {
-            return -1
-        }
-
-        return fechaB - fechaA
-    })
-}
-
+// Los pedidos llegan de ms-pedidos (GET /boletas/gestion) siempre con la misma forma:
+// productos [], cliente { nombre, correo, telefono } y entrega { direccion, comuna }
 function obtenerLineas(pedido) {
-    if (Array.isArray(pedido.productos)) {
-        return pedido.productos
-    }
-
-    if (Array.isArray(pedido.lineas)) {
-        return pedido.lineas
-    }
-
-    if (pedido.producto) {
-        return [
-            {
-                nombre: pedido.producto,
-                cantidad: pedido.cantidad || 1,
-                precio: pedido.total,
-                subtotal: pedido.total
-            }
-        ]
-    }
-
-    return []
+    return pedido.productos || []
 }
 
 function nombreCliente(pedido) {
-    if (pedido.cliente && typeof pedido.cliente === 'object') {
-        return pedido.cliente.nombre || 'Sin nombre'
-    }
-
-    return pedido.cliente || 'Sin nombre'
+    return pedido.cliente?.nombre || 'Sin nombre'
 }
 
 function correoCliente(pedido) {
-    if (pedido.cliente && typeof pedido.cliente === 'object') {
-        return pedido.cliente.correo || ''
-    }
-
-    return pedido.correo || ''
+    return pedido.cliente?.correo || ''
 }
 
 function telefonoCliente(pedido) {
-    if (pedido.cliente && typeof pedido.cliente === 'object') {
-        return pedido.cliente.telefono || ''
-    }
-
-    return ''
+    return pedido.cliente?.telefono || ''
 }
 
 function direccionEntrega(pedido) {
-    if (pedido.entrega && typeof pedido.entrega === 'object') {
-        return pedido.entrega.direccion || 'Sin dirección'
-    }
-
-    return pedido.direccion || 'Sin dirección'
+    return pedido.entrega?.direccion || 'Sin dirección'
 }
 
 function comunaEntrega(pedido) {
-    if (pedido.entrega && typeof pedido.entrega === 'object') {
-        return pedido.entrega.comuna || 'Sin comuna'
-    }
-
-    return pedido.comuna || 'Sin comuna'
+    return pedido.entrega?.comuna || 'Sin comuna'
 }
 
 function indicacionesEntrega(pedido) {
-    if (pedido.entrega && typeof pedido.entrega === 'object') {
-        return pedido.entrega.indicaciones || ''
-    }
-
-    return ''
+    return pedido.entrega?.indicaciones || ''
 }
 
 function medioPago(pedido) {
-    if (pedido.pago && typeof pedido.pago === 'object') {
-        return pedido.pago.tarjeta || pedido.pago.metodo || ''
-    }
-
-    return pedido.pago || ''
+    return pedido.pago?.tarjeta || ''
 }
 
 function resumenProductos(pedido) {
@@ -135,7 +66,8 @@ function resumenProductos(pedido) {
 }
 
 function AdminOrdenes() {
-    const [pedidos, setPedidos] = useState(() => ordenarPorFecha(leerPedidos()))
+    const datos = usePedidosHttp()
+    const { pedidos } = datos
     const [pedidoDetalle, setPedidoDetalle] = useState(null)
     const [pedidoEditando, setPedidoEditando] = useState(null)
     const [pedidoABorrar, setPedidoABorrar] = useState(null)
@@ -148,10 +80,6 @@ function AdminOrdenes() {
     const lista = useApi('/usuarios/repartidores')
 
     const repartidores = lista.datos || []
-
-    function refrescarPedidos() {
-        setPedidos(ordenarPorFecha(leerPedidos()))
-    }
 
     function claseEstado(estado) {
         if (estado === 'En camino') {
@@ -180,22 +108,21 @@ function AdminOrdenes() {
         }).format(fechaPedido)
     }
 
-    function nombreRepartidor(correo) {
-        if (!correo) {
+    function nombreRepartidor(id) {
+        if (!id) {
             return 'Sin asignar'
         }
 
         const repartidor = repartidores.find(
             (cuenta) =>
-                cuenta.correo.toLowerCase() ===
-                String(correo).toLowerCase()
+                String(cuenta.id) === String(id)
         )
 
-        return repartidor ? nombreCompleto(repartidor) : correo
+        return repartidor ? nombreCompleto(repartidor) : 'Sin registrar'
     }
 
     function abrirEditar(pedido) {
-        setPedidoEditando(pedido)
+        setPedidoEditando({ ...pedido, identidadVista: datos.identidad })
         setFormulario({
             estado: pedido.estado || 'Pendiente',
             repartidor: pedido.repartidor || ''
@@ -211,30 +138,24 @@ function AdminOrdenes() {
         }))
     }
 
-    function guardarEdicion(evento) {
+    async function guardarEdicion(evento) {
         evento.preventDefault()
 
         if (!pedidoEditando) {
             return
         }
 
-        actualizarPedido(pedidoEditando.numero, {
-            estado: formulario.estado,
-            repartidor: formulario.repartidor
-        })
-
-        setPedidoEditando(null)
-        refrescarPedidos()
+        const resultado = await datos.guardar(pedidoEditando, { ...formulario })
+        if (resultado.ok) setPedidoEditando(null)
     }
 
-    function confirmarEliminar() {
+    async function confirmarEliminar() {
         if (!pedidoABorrar) {
             return
         }
 
-        eliminarPedido(pedidoABorrar.numero)
-        setPedidoABorrar(null)
-        refrescarPedidos()
+        const resultado = await datos.anular(pedidoABorrar)
+        if (resultado.ok) setPedidoABorrar(null)
     }
 
     function cerrarDetalle() {
@@ -297,14 +218,14 @@ function AdminOrdenes() {
                             </div>
                         </div>
 
-                        {lista.error && (
+                        {(lista.error || datos.error) && (
                             <div className="alert alert-warning" role="alert">
-                                No se pudo cargar la lista de repartidores. {lista.error}
+                                {lista.error ? <>No se pudo cargar la lista de repartidores. {lista.error}</> : datos.error}
                             </div>
                         )}
 
                         <div className="tabla-marco table-responsive">
-                            <table className="tabla-panel">
+                            <table className="tabla-panel" aria-busy={datos.cargando || datos.ocupado}>
                                 <thead>
                                 <tr>
                                     <th>N° Pedido</th>
@@ -323,7 +244,7 @@ function AdminOrdenes() {
                                 {pedidos.length === 0 ? (
                                     <tr>
                                         <td colSpan="9">
-                                            Todavía no hay pedidos registrados.
+                                            {datos.cargando ? '…' : datos.error ? '—' : 'Todavía no hay pedidos registrados.'}
                                         </td>
                                     </tr>
                                 ) : (
@@ -359,7 +280,7 @@ function AdminOrdenes() {
                                                     className="btn btn-sm btn-secundario me-1 mb-1"
                                                     aria-label={`Ver boleta del pedido ${pedido.numero}`}
                                                     onClick={() =>
-                                                        setPedidoDetalle(pedido)
+                                                        setPedidoDetalle({ ...pedido, identidadVista: datos.identidad })
                                                     }
                                                 >
                                                     Ver boleta
@@ -369,6 +290,7 @@ function AdminOrdenes() {
                                                     type="button"
                                                     className="btn btn-sm btn-principal me-1 mb-1"
                                                     aria-label={`Editar pedido ${pedido.numero}`}
+                                                    disabled={datos.ocupado || datos.obsoleto(pedido) || ['Entregado', 'Cancelado'].includes(pedido.estado)}
                                                     onClick={() =>
                                                         abrirEditar(pedido)
                                                     }
@@ -380,8 +302,9 @@ function AdminOrdenes() {
                                                     type="button"
                                                     className="btn btn-sm btn-peligro mb-1"
                                                     aria-label={`Eliminar pedido ${pedido.numero}`}
+                                                    disabled={datos.ocupado || datos.obsoleto(pedido) || pedido.estado !== 'Pendiente'}
                                                     onClick={() =>
-                                                        setPedidoABorrar(pedido)
+                                                        setPedidoABorrar({ ...pedido, identidadVista: datos.identidad })
                                                     }
                                                 >
                                                     Eliminar
@@ -397,7 +320,7 @@ function AdminOrdenes() {
                 </div>
             </div>
 
-            {pedidoDetalle && (
+            {pedidoDetalle && pedidoDetalle.identidadVista === datos.identidad && (
                 <>
                     <div
                         className="modal fade show"
@@ -601,7 +524,7 @@ function AdminOrdenes() {
                 </>
             )}
 
-            {pedidoEditando && (
+            {pedidoEditando && pedidoEditando.identidadVista === datos.identidad && (
                 <>
                     <div
                         className="modal fade show"
@@ -643,6 +566,7 @@ function AdminOrdenes() {
                                                 id="estadoPedido"
                                                 name="estado"
                                                 className="selector-estado w-100"
+                                                disabled={datos.ocupado || datos.obsoleto(pedidoEditando)}
                                                 value={formulario.estado}
                                                 onChange={cambiarFormulario}
                                             >
@@ -651,6 +575,7 @@ function AdminOrdenes() {
                                                         <option
                                                             key={estado}
                                                             value={estado}
+                                                            disabled={!puedeCambiarEstado(pedidoEditando.estado, estado)}
                                                         >
                                                             {estado}
                                                         </option>
@@ -671,6 +596,7 @@ function AdminOrdenes() {
                                                 id="repartidorPedido"
                                                 name="repartidor"
                                                 className="selector-repartidor w-100"
+                                                disabled={datos.ocupado || datos.obsoleto(pedidoEditando) || pedidoEditando.estado !== 'Pendiente' || lista.cargando || Boolean(lista.error)}
                                                 value={formulario.repartidor}
                                                 onChange={cambiarFormulario}
                                             >
@@ -682,7 +608,7 @@ function AdminOrdenes() {
                                                     (repartidor) => (
                                                         <option
                                                             key={repartidor.correo}
-                                                            value={repartidor.correo}
+                                                            value={String(repartidor.id)}
                                                         >
                                                             {nombreCompleto(repartidor)} -{' '}
                                                             {nombreDeRol(
@@ -707,6 +633,7 @@ function AdminOrdenes() {
                                         <button
                                             type="submit"
                                             className="btn btn-principal"
+                                            disabled={datos.ocupado || datos.obsoleto(pedidoEditando)}
                                         >
                                             Guardar cambios
                                         </button>
@@ -720,7 +647,7 @@ function AdminOrdenes() {
                 </>
             )}
 
-            {pedidoABorrar && (
+            {pedidoABorrar && pedidoABorrar.identidadVista === datos.identidad && (
                 <>
                     <div
                         className="modal fade show"
@@ -775,6 +702,7 @@ function AdminOrdenes() {
                                         type="button"
                                         className="btn btn-peligro"
                                         onClick={confirmarEliminar}
+                                        disabled={datos.ocupado || datos.obsoleto(pedidoABorrar) || pedidoABorrar.estado !== 'Pendiente'}
                                     >
                                         Sí, eliminar
                                     </button>

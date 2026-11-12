@@ -1,10 +1,11 @@
 import { describe, it, expect } from 'vitest'
-import { screen, within } from '@testing-library/react'
+import { screen, within, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import Repartidor from './Repartidor'
 import { leerPedidos } from '../datos/pedidos'
-import { renderizar, pedidoDeEjemplo } from '../test/renderizar'
+import { pedidoDeEjemplo } from '../test/renderizar'
+import { abrirPedidos as renderizar } from '../test/pedidosHttp'
 
 const REPARTIDOR = {
   nombre: 'Matías Vera',
@@ -39,8 +40,8 @@ function valorDeTarjeta(etiqueta) {
 
 describe('Panel de repartidor', () => {
 
-  it('muestra solo los pedidos asignados al repartidor', () => {
-    renderizar(<Repartidor />, { usuario: REPARTIDOR, pedidos: PEDIDOS })
+  it('muestra solo los pedidos asignados al repartidor', async () => {
+    await renderizar(<Repartidor />, { usuario: REPARTIDOR, pedidos: PEDIDOS })
 
     expect(screen.getByRole('heading', { name: 'Mis pedidos asignados' })).toBeInTheDocument()
     expect(filaConPedido(4)).toBeDefined()
@@ -55,30 +56,32 @@ describe('Panel de repartidor', () => {
 
   it('actualiza el estado de un pedido asignado', async () => {
     const user = userEvent.setup()
-    renderizar(<Repartidor />, { usuario: REPARTIDOR, pedidos: PEDIDOS })
+    const vista = await renderizar(<Repartidor />, { usuario: REPARTIDOR, pedidos: PEDIDOS })
 
     await user.selectOptions(
       within(filaConPedido(4)).getByLabelText('Cambiar el estado del pedido 4'),
       'En camino'
     )
 
-    const pedido = leerPedidos().find((uno) => uno.numero === 4)
+    await waitFor(() => expect(valorDeTarjeta('Pendientes')).toHaveTextContent('0'))
+    const pedido = vista.gestiones.find((uno) => uno.boleta.id === 4).boleta
 
-    expect(pedido.estado).toBe('En camino')
+    expect(pedido.estado).toBe('EN_CAMINO')
+    expect(leerPedidos()).toEqual(PEDIDOS)
     expect(valorDeTarjeta('Pendientes')).toHaveTextContent('0')
     expect(valorDeTarjeta('En camino')).toHaveTextContent('2')
   })
 
-  it('bloquea la edición de pedidos entregados', () => {
-    renderizar(<Repartidor />, { usuario: REPARTIDOR, pedidos: PEDIDOS })
+  it('bloquea la edición de pedidos entregados', async () => {
+    await renderizar(<Repartidor />, { usuario: REPARTIDOR, pedidos: PEDIDOS })
 
     expect(
       within(filaConPedido(1)).getByLabelText('Cambiar el estado del pedido 1')
     ).toBeDisabled()
   })
 
-  it('avisa si no tiene pedidos asignados', () => {
-    renderizar(<Repartidor />, { usuario: REPARTIDOR })
+  it('avisa si no tiene pedidos asignados', async () => {
+    await renderizar(<Repartidor />, { usuario: REPARTIDOR })
 
     expect(screen.getByText('No tienes pedidos asignados')).toBeInTheDocument()
   })

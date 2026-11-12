@@ -82,7 +82,7 @@ describe("Catálogo: imágenes", () => {
             imagen: ""
         };
 
-        expect(imagenDe(producto)).toBe("/img/cl001.jpg");
+        expect(imagenDe(producto)).toBe("/img/cl001.webp");
     });
 
 });

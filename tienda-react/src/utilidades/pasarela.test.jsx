@@ -5,7 +5,8 @@ import {
     validarVencimiento,
     validarCvv,
     procesarPago,
-    ultimosCuatro
+    ultimosCuatro,
+    formatearVencimiento
 } from "./pasarela";
 
 // Reglas de la pasarela de pago simulada.
@@ -44,6 +45,16 @@ describe("Pasarela: validaciones de la tarjeta", () => {
 
     it("de la tarjeta solo se guardan los últimos 4 dígitos", () => {
         expect(ultimosCuatro("4111 1111 1111 1234")).toBe("1234");
+    });
+
+    it("al escribir el vencimiento pone la / sola y deja borrarla", () => {
+        expect(formatearVencimiento("1")).toBe("1");
+        expect(formatearVencimiento("12", "1")).toBe("12/");
+        expect(formatearVencimiento("12/2", "12/")).toBe("12/2");
+        expect(formatearVencimiento("1228")).toBe("12/28");
+        expect(formatearVencimiento("12/289")).toBe("12/28");
+        // Al borrar desde "12/" no vuelve a aparecer la barra
+        expect(formatearVencimiento("12", "12/")).toBe("12");
     });
 
 });

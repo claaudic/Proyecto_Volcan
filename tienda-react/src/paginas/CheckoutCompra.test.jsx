@@ -68,7 +68,9 @@ async function completar(usuario, tarjeta = '4111 1111 1111 1111', { invitado = 
     await usuario.selectOptions(screen.getByLabelText('Comuna'), 'Chillán')
     await usuario.type(screen.getByLabelText('Número de la tarjeta'), tarjeta)
     await usuario.type(screen.getByLabelText('Nombre del titular'), 'Pedro Soto')
-    await usuario.type(screen.getByLabelText('Vencimiento'), '12/40')
+    // Solo números: la "/" se agrega sola
+    await usuario.type(screen.getByLabelText('Vencimiento'), '1240')
+    expect(screen.getByLabelText('Vencimiento')).toHaveValue('12/40')
     await usuario.type(screen.getByLabelText('CVV'), '123')
 }
 
@@ -106,8 +108,10 @@ describe('Checkout: pago y registro de la boleta', () => {
 
         expect(await screen.findByText('Compra realizada con éxito')).toBeInTheDocument()
         expect(screen.getByText('#77')).toBeInTheDocument()
-        expect(screen.getByText('Total pagado')).toBeInTheDocument()
-        expect(screen.getByText('Tarjeta •••• 1111')).toBeInTheDocument()
+        // Aparecen en la página y en el comprobante para descargar
+        expect(screen.getAllByText('Total pagado')).toHaveLength(2)
+        expect(screen.getAllByText('Tarjeta •••• 1111')).toHaveLength(2)
+        expect(screen.getByText('N° 000077')).toBeInTheDocument()
         expect(carritoGuardado()).toEqual([])
 
         // Lo que llegó al backend: ids reales, datos del invitado y la clave de idempotencia

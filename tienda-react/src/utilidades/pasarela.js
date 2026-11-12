@@ -118,6 +118,19 @@ export function validarCvv(cvv) {
   return "";
 }
 
+// Mientras se escribe el vencimiento, la "/" se pone sola: "1228" -> "12/28".
+// Si se está borrando, no la vuelve a agregar (para poder borrar el mes).
+export function formatearVencimiento(valor, anterior = "") {
+  const digitos = soloDigitos(valor).slice(0, 4);
+  const borrando = String(valor).length < String(anterior).length;
+
+  if (digitos.length > 2 || (digitos.length === 2 && !borrando)) {
+    return digitos.slice(0, 2) + "/" + digitos.slice(2);
+  }
+
+  return digitos;
+}
+
 // El "banco" responde: { aprobado: true } o { aprobado: false, motivo }
 export function procesarPago(numero) {
   const motivo = TARJETAS_RECHAZADAS[soloDigitos(numero)];

@@ -1,87 +1,76 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
 import { useSesion } from '../contexto/sesionContexto'
 import { useCarrito } from '../contexto/carritoContexto'
 import { estadoDelCarrito } from '../datos/estadoCarrito'
 import { useCatalogoCheckout } from '../utilidades/useCatalogoCheckout'
-import { useCompraCheckout } from '../utilidades/useCompraCheckout'
-import { obtenerCatalogo } from '../datos/catalogoApi'
+import { pedir } from '../utilidades/api'
 import { formatearPrecio, imagenDe } from '../datos/productos'
-import { normalizar } from '../datos/zonas'
+import { COMUNAS_COBERTURA, normalizar } from '../datos/zonas'
 import { usarImagenRespaldo } from '../utilidades/imagenes'
 import {
     validarNombre,
     validarCorreo,
     validarDireccion,
+    validarTelefono,
     validarTelefonoObligatorio
 } from '../utilidades/validaciones'
+import {
+    validarNumeroTarjeta,
+    validarTitular,
+    validarVencimiento,
+    validarCvv,
+    procesarPago,
+    ultimosCuatro
+} from '../utilidades/pasarela'
 
-const COMUNAS = [
-    'Chillán',
-    'Chillán Viejo',
-    'El Carmen',
-    'Pinto',
-    'San Ignacio',
-    'Bulnes',
-    'Quillón'
-]
+// Fecha local sin zona horaria, como la espera el backend (LocalDateTime)
+function fechaLocal() {
+    const ahora = new Date()
+    const dos = (n) => String(n).padStart(2, '0')
+    return `${ahora.getFullYear()}-${dos(ahora.getMonth() + 1)}-${dos(ahora.getDate())}T${dos(ahora.getHours())}:${dos(ahora.getMinutes())}:${dos(ahora.getSeconds())}`
+}
+
+// Sin respuesta (0) o falla del servidor (5xx): no sabemos si la boleta se creó,
+// así que el reintento usa la misma clave y el backend no la duplica.
+function convieneReintentar(error) {
+    return !error.estado || error.estado >= 500
+}
 
 function Checkout() {
     const navigate = useNavigate()
     const { items, vaciar } = useCarrito()
     const { usuario, llamarApi } = useSesion()
-    const catalogo = useCatalogoCheckout()
-    const compra = useCompraCheckout({ usuario, llamarApi })
-    const [revisionCatalogo, setRevisionCatalogo] = useState(null)
-    const [comprobando, setComprobando] = useState(false)
-    const bloqueo = useRef(false)
-    const montado = useRef(false)
-    const vigencia = useRef({ firma: '', revision: 0 })
-    const catalogoActual = revisionCatalogo ?? catalogo
-    const disponibilidad = estadoDelCarrito(items, catalogoActual.productos, catalogoActual)
-    const { detalle } = disponibilidad
-    const identidadValida = usuario == null || (Number.isSafeInteger(usuario.id) && usuario.id > 0 && usuario.rol === 'CLIENTE')
-    const ocupado = comprobando || compra.enviando
-    const puedeRegistrar = compra.puedePreparar && identidadValida && disponibilidad.puedeConfirmar
-    const puedeActualizar = compra.puedePreparar && identidadValida && !catalogoActual.cargando
-        && (Boolean(catalogoActual.error) || (items.length > 0 && !disponibilidad.puedeConfirmar))
 
-    // Si hay sesion, los datos de la cuenta se rellenan solos
-    // (lo pide la Figura 6 de las instrucciones de la EP2).
-    // El nombre y el correo ya estan en la sesion; el resto se pide al backend.
+    // El catálogo se vuelve a pedir al backend: precio, stock y productos activos reales
+    const catalogo = useCatalogoCheckout()
+    const disponibilidad = estadoDelCarrito(items, catalogo.productos, catalogo)
+    const { detalle } = disponibilidad
+
+    // Solo compran los clientes o los invitados (sin sesión)
+    const puedeComprar = !usuario || usuario.rol === 'CLIENTE'
+
     const [formulario, setFormulario] = useState({
         nombre: usuario?.nombre || '',
         correo: usuario?.correo || '',
         telefono: '',
         direccion: '',
         comuna: '',
-        indicaciones: ''
+        indicaciones: '',
+        // Datos de la tarjeta: viven solo en este estado, nunca se guardan ni se envían
+        numeroTarjeta: '',
+        titular: '',
+        vencimiento: '',
+        cvv: ''
     })
-
     const [errores, setErrores] = useState({})
-    const [cuentaConfirmada, setCuentaConfirmada] = useState(null)
-    const identidadCuenta = usuario ? `${usuario.id}:${usuario.correo}` : null
-    const idSesion = usuario?.id
-    const contactoCuenta = cuentaConfirmada?.identidad === identidadCuenta ? cuentaConfirmada : null
+    const [procesando, setProcesando] = useState(false)
 
-    const firma = JSON.stringify({ items, formulario, identidad: usuario == null ? null
-        : { id: usuario.id, rol: usuario.rol, correo: usuario.correo } })
-    useLayoutEffect(() => {
-        if (vigencia.current.firma !== firma) {
-            vigencia.current = { firma, revision: vigencia.current.revision + 1 }
-        }
-    }, [firma])
-    useLayoutEffect(() => {
-        montado.current = true
-        return () => {
-            montado.current = false
-            vigencia.current = { ...vigencia.current, revision: vigencia.current.revision + 1 }
-        }
-    }, [])
+    // Idempotency-Key de la compra en curso: se reutiliza solo si hay que reintentar
+    const claveCompra = useRef(null)
 
-    // GET /usuarios/yo: telefono, direccion y comuna guardados en el perfil.
-    // Solo rellena los campos vacios, para no borrar lo que ya se escribio.
+    // Con sesión, se rellenan teléfono, dirección y comuna desde el perfil.
     // Si falla, no pasa nada: el cliente escribe sus datos a mano.
     const correoSesion = usuario?.correo
     useEffect(() => {
@@ -97,23 +86,16 @@ function Checkout() {
                     return
                 }
 
-                if ((idSesion != null && cuenta.id !== idSesion) || cuenta.correo !== correoSesion) return
-                const cliente = {
-                    nombre: [cuenta.nombre, cuenta.apellidos].filter(Boolean).join(' '),
-                    correo: cuenta.correo,
-                    telefono: cuenta.telefono || ''
-                }
-                setCuentaConfirmada({ identidad: identidadCuenta, cliente })
-
-                // La comuna se busca en la lista sin importar tildes ni mayusculas
+                // La comuna se busca en la lista sin importar tildes ni mayúsculas
                 const deLaCuenta = {
                     telefono: cuenta.telefono || '',
                     direccion: cuenta.direccion || '',
-                    comuna: COMUNAS.find((c) => normalizar(c) === normalizar(cuenta.comuna || '')) || ''
+                    comuna: COMUNAS_COBERTURA.find((c) => normalizar(c) === normalizar(cuenta.comuna || '')) || ''
                 }
 
+                // Solo rellena los campos vacíos, para no borrar lo que ya se escribió
                 setFormulario((actual) => {
-                    const relleno = { ...actual, ...cliente }
+                    const relleno = { ...actual }
                     Object.keys(deLaCuenta).forEach((campo) => {
                         if (relleno[campo] === '') {
                             relleno[campo] = deLaCuenta[campo]
@@ -125,188 +107,140 @@ function Checkout() {
             .catch(() => {})
 
         return () => { vigente = false }
-    }, [correoSesion, llamarApi, identidadCuenta, idSesion])
+    }, [correoSesion, llamarApi])
 
     function manejarCambio(e) {
         const { name, value } = e.target
-        if (name === 'indicaciones' || (usuario && ['nombre', 'correo', 'telefono'].includes(name))) return
 
-        setFormulario((anterior) => ({
-            ...anterior,
-            [name]: value
-        }))
+        // El nombre y el correo de una cuenta vienen de la sesión
+        if (usuario && (name === 'nombre' || name === 'correo')) {
+            return
+        }
 
-        setErrores((anteriores) => ({
-            ...anteriores,
-            [name]: ''
-        }))
+        setFormulario((anterior) => ({ ...anterior, [name]: value }))
+        setErrores((anteriores) => ({ ...anteriores, [name]: '' }))
+        // Si cambian los datos, la próxima compra es otra (clave nueva)
+        claveCompra.current = null
     }
 
     function validarFormulario() {
+        // Cada regla devuelve "" si está bien
+        const reglas = {
+            nombre: validarNombre(formulario.nombre),
+            correo: validarCorreo(formulario.correo),
+            // El invitado debe dejar un teléfono de contacto; en una cuenta es opcional
+            telefono: usuario ? validarTelefono(formulario.telefono) : validarTelefonoObligatorio(formulario.telefono),
+            direccion: validarDireccion(formulario.direccion),
+            comuna: formulario.comuna === '' ? 'Selecciona una comuna.' : '',
+            indicaciones: formulario.indicaciones.length > 300
+                ? 'Las indicaciones no pueden superar los 300 caracteres.' : '',
+            numeroTarjeta: validarNumeroTarjeta(formulario.numeroTarjeta),
+            titular: validarTitular(formulario.titular),
+            vencimiento: validarVencimiento(formulario.vencimiento),
+            cvv: validarCvv(formulario.cvv)
+        }
+
         const nuevosErrores = {}
-
-        if (usuario && !contactoCuenta) {
-            nuevosErrores.carrito = 'No se pudieron comprobar los datos de tu cuenta.'
-        }
-
-        const errorNombre = validarNombre(formulario.nombre)
-        const errorCorreo = validarCorreo(formulario.correo)
-
-        if (errorNombre) {
-            nuevosErrores.nombre = errorNombre
-        }
-
-        if (errorCorreo) {
-            nuevosErrores.correo = errorCorreo
-        }
-
-        const errorTelefono = validarTelefonoObligatorio(formulario.telefono)
-
-        if (errorTelefono) {
-            nuevosErrores.telefono = errorTelefono
-        }
-
-        // Calle y numero: misma regla que el perfil
-        const errorDireccion = validarDireccion(formulario.direccion)
-
-        if (errorDireccion) {
-            nuevosErrores.direccion = errorDireccion
-        }
-
-        if (formulario.comuna === '') {
-            nuevosErrores.comuna = 'Selecciona una comuna.'
-        }
-
-        if (formulario.indicaciones.length > 300) {
-            nuevosErrores.indicaciones =
-                'Las indicaciones no pueden superar los 300 caracteres.'
-        }
+        Object.keys(reglas).forEach((campo) => {
+            if (reglas[campo]) {
+                nuevosErrores[campo] = reglas[campo]
+            }
+        })
 
         setErrores(nuevosErrores)
-
         return Object.keys(nuevosErrores).length === 0
     }
 
-    function guardarResumen(intento, productos) {
-        // Datos de presentación separados del cuerpo HTTP y de su Idempotency-Key.
-        // No se guardan credenciales ni información bancaria.
-        const resumen = {
-            clave: intento.clave,
-            cuerpo: intento.cuerpo,
-            items,
-            cliente: usuario ? contactoCuenta.cliente : {
-                nombre: intento.cuerpo.nombreInvitado,
-                correo: intento.cuerpo.correoInvitado,
-                telefono: intento.cuerpo.telefonoInvitado
-            },
-            productos: items.map(item => {
-                const producto = productos.find(p => p.codigo === item.codigo)
-                return { id: producto.id, codigo: producto.codigo, nombre: producto.nombre }
-            })
+    // Lo que se envía a POST /boletas. El total y los precios los calcula el backend.
+    function armarBoleta() {
+        const boleta = {
+            clienteId: usuario?.id ?? null,
+            direccion: formulario.direccion.trim(),
+            comuna: formulario.comuna,
+            estado: 'PENDIENTE',
+            repartidorId: null,
+            fecha: fechaLocal(),
+            detalles: detalle.lineas.map((linea) => ({ productoId: linea.id, cantidad: linea.cantidad }))
         }
-        sessionStorage.setItem('gasVolcan.resumenCheckout.v1', JSON.stringify(resumen))
-        return resumen
-    }
 
-    function recuperarResumen(intento) {
-        const contenido = sessionStorage.getItem('gasVolcan.resumenCheckout.v1')
-        if (!contenido) return null
-        const resumen = JSON.parse(contenido)
-        return resumen.clave === intento.clave && JSON.stringify(resumen.cuerpo) === JSON.stringify(intento.cuerpo)
-            ? resumen : null
-    }
-
-    function mostrarPedido(boleta, intento, resumen, vigente) {
-        // enviar() solo devuelve una respuesta 201 cuyo cuerpo ya fue validado.
-        // Una respuesta tardía no borra artículos nuevos ni cambia de pantalla.
-        if (!vigente()) return
-        const pedido = {
-            numero: boleta.id,
-            productos: boleta.detalles.map(linea => {
-                const producto = resumen?.productos.find(p => p.id === linea.productoId)
-                return { codigo: producto?.codigo ?? String(linea.productoId),
-                    nombre: producto?.nombre ?? 'Producto', cantidad: linea.cantidad,
-                    precio: linea.precio, subtotal: Math.round(linea.precio * 100) * linea.cantidad / 100 }
-            }),
-            total: boleta.total,
-            cliente: resumen?.cliente ?? (intento.identidad.tipo === 'invitado' ? {
-                nombre: intento.cuerpo.nombreInvitado, correo: intento.cuerpo.correoInvitado,
-                telefono: intento.cuerpo.telefonoInvitado
-            } : null),
-            entrega: { direccion: boleta.direccion, comuna: boleta.comuna }
+        if (!usuario) {
+            boleta.nombreInvitado = formulario.nombre.trim()
+            boleta.correoInvitado = formulario.correo.trim()
+            boleta.telefonoInvitado = formulario.telefono.trim()
         }
-        // Un intento antiguo sin resumen no demuestra qué carrito debe vaciarse.
-        if (resumen && JSON.stringify(items) === JSON.stringify(resumen.items)) vaciar()
-        navigate('/compra-exitosa', { state: { pedido } })
+
+        return boleta
     }
 
     async function confirmarCompra(e) {
         e.preventDefault()
-        if (bloqueo.current || ocupado || compra.estadoIntento === 'confirmado') return
-        bloqueo.current = true
-        const revision = vigencia.current.revision
-        const vigente = () => montado.current && vigencia.current.revision === revision
+
+        if (procesando) {
+            return
+        }
+
+        if (!puedeComprar) {
+            setErrores({ carrito: 'Para comprar debes usar una cuenta de cliente.' })
+            return
+        }
+
+        if (!disponibilidad.puedeConfirmar) {
+            setErrores({ carrito: 'Revisa tu carrito: está vacío o hay productos sin stock suficiente.' })
+            return
+        }
+
+        if (!validarFormulario()) {
+            return
+        }
+
+        // 1. Pago: si el banco lo rechaza, no se crea la boleta y el carrito queda intacto
+        const pago = procesarPago(formulario.numeroTarjeta)
+
+        if (!pago.aprobado) {
+            navigate('/pago-rechazado', { state: { motivo: pago.motivo } })
+            return
+        }
+
+        // 2. Pago aprobado: se registra la boleta en ms-pedidos (descuenta el stock)
+        setProcesando(true)
+        claveCompra.current = claveCompra.current || crypto.randomUUID()
+
         try {
-            // Recuperar no reconstruye el cuerpo con los datos actuales.
-            if (compra.puedeEnviar) {
-                setErrores({})
-                const intento = compra.intento
-                const resumen = recuperarResumen(intento)
-                const boleta = await compra.enviar()
-                mostrarPedido(boleta, intento, resumen, vigente)
-                return
-            }
-            if (!compra.puedePreparar) return
-            if (puedeActualizar) {
-                setComprobando(true)
-                const actualizado = await obtenerCatalogo()
-                if (vigente()) {
-                    setRevisionCatalogo({ ...actualizado, cargando: false, error: '' })
-                    setErrores({})
-                }
-                return
-            }
-            const valido = validarFormulario()
-            if (!identidadValida || !disponibilidad.puedeConfirmar) {
-                setErrores(actual => ({ ...actual, carrito: identidadValida
-                    ? 'Revisa el carrito y el catálogo oficial antes de registrar.'
-                    : 'Necesitas una cuenta de cliente con identidad válida.' }))
-                return
-            }
-            if (!valido) return
-            setComprobando(true)
-            const actualizado = await obtenerCatalogo()
-            if (!vigente()) {
-                if (montado.current) setErrores({ carrito: 'Los datos cambiaron. Revisa el resumen y confirma nuevamente.' })
-                return
-            }
-            setRevisionCatalogo({ ...actualizado, cargando: false, error: '' })
-            const disponible = estadoDelCarrito(items, actualizado.productos)
-            if (!disponible.puedeConfirmar) {
-                setErrores({ carrito: 'El catálogo actualizado no permite registrar estos productos. Revisa disponibilidad y stock.' })
-                return
-            }
-            const cambiaron = items.some(item => {
-                const anterior = catalogoActual.productos.find(p => p.codigo === item.codigo)
-                const nuevo = actualizado.productos.find(p => p.codigo === item.codigo)
-                return !anterior || !nuevo || ['id', 'precioResidencial', 'precioComercial', 'precioOferta']
-                    .some(campo => anterior[campo] !== nuevo[campo])
+            const enviar = usuario ? llamarApi : pedir
+            const boleta = await enviar('/boletas', {
+                metodo: 'POST',
+                cuerpo: armarBoleta(),
+                encabezados: { 'Idempotency-Key': claveCompra.current }
             })
-            if (cambiaron) {
-                setErrores({ carrito: 'Los precios o productos cambiaron. Revisa el resumen actualizado y confirma nuevamente.' })
-                return
+
+            const pedido = {
+                numero: boleta.id,
+                productos: detalle.lineas,
+                total: boleta.total,
+                cliente: {
+                    nombre: formulario.nombre.trim(),
+                    correo: formulario.correo.trim(),
+                    telefono: formulario.telefono.trim()
+                },
+                entrega: {
+                    direccion: boleta.direccion,
+                    comuna: boleta.comuna,
+                    indicaciones: formulario.indicaciones.trim()
+                },
+                // De la tarjeta solo se muestran los últimos 4 dígitos
+                pago: { tarjeta: '•••• ' + ultimosCuatro(formulario.numeroTarjeta) }
             }
-            const intento = compra.preparar({ items, productos: actualizado.productos,
-                entrega: { direccion: formulario.direccion.trim(), comuna: formulario.comuna },
-                invitado: { nombre: formulario.nombre.trim(), correo: formulario.correo.trim(), telefono: formulario.telefono.trim() } })
-            const resumen = guardarResumen(intento, actualizado.productos)
-            const boleta = await compra.enviar()
-            mostrarPedido(boleta, intento, resumen, vigente)
+
+            claveCompra.current = null
+            vaciar()
+            navigate('/compra-exitosa', { state: { pedido } })
         } catch (error) {
-            if (vigente()) setErrores(actual => ({ ...actual, carrito: error.message }))
-        } finally {
-            bloqueo.current = false
-            if (montado.current) setComprobando(false)
+            // Un 4xx (por ejemplo, sin stock) es definitivo: se corrige y se compra con clave nueva
+            if (!convieneReintentar(error)) {
+                claveCompra.current = null
+            }
+            setErrores({ carrito: error.message })
+            setProcesando(false)
         }
     }
 
@@ -335,12 +269,9 @@ function Checkout() {
                 name={nombre}
                 type="text"
                 className={clase(nombre)}
-                value={usuario && ['nombre', 'correo', 'telefono'].includes(nombre)
-                    ? contactoCuenta?.cliente[nombre] ?? (nombre === 'nombre' ? usuario.nombre : nombre === 'correo' ? usuario.correo : '')
-                    : formulario[nombre]}
+                value={formulario[nombre]}
                 onChange={manejarCambio}
-                disabled={!compra.puedePreparar}
-                readOnly={Boolean(usuario) && ['nombre', 'correo', 'telefono'].includes(nombre)}
+                readOnly={Boolean(usuario) && (nombre === 'nombre' || nombre === 'correo')}
                 {...opciones}
             />
         )
@@ -366,8 +297,8 @@ function Checkout() {
                     <h1 id="titulo-checkout">Finalizar compra</h1>
                     <p className="pagina-bajada">
                         {usuario
-                            ? 'Revisamos tus datos de la cuenta. Confirma la entrega y el pedido.'
-                            : 'Completa tus datos y la dirección de entrega para confirmar el pedido.'}
+                            ? 'Revisamos tus datos de la cuenta. Confirma la entrega y el pago.'
+                            : 'Completa tus datos, la dirección de entrega y el pago.'}
                     </p>
                 </div>
 
@@ -400,7 +331,7 @@ function Checkout() {
                                             {campo('correo', 'Correo electrónico', entrada('correo', { type: 'email', autoComplete: 'email', maxLength: 100 }))}
                                         </div>
                                         <div className="col-sm-6">
-                                            {campo('telefono', 'Teléfono', entrada('telefono', { type: 'tel', autoComplete: 'tel', maxLength: 15, placeholder: '+56 9 1234 5678' }))}
+                                            {campo('telefono', usuario ? 'Teléfono (opcional)' : 'Teléfono', entrada('telefono', { type: 'tel', autoComplete: 'tel', maxLength: 15, placeholder: '+56 9 1234 5678' }))}
                                         </div>
                                     </div>
                                 </div>
@@ -419,10 +350,9 @@ function Checkout() {
                                                     className={clase('comuna')}
                                                     value={formulario.comuna}
                                                     onChange={manejarCambio}
-                                                    disabled={!compra.puedePreparar}
                                                 >
                                                     <option value="">Selecciona una comuna</option>
-                                                    {COMUNAS.map((comuna) => (
+                                                    {COMUNAS_COBERTURA.map((comuna) => (
                                                         <option key={comuna} value={comuna}>{comuna}</option>
                                                     ))}
                                                 </select>
@@ -435,7 +365,6 @@ function Checkout() {
                                             name="indicaciones"
                                             className={`checkout-indicaciones ${clase('indicaciones')}`}
                                             rows="3"
-                                            disabled
                                             maxLength={300}
                                             placeholder="Ej.: casa con reja verde, tocar el timbre"
                                             value={formulario.indicaciones}
@@ -445,7 +374,20 @@ function Checkout() {
                                 </div>
 
                                 <div className="tarjeta-panel checkout-paso">
-                                    <h2><span className="paso-numero">3</span> Confirmación del pedido</h2>
+                                    <h2><span className="paso-numero">3</span> Pago</h2>
+                                    <p className="panel-bajada">No guardamos los datos de tu tarjeta.</p>
+                                    {campo('numeroTarjeta', 'Número de la tarjeta', entrada('numeroTarjeta', { inputMode: 'numeric', autoComplete: 'cc-number', maxLength: 19, placeholder: '1234 5678 9012 3456' }))}
+                                    <div className="row g-3">
+                                        <div className="col-sm-6">
+                                            {campo('titular', 'Nombre del titular', entrada('titular', { autoComplete: 'cc-name', maxLength: 50, placeholder: 'Como aparece en la tarjeta' }))}
+                                        </div>
+                                        <div className="col-6 col-sm-3">
+                                            {campo('vencimiento', 'Vencimiento', entrada('vencimiento', { inputMode: 'numeric', autoComplete: 'cc-exp', maxLength: 5, placeholder: 'MM/AA' }))}
+                                        </div>
+                                        <div className="col-6 col-sm-3">
+                                            {campo('cvv', 'CVV', entrada('cvv', { inputMode: 'numeric', autoComplete: 'cc-csc', maxLength: 3, placeholder: '123' }))}
+                                        </div>
+                                    </div>
                                 </div>
                             </form>
                         </div>
@@ -455,16 +397,18 @@ function Checkout() {
                             <aside className="tarjeta-panel checkout-lateral" aria-labelledby="titulo-resumen">
                                 <h2 id="titulo-resumen">Resumen del pedido</h2>
 
-                                {!identidadValida && <p role="alert">Necesitas una cuenta de cliente con identidad válida.</p>}
-                                {compra.error && <p role="alert">{compra.error}</p>}
-                                {catalogoActual.cargando && <p role="status">Cargando catálogo oficial…</p>}
-                                {catalogoActual.error && (
+                                {!puedeComprar && <p role="alert">Para comprar debes usar una cuenta de cliente.</p>}
+                                {catalogo.cargando && <p role="status">Cargando catálogo…</p>}
+                                {catalogo.error && (
                                     <div role="alert">
-                                        <p>No se pudo consultar el catálogo oficial: {catalogoActual.error}</p>
+                                        <p>No se pudo consultar el catálogo: {catalogo.error}</p>
+                                        <button type="button" className="btn btn-secundario" onClick={catalogo.recargar}>
+                                            Reintentar
+                                        </button>
                                     </div>
                                 )}
                                 {disponibilidad.estado === 'no-disponible' && (
-                                    <p role="alert">Hay productos inválidos, inactivos o sin stock suficiente. Revisa tu carrito.</p>
+                                    <p role="alert">Hay productos inactivos o sin stock suficiente. Revisa tu carrito.</p>
                                 )}
 
                                 {items.length === 0 ? (
@@ -493,7 +437,7 @@ function Checkout() {
                                 </div>
 
                                 {errores.carrito && (
-                                    <p className="mensaje-error-campo">{errores.carrito}</p>
+                                    <p className="mensaje-error-campo" role="alert">{errores.carrito}</p>
                                 )}
 
                                 {/* El boton esta fuera del form: "form" lo conecta igual */}
@@ -501,12 +445,10 @@ function Checkout() {
                                     type="submit"
                                     form="formCheckout"
                                     className="btn btn-principal w-100"
-                                    disabled={ocupado || !(puedeRegistrar || compra.puedeEnviar || puedeActualizar)}
-                                    aria-busy={ocupado}
+                                    disabled={procesando || !puedeComprar || !disponibilidad.puedeConfirmar}
+                                    aria-busy={procesando}
                                 >
-                                    {ocupado ? 'Procesando pedido…' : compra.estadoIntento === 'confirmado'
-                                        ? 'Pedido registrado' : compra.puedeEnviar ? 'Reintentar registro'
-                                            : puedeActualizar ? 'Reintentar' : 'Confirmar pedido'}
+                                    {procesando ? 'Procesando pago…' : 'Pagar y confirmar'}
                                 </button>
                             </aside>
                         </div>

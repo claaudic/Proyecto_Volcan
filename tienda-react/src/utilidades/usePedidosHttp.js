@@ -69,12 +69,14 @@ export function usePedidosHttp() {
   const bloqueado = cargando || Boolean(error) || (operacion.identidad === identidad && operacion.requiereLectura)
   const obsoleto = pedido => bloqueado || !pedidos.some(p => p.numero === pedido.numero && p.version === pedido.version)
 
-  async function guardar(pedido, cambios = {}, anular = false) {
+  async function guardar(pedido, cambios = {}, anularPedido = false) {
+    // Cancelar siempre va por /anulacion (ADMINISTRADOR o DESPACHADORA); /estado ya no cancela
+    const anular = anularPedido || cambios.estado === 'Cancelado'
     if (pendiente.current || obsoleto(pedido)) return { ok: false }
     if (anular && pedido.estado !== 'Pendiente') return { ok: false }
     const contexto = actual.current
     if (!['ADMINISTRADOR', 'DESPACHADORA', 'REPARTIDOR'].includes(contexto.usuario?.rol)
-        || (anular && contexto.usuario.rol !== 'ADMINISTRADOR')
+        || (anular && !['ADMINISTRADOR', 'DESPACHADORA'].includes(contexto.usuario.rol))
         || (contexto.usuario.rol === 'REPARTIDOR' && (pedido.repartidor !== String(contexto.usuario.id)
           || Object.hasOwn(cambios, 'repartidor') || !['En camino', 'Entregado'].includes(cambios.estado)))) return { ok: false }
     const dueno = Symbol()

@@ -48,7 +48,8 @@ export async function abrirPedidos(elemento, opciones = {}) {
       return [200, copia({ boleta: g.boleta, version: g.version })]
     }
     rutas[`PUT ${ruta}/estado`] = cuerpo => {
-      const destinos = { PENDIENTE: ['EN_CAMINO', 'CANCELADO'], EN_CAMINO: ['ENTREGADO'], ENTREGADO: [], CANCELADO: [] }
+      // Igual que el backend: /estado no cancela, para eso esta /anulacion
+      const destinos = { PENDIENTE: ['EN_CAMINO'], EN_CAMINO: ['ENTREGADO'], ENTREGADO: [], CANCELADO: [] }
       if (!destinos[g.boleta.estado].includes(cuerpo.estado)) return [400, { mensaje: 'Transicion de estado no permitida.' }]
       g.boleta.estado = cuerpo.estado; g.version++
       return [200, copia(g.boleta)]

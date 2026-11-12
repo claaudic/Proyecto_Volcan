@@ -34,7 +34,7 @@ function Blogs() {
             <li className="col-12 col-md-6 col-lg-4">
               <article className="tarjeta-blog">
                 <Link className="blog-imagen" to="/blogs/1">
-                  <img src="/img/cl002.jpg" alt="Cilindro de gas licuado de 11 kilogramos" loading="lazy" />
+                  <img src="/img/cl002.webp" alt="Cilindro de gas licuado de 11 kilogramos" loading="lazy" />
                 </Link>
                 <div className="blog-cuerpo">
                   <p className="blog-etiqueta">Seguridad</p>
@@ -48,7 +48,7 @@ function Blogs() {
             <li className="col-12 col-md-6 col-lg-4">
               <article className="tarjeta-blog">
                 <Link className="blog-imagen" to="/blogs/2">
-                  <img src="/img/cl004.jpg" alt="Cilindro de gas licuado industrial de 45 kilogramos" loading="lazy" />
+                  <img src="/img/cl004.webp" alt="Cilindro de gas licuado industrial de 45 kilogramos" loading="lazy" />
                 </Link>
                 <div className="blog-cuerpo">
                   <p className="blog-etiqueta">Guía de compra</p>
@@ -62,7 +62,7 @@ function Blogs() {
             <li className="col-12 col-md-6 col-lg-4">
               <article className="tarjeta-blog">
                 <Link className="blog-imagen" to="/blogs/3">
-                  <img src="/img/ac003.jpg" alt="Detector de gas a batería con alarma sonora y visual" loading="lazy" />
+                  <img src="/img/ac003.webp" alt="Detector de gas a batería con alarma sonora y visual" loading="lazy" />
                 </Link>
                 <div className="blog-cuerpo">
                   <p className="blog-etiqueta">Prevención</p>

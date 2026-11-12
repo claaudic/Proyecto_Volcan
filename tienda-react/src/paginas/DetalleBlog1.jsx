@@ -32,7 +32,7 @@ function DetalleBlog1() {
       <section className="articulo">
         <div className="container">
           <figure className="articulo-portada">
-            <img src="/img/cl002.jpg" alt="Cilindro de gas licuado de 11 kilogramos" />
+            <img src="/img/cl002.webp" alt="Cilindro de gas licuado de 11 kilogramos" />
           </figure>
 
           <div className="articulo-cuerpo">

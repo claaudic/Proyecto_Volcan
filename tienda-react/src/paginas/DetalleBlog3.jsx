@@ -32,7 +32,7 @@ function DetalleBlog3() {
       <section className="articulo">
         <div className="container">
           <figure className="articulo-portada">
-            <img src="/img/ac003.jpg" alt="Detector de gas a batería con alarma sonora y visual" />
+            <img src="/img/ac003.webp" alt="Detector de gas a batería con alarma sonora y visual" />
           </figure>
 
           <div className="articulo-cuerpo">

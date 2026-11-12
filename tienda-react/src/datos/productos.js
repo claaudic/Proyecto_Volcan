@@ -262,5 +262,6 @@ export function imagenDe(productoOCodigo) {
         return imagenDe(productoOCodigo.codigo);
     }
 
-    return "/img/" + String(productoOCodigo).toLowerCase() + ".jpg";
+    // WebP: mantiene el fondo transparente y pesa ~10 veces menos que el PNG original
+    return "/img/" + String(productoOCodigo).toLowerCase() + ".webp";
 }

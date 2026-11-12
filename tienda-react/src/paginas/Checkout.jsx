@@ -23,7 +23,8 @@ import {
     validarCvv,
     procesarPago,
     ultimosCuatro,
-    formatearVencimiento
+    formatearVencimiento,
+    formatearNumeroTarjeta
 } from '../utilidades/pasarela'
 
 // Fecha local sin zona horaria, como la espera el backend (LocalDateTime)
@@ -120,7 +121,8 @@ function Checkout() {
 
         setFormulario((anterior) => ({
             ...anterior,
-            [name]: name === 'vencimiento' ? formatearVencimiento(value, anterior.vencimiento) : value
+            [name]: name === 'vencimiento' ? formatearVencimiento(value, anterior.vencimiento)
+                : name === 'numeroTarjeta' ? formatearNumeroTarjeta(value) : value
         }))
         setErrores((anteriores) => ({ ...anteriores, [name]: '' }))
         // Si cambian los datos, la próxima compra es otra (clave nueva)

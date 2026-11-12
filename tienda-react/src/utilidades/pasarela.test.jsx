@@ -6,7 +6,8 @@ import {
     validarCvv,
     procesarPago,
     ultimosCuatro,
-    formatearVencimiento
+    formatearVencimiento,
+    formatearNumeroTarjeta
 } from "./pasarela";
 
 // Reglas de la pasarela de pago simulada.
@@ -55,6 +56,16 @@ describe("Pasarela: validaciones de la tarjeta", () => {
         expect(formatearVencimiento("12/289")).toBe("12/28");
         // Al borrar desde "12/" no vuelve a aparecer la barra
         expect(formatearVencimiento("12", "12/")).toBe("12");
+    });
+
+    it("al escribir el número de la tarjeta lo separa de a 4", () => {
+        expect(formatearNumeroTarjeta("4111")).toBe("4111");
+        expect(formatearNumeroTarjeta("41111")).toBe("4111 1");
+        expect(formatearNumeroTarjeta("4111111111111111")).toBe("4111 1111 1111 1111");
+        // Letras y números de más se ignoran
+        expect(formatearNumeroTarjeta("4111-1111 1111 1111 99a")).toBe("4111 1111 1111 1111");
+        // Borrar el último dígito de un grupo no deja un espacio colgando
+        expect(formatearNumeroTarjeta("4111 ")).toBe("4111");
     });
 
 });

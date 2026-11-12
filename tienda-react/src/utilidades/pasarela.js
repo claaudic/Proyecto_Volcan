@@ -118,6 +118,13 @@ export function validarCvv(cvv) {
   return "";
 }
 
+// Mientras se escribe el número, se separa solo de a 4: "4111111111111111" -> "4111 1111 1111 1111".
+// El espacio va solo entre grupos, así se puede borrar sin trabarse.
+export function formatearNumeroTarjeta(valor) {
+  const digitos = soloDigitos(valor).slice(0, 16);
+  return digitos.replace(/(\d{4})(?=\d)/g, "$1 ");
+}
+
 // Mientras se escribe el vencimiento, la "/" se pone sola: "1228" -> "12/28".
 // Si se está borrando, no la vuelve a agregar (para poder borrar el mes).
 export function formatearVencimiento(valor, anterior = "") {

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import TarjetaProducto from '../components/TarjetaProducto'
+import EstadoCatalogo from '../components/EstadoCatalogo'
 import EtiquetaStock from '../components/EtiquetaStock'
 import { formatearPrecio, imagenDe } from '../datos/productos'
 import { ofertaDeProducto, precioProducto } from '../datos/ofertas'
@@ -29,7 +30,7 @@ function FichaProducto({ codigo }) {
   const [cantidad, setCantidad] = useState(1)
   const [aviso, setAviso] = useState("")
   const { agregar } = useCarrito()
-  const { activos } = useCatalogo()
+  const { activos, cargando, error } = useCatalogo()
 
   // Un producto desactivado no tiene pagina: aparece como no encontrado
   const producto = activos.find((p) => p.codigo === codigo.toUpperCase())
@@ -43,6 +44,12 @@ function FichaProducto({ codigo }) {
       registrarVisto(codigoVisto)
     }
   }, [codigoVisto])
+
+  if (cargando || error) {
+    return <main><section className="detalle"><div className="container">
+      <EstadoCatalogo recuperacion={<Link className="btn btn-principal" to="/productos">Volver al catálogo</Link>} />
+    </div></section></main>
+  }
 
   if (!producto) {
     return (

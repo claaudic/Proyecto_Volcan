@@ -1,22 +1,12 @@
-import { useState } from 'react'
-
 import { useSesion } from '../contexto/sesionContexto'
-import {
-    actualizarPedido,
-    leerPedidos
-} from '../datos/pedidos'
+import { usePedidosHttp } from '../utilidades/usePedidosHttp'
+import { puedeCambiarEstado } from '../datos/pedidosGestionApi'
 
 const ESTADOS_REPARTIDOR = [
     'Pendiente',
     'En camino',
     'Entregado'
 ]
-
-function ordenarPorFecha(pedidos) {
-    return [...pedidos].sort(
-        (a, b) => new Date(b.fecha) - new Date(a.fecha)
-    )
-}
 
 function normalizarEstado(estado) {
     const limpio = String(estado || '').trim().toLowerCase()
@@ -115,12 +105,13 @@ function resumenProductos(pedido) {
 
 function Repartidor() {
     const { usuario } = useSesion()
-    const [pedidos, setPedidos] = useState(() => ordenarPorFecha(leerPedidos()))
+    const datos = usePedidosHttp()
+    const { pedidos } = datos
+    const indicador = valor => datos.cargando || datos.error ? '—' : valor
 
     const pedidosAsignados = pedidos.filter((pedido) => {
         return (
-            String(pedido.repartidor || '').toLowerCase() ===
-                String(usuario.correo).toLowerCase() &&
+            String(pedido.repartidor || '') === String(usuario?.id) &&
             normalizarEstado(pedido.estado) !== 'Cancelado'
         )
     })
@@ -150,13 +141,9 @@ function Repartidor() {
         }
     )
 
-    function refrescarPedidos() {
-        setPedidos(ordenarPorFecha(leerPedidos()))
-    }
-
     function cambiarEstado(numero, estado) {
-        actualizarPedido(numero, { estado })
-        refrescarPedidos()
+        const pedido = pedidosAsignados.find(p => p.numero === numero)
+        if (pedido) void datos.guardar(pedido, { estado })
     }
 
     return (
@@ -218,7 +205,7 @@ function Repartidor() {
                                         Pendientes
                                     </p>
                                     <p className="tarjeta-dato-numero">
-                                        {resumen.pendientes}
+                                        {indicador(resumen.pendientes)}
                                     </p>
                                 </div>
                             </article>
@@ -234,7 +221,7 @@ function Repartidor() {
                                         En camino
                                     </p>
                                     <p className="tarjeta-dato-numero">
-                                        {resumen.camino}
+                                        {indicador(resumen.camino)}
                                     </p>
                                 </div>
                             </article>
@@ -250,7 +237,7 @@ function Repartidor() {
                                         Entregados
                                     </p>
                                     <p className="tarjeta-dato-numero">
-                                        {resumen.entregados}
+                                        {indicador(resumen.entregados)}
                                     </p>
                                 </div>
                             </article>
@@ -270,23 +257,22 @@ function Repartidor() {
                             </h2>
                         </div>
 
-                        <p className="panel-titulo-nota">
-                            Solo puedes ver tus pedidos.
+                        <p className="panel-titulo-nota" role={datos.error ? 'alert' : undefined}>
+                            {datos.error || 'Solo puedes ver tus pedidos.'}
                         </p>
                     </div>
 
                     {pedidosAsignados.length === 0 ? (
                         <div className="panel-vacio">
-                            <h3>No tienes pedidos asignados</h3>
+                            <h3>{datos.cargando ? '…' : datos.error ? '—' : 'No tienes pedidos asignados'}</h3>
                             <p>
-                                Cuando la despachadora te asigne una ruta,
-                                aparecerá aquí.
+                                {!datos.cargando && !datos.error && 'Cuando la despachadora te asigne una ruta, aparecerá aquí.'}
                             </p>
                         </div>
                     ) : (
                         <div className="tabla-marco">
                             <div className="table-responsive">
-                                <table className="tabla-panel">
+                                <table className="tabla-panel" aria-busy={datos.cargando || datos.ocupado}>
                                     <thead>
                                     <tr>
                                         <th>Pedido</th>
@@ -334,7 +320,7 @@ function Repartidor() {
                                                         aria-label={`Cambiar el estado del pedido ${pedido.numero}`}
                                                         value={estado}
                                                         disabled={
-                                                            estado === 'Entregado'
+                                                            datos.ocupado || datos.obsoleto(pedido) || estado === 'Entregado'
                                                         }
                                                         onChange={(evento) =>
                                                             cambiarEstado(
@@ -349,8 +335,7 @@ function Repartidor() {
                                                                     key={opcion}
                                                                     value={opcion}
                                                                     disabled={
-                                                                        estado === 'En camino' &&
-                                                                        opcion === 'Pendiente'
+                                                                        !puedeCambiarEstado(estado, opcion)
                                                                     }
                                                                 >
                                                                     {opcion}

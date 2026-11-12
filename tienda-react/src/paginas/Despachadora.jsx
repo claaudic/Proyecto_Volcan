@@ -1,9 +1,5 @@
-import { useState } from 'react'
-
-import {
-    actualizarPedido,
-    leerPedidos
-} from '../datos/pedidos'
+import { usePedidosHttp } from '../utilidades/usePedidosHttp'
+import { puedeCambiarEstado } from '../datos/pedidosGestionApi'
 import { nombreCompleto } from '../datos/usuarios'
 import { useApi } from '../utilidades/useApi'
 
@@ -13,12 +9,6 @@ const ESTADOS_PEDIDO = [
     'Entregado',
     'Cancelado'
 ]
-
-function ordenarPorFecha(pedidos) {
-    return [...pedidos].sort(
-        (a, b) => new Date(b.fecha) - new Date(a.fecha)
-    )
-}
 
 function normalizarEstado(estado) {
     const limpio = String(estado || '').trim().toLowerCase()
@@ -75,7 +65,9 @@ function comunaEntrega(pedido) {
 }
 
 function Despachadora() {
-    const [pedidos, setPedidos] = useState(() => ordenarPorFecha(leerPedidos()))
+    const datos = usePedidosHttp()
+    const { pedidos } = datos
+    const indicador = valor => datos.cargando || datos.error ? '—' : valor
 
     // ms-usuarios entrega solo los repartidores activos
     const lista = useApi('/usuarios/repartidores')
@@ -110,13 +102,9 @@ function Despachadora() {
         }
     )
 
-    function refrescarPedidos() {
-        setPedidos(ordenarPorFecha(leerPedidos()))
-    }
-
     function actualizar(numero, cambios) {
-        actualizarPedido(numero, cambios)
-        refrescarPedidos()
+        const pedido = pedidos.find(p => p.numero === numero)
+        if (pedido) void datos.guardar(pedido, cambios)
     }
 
     function fechaActual() {
@@ -189,7 +177,7 @@ function Despachadora() {
                                         Pedidos registrados
                                     </p>
                                     <p className="tarjeta-dato-numero">
-                                        {resumen.total}
+                                        {indicador(resumen.total)}
                                     </p>
                                 </div>
                             </article>
@@ -205,7 +193,7 @@ function Despachadora() {
                                         Pendientes
                                     </p>
                                     <p className="tarjeta-dato-numero">
-                                        {resumen.pendientes}
+                                        {indicador(resumen.pendientes)}
                                     </p>
                                 </div>
                             </article>
@@ -221,7 +209,7 @@ function Despachadora() {
                                         En camino
                                     </p>
                                     <p className="tarjeta-dato-numero">
-                                        {resumen.camino}
+                                        {indicador(resumen.camino)}
                                     </p>
                                 </div>
                             </article>
@@ -237,7 +225,7 @@ function Despachadora() {
                                         Entregados
                                     </p>
                                     <p className="tarjeta-dato-numero">
-                                        {resumen.entregados}
+                                        {indicador(resumen.entregados)}
                                     </p>
                                 </div>
                             </article>
@@ -266,9 +254,9 @@ function Despachadora() {
                     className="container panel-seccion"
                     aria-labelledby="titulo-pedidos-despacho"
                 >
-                    {lista.error && (
+                    {(lista.error || datos.error) && (
                         <div className="alert alert-warning" role="alert">
-                            No se pudo cargar la lista de repartidores. {lista.error}
+                            {lista.error ? <>No se pudo cargar la lista de repartidores. {lista.error}</> : datos.error}
                         </div>
                     )}
 
@@ -287,13 +275,13 @@ function Despachadora() {
 
                     {pedidos.length === 0 ? (
                         <div className="panel-vacio">
-                            <h3>No hay pedidos registrados</h3>
-                            <p>Los pedidos aparecerán aquí.</p>
+                            <h3>{datos.cargando ? '…' : datos.error ? '—' : 'No hay pedidos registrados'}</h3>
+                            <p>{!datos.cargando && !datos.error && 'Los pedidos aparecerán aquí.'}</p>
                         </div>
                     ) : (
                         <div className="tabla-marco">
                             <div className="table-responsive">
-                                <table className="tabla-panel">
+                                <table className="tabla-panel" aria-busy={datos.cargando || datos.ocupado}>
                                     <thead>
                                     <tr>
                                         <th>N° Pedido</th>
@@ -323,6 +311,7 @@ function Despachadora() {
                                             <td>
                                                 <select
                                                     className="selector-repartidor"
+                                                    disabled={datos.ocupado || datos.obsoleto(pedido) || pedido.estado !== 'Pendiente' || lista.cargando || Boolean(lista.error)}
                                                     aria-label={`Asignar repartidor al pedido ${pedido.numero}`}
                                                     value={pedido.repartidor || ''}
                                                     onChange={(evento) =>
@@ -342,7 +331,7 @@ function Despachadora() {
                                                         (repartidor) => (
                                                             <option
                                                                 key={repartidor.correo}
-                                                                value={repartidor.correo}
+                                                                value={String(repartidor.id)}
                                                             >
                                                                 {nombreCompleto(repartidor)}
                                                             </option>
@@ -363,6 +352,7 @@ function Despachadora() {
 
                                                 <select
                                                     className="selector-estado-despacho mt-2"
+                                                    disabled={datos.ocupado || datos.obsoleto(pedido) || ['Entregado', 'Cancelado'].includes(pedido.estado)}
                                                     aria-label={`Cambiar estado del pedido ${pedido.numero}`}
                                                     value={normalizarEstado(
                                                         pedido.estado
@@ -382,6 +372,7 @@ function Despachadora() {
                                                             <option
                                                                 key={estado}
                                                                 value={estado}
+                                                                disabled={!puedeCambiarEstado(pedido.estado, estado)}
                                                             >
                                                                 {estado}
                                                             </option>

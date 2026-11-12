@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 import { useSesion } from '../contexto/sesionContexto'
 import { useCarrito } from '../contexto/carritoContexto'
@@ -28,7 +28,8 @@ const COMUNAS = [
 ]
 
 function Checkout() {
-    const { items } = useCarrito()
+    const navigate = useNavigate()
+    const { items, vaciar } = useCarrito()
     const { usuario, llamarApi } = useSesion()
     const catalogo = useCatalogoCheckout()
     const compra = useCompraCheckout({ usuario, llamarApi })
@@ -43,6 +44,8 @@ function Checkout() {
     const identidadValida = usuario == null || (Number.isSafeInteger(usuario.id) && usuario.id > 0 && usuario.rol === 'CLIENTE')
     const ocupado = comprobando || compra.enviando
     const puedeRegistrar = compra.puedePreparar && identidadValida && disponibilidad.puedeConfirmar
+    const puedeActualizar = compra.puedePreparar && identidadValida && !catalogoActual.cargando
+        && (Boolean(catalogoActual.error) || (items.length > 0 && !disponibilidad.puedeConfirmar))
 
     // Si hay sesion, los datos de la cuenta se rellenan solos
     // (lo pide la Figura 6 de las instrucciones de la EP2).
@@ -57,6 +60,10 @@ function Checkout() {
     })
 
     const [errores, setErrores] = useState({})
+    const [cuentaConfirmada, setCuentaConfirmada] = useState(null)
+    const identidadCuenta = usuario ? `${usuario.id}:${usuario.correo}` : null
+    const idSesion = usuario?.id
+    const contactoCuenta = cuentaConfirmada?.identidad === identidadCuenta ? cuentaConfirmada : null
 
     const firma = JSON.stringify({ items, formulario, identidad: usuario == null ? null
         : { id: usuario.id, rol: usuario.rol, correo: usuario.correo } })
@@ -90,6 +97,14 @@ function Checkout() {
                     return
                 }
 
+                if ((idSesion != null && cuenta.id !== idSesion) || cuenta.correo !== correoSesion) return
+                const cliente = {
+                    nombre: [cuenta.nombre, cuenta.apellidos].filter(Boolean).join(' '),
+                    correo: cuenta.correo,
+                    telefono: cuenta.telefono || ''
+                }
+                setCuentaConfirmada({ identidad: identidadCuenta, cliente })
+
                 // La comuna se busca en la lista sin importar tildes ni mayusculas
                 const deLaCuenta = {
                     telefono: cuenta.telefono || '',
@@ -98,7 +113,7 @@ function Checkout() {
                 }
 
                 setFormulario((actual) => {
-                    const relleno = { ...actual }
+                    const relleno = { ...actual, ...cliente }
                     Object.keys(deLaCuenta).forEach((campo) => {
                         if (relleno[campo] === '') {
                             relleno[campo] = deLaCuenta[campo]
@@ -110,10 +125,11 @@ function Checkout() {
             .catch(() => {})
 
         return () => { vigente = false }
-    }, [correoSesion, llamarApi])
+    }, [correoSesion, llamarApi, identidadCuenta, idSesion])
 
     function manejarCambio(e) {
         const { name, value } = e.target
+        if (name === 'indicaciones' || (usuario && ['nombre', 'correo', 'telefono'].includes(name))) return
 
         setFormulario((anterior) => ({
             ...anterior,
@@ -126,13 +142,12 @@ function Checkout() {
         }))
     }
 
-    function actualizarCatalogo() {
-        setRevisionCatalogo(null)
-        catalogo.recargar()
-    }
-
     function validarFormulario() {
         const nuevosErrores = {}
+
+        if (usuario && !contactoCuenta) {
+            nuevosErrores.carrito = 'No se pudieron comprobar los datos de tu cuenta.'
+        }
 
         const errorNombre = validarNombre(formulario.nombre)
         const errorCorreo = validarCorreo(formulario.correo)
@@ -172,6 +187,59 @@ function Checkout() {
         return Object.keys(nuevosErrores).length === 0
     }
 
+    function guardarResumen(intento, productos) {
+        // Datos de presentación separados del cuerpo HTTP y de su Idempotency-Key.
+        // No se guardan credenciales ni información bancaria.
+        const resumen = {
+            clave: intento.clave,
+            cuerpo: intento.cuerpo,
+            items,
+            cliente: usuario ? contactoCuenta.cliente : {
+                nombre: intento.cuerpo.nombreInvitado,
+                correo: intento.cuerpo.correoInvitado,
+                telefono: intento.cuerpo.telefonoInvitado
+            },
+            productos: items.map(item => {
+                const producto = productos.find(p => p.codigo === item.codigo)
+                return { id: producto.id, codigo: producto.codigo, nombre: producto.nombre }
+            })
+        }
+        sessionStorage.setItem('gasVolcan.resumenCheckout.v1', JSON.stringify(resumen))
+        return resumen
+    }
+
+    function recuperarResumen(intento) {
+        const contenido = sessionStorage.getItem('gasVolcan.resumenCheckout.v1')
+        if (!contenido) return null
+        const resumen = JSON.parse(contenido)
+        return resumen.clave === intento.clave && JSON.stringify(resumen.cuerpo) === JSON.stringify(intento.cuerpo)
+            ? resumen : null
+    }
+
+    function mostrarPedido(boleta, intento, resumen, vigente) {
+        // enviar() solo devuelve una respuesta 201 cuyo cuerpo ya fue validado.
+        // Una respuesta tardía no borra artículos nuevos ni cambia de pantalla.
+        if (!vigente()) return
+        const pedido = {
+            numero: boleta.id,
+            productos: boleta.detalles.map(linea => {
+                const producto = resumen?.productos.find(p => p.id === linea.productoId)
+                return { codigo: producto?.codigo ?? String(linea.productoId),
+                    nombre: producto?.nombre ?? 'Producto', cantidad: linea.cantidad,
+                    precio: linea.precio, subtotal: Math.round(linea.precio * 100) * linea.cantidad / 100 }
+            }),
+            total: boleta.total,
+            cliente: resumen?.cliente ?? (intento.identidad.tipo === 'invitado' ? {
+                nombre: intento.cuerpo.nombreInvitado, correo: intento.cuerpo.correoInvitado,
+                telefono: intento.cuerpo.telefonoInvitado
+            } : null),
+            entrega: { direccion: boleta.direccion, comuna: boleta.comuna }
+        }
+        // Un intento antiguo sin resumen no demuestra qué carrito debe vaciarse.
+        if (resumen && JSON.stringify(items) === JSON.stringify(resumen.items)) vaciar()
+        navigate('/compra-exitosa', { state: { pedido } })
+    }
+
     async function confirmarCompra(e) {
         e.preventDefault()
         if (bloqueo.current || ocupado || compra.estadoIntento === 'confirmado') return
@@ -182,10 +250,22 @@ function Checkout() {
             // Recuperar no reconstruye el cuerpo con los datos actuales.
             if (compra.puedeEnviar) {
                 setErrores({})
-                await compra.enviar()
+                const intento = compra.intento
+                const resumen = recuperarResumen(intento)
+                const boleta = await compra.enviar()
+                mostrarPedido(boleta, intento, resumen, vigente)
                 return
             }
             if (!compra.puedePreparar) return
+            if (puedeActualizar) {
+                setComprobando(true)
+                const actualizado = await obtenerCatalogo()
+                if (vigente()) {
+                    setRevisionCatalogo({ ...actualizado, cargando: false, error: '' })
+                    setErrores({})
+                }
+                return
+            }
             const valido = validarFormulario()
             if (!identidadValida || !disponibilidad.puedeConfirmar) {
                 setErrores(actual => ({ ...actual, carrito: identidadValida
@@ -216,10 +296,12 @@ function Checkout() {
                 setErrores({ carrito: 'Los precios o productos cambiaron. Revisa el resumen actualizado y confirma nuevamente.' })
                 return
             }
-            compra.preparar({ items, productos: actualizado.productos,
+            const intento = compra.preparar({ items, productos: actualizado.productos,
                 entrega: { direccion: formulario.direccion.trim(), comuna: formulario.comuna },
                 invitado: { nombre: formulario.nombre.trim(), correo: formulario.correo.trim(), telefono: formulario.telefono.trim() } })
-            await compra.enviar()
+            const resumen = guardarResumen(intento, actualizado.productos)
+            const boleta = await compra.enviar()
+            mostrarPedido(boleta, intento, resumen, vigente)
         } catch (error) {
             if (vigente()) setErrores(actual => ({ ...actual, carrito: error.message }))
         } finally {
@@ -253,9 +335,12 @@ function Checkout() {
                 name={nombre}
                 type="text"
                 className={clase(nombre)}
-                value={formulario[nombre]}
+                value={usuario && ['nombre', 'correo', 'telefono'].includes(nombre)
+                    ? contactoCuenta?.cliente[nombre] ?? (nombre === 'nombre' ? usuario.nombre : nombre === 'correo' ? usuario.correo : '')
+                    : formulario[nombre]}
                 onChange={manejarCambio}
                 disabled={!compra.puedePreparar}
+                readOnly={Boolean(usuario) && ['nombre', 'correo', 'telefono'].includes(nombre)}
                 {...opciones}
             />
         )
@@ -281,8 +366,8 @@ function Checkout() {
                     <h1 id="titulo-checkout">Finalizar compra</h1>
                     <p className="pagina-bajada">
                         {usuario
-                            ? 'Revisamos tus datos de la cuenta. Confirma la entrega y registra tu boleta.'
-                            : 'Completa tus datos y la dirección de entrega para registrar tu boleta.'}
+                            ? 'Revisamos tus datos de la cuenta. Confirma la entrega y el pedido.'
+                            : 'Completa tus datos y la dirección de entrega para confirmar el pedido.'}
                     </p>
                 </div>
 
@@ -344,7 +429,6 @@ function Checkout() {
                                             ))}
                                         </div>
                                     </div>
-                                    <p className="panel-bajada">Las indicaciones adicionales aún no están disponibles.</p>
                                     {campo('indicaciones', 'Indicaciones para la entrega (opcional)', (
                                         <textarea
                                             id="indicaciones"
@@ -361,8 +445,7 @@ function Checkout() {
                                 </div>
 
                                 <div className="tarjeta-panel checkout-paso">
-                                    <h2><span className="paso-numero">3</span> Registro de boleta</h2>
-                                    <p className="panel-bajada">Registrar una boleta no acredita un pago bancario. No solicitamos datos de tarjeta.</p>
+                                    <h2><span className="paso-numero">3</span> Confirmación del pedido</h2>
                                 </div>
                             </form>
                         </div>
@@ -372,55 +455,16 @@ function Checkout() {
                             <aside className="tarjeta-panel checkout-lateral" aria-labelledby="titulo-resumen">
                                 <h2 id="titulo-resumen">Resumen del pedido</h2>
 
-                                <p className="mensaje-error-campo" role="status">El carrito se conservará después del registro.</p>
                                 {!identidadValida && <p role="alert">Necesitas una cuenta de cliente con identidad válida.</p>}
                                 {compra.error && <p role="alert">{compra.error}</p>}
-                                {compra.intento && compra.estadoIntento !== 'confirmado' && (
-                                    <p role="status">Se conserva un intento {compra.estadoIntento}. Reintenta con los datos originales.</p>
-                                )}
-                                {ocupado && <p role="status">{comprobando && !compra.enviando ? 'Comprobando catálogo oficial…' : 'Registrando boleta…'}</p>}
-                                {compra.estadoIntento === 'confirmado' && !ocupado && (
-                                    <p role="status">Boleta registrada N.º {compra.boletaId}. Esto no confirma un pago bancario. Tu carrito se conserva.</p>
-                                )}
-                                {compra.boleta && !ocupado && (
-                                    <section aria-label="Resumen de la boleta registrada">
-                                        <h3>Datos confirmados por el servidor</h3>
-                                        <ul>{compra.boleta.detalles.map(linea => (
-                                            <li key={linea.id}>Producto {linea.productoId}: {linea.cantidad} × {formatearPrecio(linea.precio)}</li>
-                                        ))}</ul>
-                                        <div className="checkout-total">
-                                            <span>Total boleta</span>
-                                            <strong>{formatearPrecio(compra.boleta.total)}</strong>
-                                        </div>
-                                    </section>
-                                )}
-                                {compra.intento && (
-                                    <section aria-label="Datos del intento guardado">
-                                        <h3>Datos del registro guardado</h3>
-                                        <p>{compra.intento.cuerpo.direccion}, {compra.intento.cuerpo.comuna}</p>
-                                        <ul>{compra.intento.cuerpo.detalles.map((linea, indice) => (
-                                            <li key={indice}>Producto {linea.productoId} × {linea.cantidad}</li>
-                                        ))}</ul>
-                                        <p>Al reintentar se enviarán estos mismos datos. Los cambios del carrito se conservan para después.</p>
-                                    </section>
-                                )}
                                 {catalogoActual.cargando && <p role="status">Cargando catálogo oficial…</p>}
                                 {catalogoActual.error && (
                                     <div role="alert">
                                         <p>No se pudo consultar el catálogo oficial: {catalogoActual.error}</p>
-                                        <button type="button" className="btn btn-outline-secondary" disabled={ocupado} onClick={actualizarCatalogo}>Reintentar</button>
                                     </div>
-                                )}
-                                {compra.puedePreparar && !catalogoActual.cargando && !catalogoActual.error && (
-                                    <button type="button" className="btn btn-outline-secondary" disabled={ocupado} onClick={actualizarCatalogo}>Actualizar catálogo</button>
                                 )}
                                 {disponibilidad.estado === 'no-disponible' && (
                                     <p role="alert">Hay productos inválidos, inactivos o sin stock suficiente. Revisa tu carrito.</p>
-                                )}
-                                {items.length > 0 && !disponibilidad.puedeConfirmar && (
-                                    <ul aria-label="Artículos conservados">
-                                        {items.map((item, indice) => <li key={item.codigo + '-' + indice}>{item.codigo} × {item.cantidad}</li>)}
-                                    </ul>
                                 )}
 
                                 {items.length === 0 ? (
@@ -444,7 +488,7 @@ function Checkout() {
                                 )}
 
                                 <div className="checkout-total">
-                                    <span>Total estimado del carrito</span>
+                                    <span>Total</span>
                                     <strong>{detalle.total === null ? 'No disponible' : formatearPrecio(detalle.total)}</strong>
                                 </div>
 
@@ -457,10 +501,12 @@ function Checkout() {
                                     type="submit"
                                     form="formCheckout"
                                     className="btn btn-principal w-100"
-                                    disabled={ocupado || !(puedeRegistrar || compra.puedeEnviar)}
+                                    disabled={ocupado || !(puedeRegistrar || compra.puedeEnviar || puedeActualizar)}
+                                    aria-busy={ocupado}
                                 >
-                                    {ocupado ? 'Procesando registro…' : compra.estadoIntento === 'confirmado'
-                                        ? 'Boleta registrada' : compra.puedeEnviar ? 'Reintentar registro' : 'Registrar boleta'}
+                                    {ocupado ? 'Procesando pedido…' : compra.estadoIntento === 'confirmado'
+                                        ? 'Pedido registrado' : compra.puedeEnviar ? 'Reintentar registro'
+                                            : puedeActualizar ? 'Reintentar' : 'Confirmar pedido'}
                                 </button>
                             </aside>
                         </div>

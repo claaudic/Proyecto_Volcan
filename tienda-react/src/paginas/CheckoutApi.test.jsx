@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, it, expect } from 'vitest'
+import { afterEach, beforeEach, describe, it, expect, vi } from 'vitest'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import Checkout from './Checkout'
@@ -7,8 +7,10 @@ import ProveedorCatalogo from '../contexto/ProveedorCatalogo'
 import ProveedorCarrito from '../contexto/ProveedorCarrito'
 import { simularApi, guardarSesionDePrueba, CUENTAS } from '../test/api'
 import { leerIntentoCompra } from '../datos/intentoCompra'
+const { navegar } = vi.hoisted(() => ({ navegar: vi.fn() }))
+vi.mock('react-router-dom', async importar => ({ ...await importar(), useNavigate: () => navegar }))
 
-beforeEach(() => { sessionStorage.clear() })
+beforeEach(() => { sessionStorage.clear(); navegar.mockClear() })
 afterEach(() => { sessionStorage.clear() })
 
 const categoria = { id: 91, nombre: 'Categoria de prueba' }
@@ -23,14 +25,14 @@ function abrir(items = [{ codigo: 'CL002', cantidad: 1 }]) {
 function apiCon(p = producto) {
   return simularApi({ 'GET /productos': () => [200, [p]], 'GET /categorias': () => [200, [categoria]] })
 }
-const confirmar = () => screen.getByRole('button', { name: 'Registrar boleta' })
+const confirmar = () => screen.getByRole('button', { name: 'Confirmar pedido' })
 
 describe('Checkout valida el catálogo oficial antes del registro', () => {
   it('bloquea durante carga, conserva articulos y oculta precios locales', () => {
     simularApi({ 'GET /productos': () => new Promise(() => {}), 'GET /categorias': () => new Promise(() => {}) })
     abrir()
     expect(screen.getByText('Cargando catálogo oficial…')).toBeInTheDocument()
-    expect(screen.getByLabelText('Artículos conservados')).toHaveTextContent('CL002 × 1')
+    expect(screen.queryByLabelText('Artículos conservados')).not.toBeInTheDocument()
     expect(screen.getByText('No disponible')).toBeInTheDocument()
     expect(confirmar()).toBeDisabled()
     expect(JSON.parse(localStorage.getItem('carritoVolcan'))).toEqual([{ codigo: 'CL002', cantidad: 1 }])
@@ -54,7 +56,7 @@ describe('Checkout valida el catálogo oficial antes del registro', () => {
       'GET /categorias': () => [200, [categoria]] })
     abrir()
     await screen.findByText(/Sin conexion de prueba/)
-    expect(confirmar()).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Reintentar' })).toBeEnabled()
     falla = false
     fireEvent.click(screen.getByRole('button', { name: 'Reintentar' }))
     await screen.findByText('Producto oficial API')
@@ -67,17 +69,17 @@ describe('Checkout valida el catálogo oficial antes del registro', () => {
       const api = apiCon(p)
       abrir()
       await screen.findByText(/Hay productos inválidos/)
-      expect(confirmar()).toBeDisabled()
+      expect(screen.getByRole('button', { name: 'Reintentar' })).toBeEnabled()
       fireEvent.submit(document.getElementById('formCheckout'))
       expect(api.mock.calls.every(([, opciones]) => opciones.method === 'GET')).toBe(true)
       expect(leerIntentoCompra()).toBeNull()
-      expect(screen.getByLabelText('Artículos conservados')).toHaveTextContent('CL002')
+      expect(JSON.parse(localStorage.getItem('carritoVolcan'))).toEqual([{ codigo: 'CL002', cantidad: 1 }])
     })
   it('un ID ausente invalida el catalogo sin usar el local', async () => {
     apiCon({ ...producto, id: undefined })
     abrir()
     await screen.findByRole('button', { name: 'Reintentar' })
-    expect(confirmar()).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Reintentar' })).toBeEnabled()
     expect(screen.queryByText('Producto oficial API')).not.toBeInTheDocument()
   })
   it('protege acceso directo con carrito vacio', async () => {
@@ -116,7 +118,7 @@ describe('Checkout valida el catálogo oficial antes del registro', () => {
       expect(confirmar()).toBeEnabled()
       expect(api.mock.calls.some(([, opciones]) => opciones.method === 'POST')).toBe(false)
       fireEvent.click(confirmar())
-      await screen.findByText(/Boleta registrada N.º 81/)
+      await waitFor(() => expect(navegar).toHaveBeenCalledWith('/compra-exitosa', expect.any(Object)))
       const solicitudes = api.mock.calls.filter(([, opciones]) => opciones.method === 'POST')
       expect(solicitudes).toHaveLength(1)
       const [url, opciones] = solicitudes[0]
@@ -127,7 +129,7 @@ describe('Checkout valida el catálogo oficial antes del registro', () => {
       expect(opciones.body).not.toMatch(/numeroTarjeta|cvv|titular|vencimiento/)
       expect(document.querySelector('#numeroTarjeta')).toBeNull()
       expect(document.querySelector('#cvv')).toBeNull()
-      expect(JSON.parse(localStorage.getItem('carritoVolcan'))).toEqual([{ codigo: 'CL002', cantidad: 1 }])
+      await waitFor(() => expect(JSON.parse(localStorage.getItem('carritoVolcan'))).toEqual([]))
       expect(localStorage.getItem('pedidos_volcan')).toBeNull()
       expect(producto.stock).toBe(3)
     })
@@ -135,7 +137,7 @@ describe('Checkout valida el catálogo oficial antes del registro', () => {
     const api = apiCon()
     abrir([{ codigo: 'CL002', cantidad: 4 }])
     await screen.findByText(/Hay productos inválidos/)
-    expect(confirmar()).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Reintentar' })).toBeEnabled()
     fireEvent.submit(document.getElementById('formCheckout'))
     expect(leerIntentoCompra()).toBeNull()
     expect(api.mock.calls.every(([, opciones]) => opciones.method === 'GET')).toBe(true)

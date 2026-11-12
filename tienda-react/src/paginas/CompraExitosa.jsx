@@ -1,9 +1,26 @@
 import { Link, useLocation } from 'react-router-dom'
+import { useEffect } from 'react'
 import { formatearPrecio } from '../datos/productos'
+import { descartarIntentoCompra, leerIntentoCompra } from '../datos/intentoCompra'
 
 function CompraExitosa() {
     const location = useLocation()
     const pedido = location.state?.pedido
+
+    useEffect(() => {
+        if (!pedido) return
+        // La confirmación ya fue validada y el resumen llegó a su destino.
+        // Nunca se descartan intentos inciertos ni compras distintas.
+        try {
+            const intento = leerIntentoCompra()
+            if (intento?.estado === 'confirmado' && intento.boletaId === pedido.numero) {
+                descartarIntentoCompra(intento.clave)
+                sessionStorage.removeItem('gasVolcan.resumenCheckout.v1')
+            }
+        } catch {
+            // Fallar cerrado: el intento conservado seguirá impidiendo una compra nueva.
+        }
+    }, [pedido])
 
     if (!pedido) {
         return (
@@ -30,7 +47,7 @@ function CompraExitosa() {
             <section className="compra-exitosa">
                 <div className="compra-exitosa-icono">✓</div>
 
-                <h1>Compra realizada con éxito</h1>
+                <h1>Pedido registrado con éxito</h1>
 
                 <p className="text-muted">
                     Tu pedido fue registrado correctamente.
@@ -64,7 +81,7 @@ function CompraExitosa() {
                         ))}
 
                         <div className="compra-exitosa-total">
-                            <span>Total pagado</span>
+                            <span>Total</span>
                             <strong>{formatearPrecio(pedido.total)}</strong>
                         </div>
                     </div>
@@ -89,12 +106,6 @@ function CompraExitosa() {
                                         </>
                                     )}
 
-                                    {pedido.pago && (
-                                        <>
-                                            <dt>Pagado con</dt>
-                                            <dd>Tarjeta {pedido.pago.tarjeta}</dd>
-                                        </>
-                                    )}
                                 </dl>
                             </>
                         )}

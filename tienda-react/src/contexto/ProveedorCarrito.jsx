@@ -37,7 +37,17 @@ function ProveedorCarrito({ children }) {
 
   function cambiarCantidad(codigo, cantidad) {
     if (cargando || error) return;
-    setItems(cambiarCantidadItem(items, codigo, cantidad, activos));
+    setItems(anteriores => {
+      const articulo = anteriores.find(item => item.codigo === codigo);
+      const producto = activos.find(item => item.codigo === codigo);
+      // Corregir de una en una las unidades excedidas no permite confirmar stock inválido.
+      if (articulo && producto && Number.isSafeInteger(articulo.cantidad)
+          && Number.isSafeInteger(producto.stock) && producto.stock >= 0
+          && articulo.cantidad > producto.stock && cantidad === articulo.cantidad - 1 && cantidad >= 1) {
+        return anteriores.map(item => item.codigo === codigo ? { ...item, cantidad } : item);
+      }
+      return cambiarCantidadItem(anteriores, codigo, cantidad, activos);
+    });
   }
 
   function quitar(codigo) {
@@ -51,6 +61,8 @@ function ProveedorCarrito({ children }) {
   const valor = {
     items,
     ...disponibilidad,
+    // Solo lectura para las filas originales; nunca usar datos durante error/carga.
+    productos: cargando || error ? [] : activos,
     errorCatalogo: typeof error === 'string' ? error : error?.message || '',
     recargarCatalogo: recargar,
     agregar,

@@ -1,14 +1,12 @@
 import { Link } from 'react-router-dom'
 
-import { useCatalogo } from '../contexto/catalogoContexto'
-
-import { leerPedidos } from '../datos/pedidos'
+import { usePedidosHttp } from '../utilidades/usePedidosHttp'
 import { formatearPrecio } from '../datos/productos'
 
 function AdminDashboard() {
-    const { productos } = useCatalogo()
-
-    const pedidos = leerPedidos()
+    const datos = usePedidosHttp()
+    const { pedidos, productos } = datos
+    const indicador = valor => datos.cargando || datos.error ? '—' : valor
 
     // =========================
     // INDICADORES
@@ -158,7 +156,7 @@ function AdminDashboard() {
                                         </p>
 
                                         <p className="tarjeta-dato-numero">
-                                            {pendientes}
+                                            {indicador(pendientes)}
                                         </p>
                                     </div>
 
@@ -185,7 +183,7 @@ function AdminDashboard() {
                                         </p>
 
                                         <p className="tarjeta-dato-numero">
-                                            {sinRepartidor}
+                                            {indicador(sinRepartidor)}
                                         </p>
                                     </div>
 
@@ -212,9 +210,9 @@ function AdminDashboard() {
                                         </p>
 
                                         <p className="tarjeta-dato-numero">
-                                            {productoMenorStock
+                                            {indicador(productoMenorStock
                                                 ? productoMenorStock.stock
-                                                : 0}
+                                                : 0)}
                                         </p>
 
                                         {productoMenorStock && (
@@ -250,9 +248,9 @@ function AdminDashboard() {
 
                                         <p className="tarjeta-dato-numero">
                                             {
-                                                formatearPrecio(
+                                                indicador(formatearPrecio(
                                                     totalVendido
-                                                )
+                                                ))
                                             }
                                         </p>
                                     </div>
@@ -348,7 +346,7 @@ function AdminDashboard() {
 
                         <div className="tabla-marco table-responsive">
 
-                            <table className="tabla-panel">
+                            <table className="tabla-panel" aria-busy={datos.cargando}>
 
                                 <thead>
                                 <tr>
@@ -366,8 +364,7 @@ function AdminDashboard() {
 
                                     <tr>
                                         <td colSpan="5">
-                                            Todavía no hay pedidos
-                                            registrados.
+                                            {datos.cargando ? '…' : datos.error || 'Todavía no hay pedidos registrados.'}
                                         </td>
                                     </tr>
 
@@ -483,8 +480,7 @@ function AdminDashboard() {
 
                                     <tr>
                                         <td colSpan="3">
-                                            No hay productos en el
-                                            catálogo.
+                                            {datos.cargando ? '…' : datos.error || 'No hay productos en el catálogo.'}
                                         </td>
                                     </tr>
 

@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { Carousel } from 'bootstrap'
 import TarjetaProducto from '../components/TarjetaProducto'
+import EstadoCatalogo from '../components/EstadoCatalogo'
 import { formatearPrecio, imagenDe } from '../datos/productos'
 import { useCatalogo } from '../contexto/catalogoContexto'
 
@@ -123,6 +124,7 @@ function Inicio() {
             <h2 id="titulo-destacados">Productos destacados</h2>
           </div>
 
+          <EstadoCatalogo>
           <ul className="row g-4 list-unstyled">
             {destacados.map((producto) => (
               <li key={producto.codigo} className="col-12 col-sm-6 col-lg-3">
@@ -136,6 +138,7 @@ function Inicio() {
               </li>
             ))}
           </ul>
+          </EstadoCatalogo>
 
           <div className="text-center mt-5">
             <Link className="btn btn-principal" to="/productos">

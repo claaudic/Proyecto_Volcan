@@ -31,9 +31,12 @@ export function adaptarProducto(dto) {
     && esTexto(dto.unidad) && esOpcional(dto.descripcion, esCadena)
     && esOpcional(dto.etiquetaOferta, esCadena) && esOpcional(dto.imagen, esCadena)
     && esOpcional(dto.stockCritico, (stock) => Number.isInteger(stock) && stock >= 0))
+  // Compatibilidad de lectura con respuestas anteriores; nunca inventar version 0.
+  exigir(!Object.hasOwn(dto, 'version') || (Number.isSafeInteger(dto.version) && dto.version >= 0))
   const categoria = adaptarCategoria(dto.categoria)
   return {
     ...dto,
+    version: Object.hasOwn(dto, 'version') ? dto.version : null,
     categoria: categoria.nombre,
     categoriaId: categoria.id,
     categoriaDatos: categoria,

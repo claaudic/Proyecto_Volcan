@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import CarritoPanel from './CarritoPanel'
@@ -42,45 +42,55 @@ describe('Panel real con disponibilidad del carrito', () => {
   it('muestra la carga sin afirmar que el carrito esta vacio ni exponer precios', () => {
     abrir({ activos: [producto], cargando: true })
     expect(screen.getByRole('status')).toHaveTextContent('Comprobando precios y stock')
-    expect(screen.getByRole('list', { name: 'Articulos guardados pendientes de validar' })).toHaveTextContent('CL002: 2 unidades')
+    expect(screen.getByRole('status')).toHaveClass('visually-hidden')
+    expect(screen.getByRole('heading', { name: 'CL002' })).toBeInTheDocument()
+    expect(screen.getByRole('list')).toHaveClass('panel-lista')
+    expect(document.querySelector('.cantidad-valor')).toHaveTextContent('2')
+    expect(document.querySelector('.panel-total strong')).toHaveTextContent('—')
     expect(screen.queryByText(/Tu carrito/)).not.toBeInTheDocument()
     expect(screen.queryByText('$30.000')).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Pagar' })).toBeDisabled()
-    expect(screen.queryByRole('link', { name: 'Pagar' })).not.toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Pagar' })).toHaveAttribute('aria-disabled', 'true')
+    expect(screen.queryByRole('button', { name: 'Pagar' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Agregar una unidad' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Quitar una unidad' })).toBeDisabled()
     expect(guardados()).toEqual(articulos)
   })
-  it('explica el error, no muestra importes anteriores y permite reintentar', async () => {
+  it('conserva filas y pie ante un error sin mostrar importes ni añadir controles', async () => {
     const user = userEvent.setup()
     const recargar = vi.fn()
     abrir({ activos: [producto], error: 'Sin conexion', recargar })
-    expect(screen.getByRole('alert')).toHaveTextContent('Tus articulos siguen guardados')
-    expect(screen.getByRole('alert')).toHaveTextContent('Sin conexion')
+    expect(screen.getByRole('alert')).toHaveTextContent('Ocurrió un error inesperado. Intenta de nuevo.')
+    expect(screen.getByRole('heading', { name: 'CL002' }).closest('li')).toHaveClass('panel-item')
     expect(screen.queryByText('$30.000')).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Pagar' })).toBeDisabled()
-    await user.click(screen.getByRole('button', { name: 'Reintentar catalogo' }))
-    expect(recargar).toHaveBeenCalledOnce()
+    expect(screen.getByRole('link', { name: 'Pagar' })).toHaveAttribute('aria-disabled', 'true')
+    expect(screen.queryByRole('button', { name: /Reintentar|Pagar/ })).not.toBeInTheDocument()
+    await user.click(screen.getByRole('link', { name: 'Pagar' }))
+    expect(screen.queryByRole('heading', { name: 'Destino checkout' })).not.toBeInTheDocument()
+    expect(recargar).not.toHaveBeenCalled()
     expect(guardados()).toEqual(articulos)
   })
   it('permite quitar articulos y vaciar sin conexion por accion del usuario', async () => {
     const user = userEvent.setup()
     abrir({ activos: [], error: 'Sin conexion' }, [...articulos, { codigo: 'OTRO', cantidad: 1 }])
-    await user.click(screen.getByRole('button', { name: 'Quitar OTRO' }))
+    const fila = screen.getByRole('heading', { name: 'OTRO' }).closest('li')
+    await user.click(within(fila).getByRole('button', { name: 'Quitar' }))
     expect(guardados()).toEqual(articulos)
     await user.click(screen.getByRole('button', { name: 'Vaciar carrito' }))
     expect(guardados()).toEqual([])
   })
   it('distingue stock insuficiente de un carrito vacio y no descarta cantidades', () => {
     abrir({ activos: [{ ...producto, stock: 1 }] })
-    expect(screen.getByRole('alert')).toHaveTextContent('sin disponibilidad suficiente')
-    expect(screen.getByRole('button', { name: 'Pagar' })).toBeDisabled()
-    expect(screen.queryByRole('link', { name: 'Pagar' })).not.toBeInTheDocument()
+    expect(screen.getByRole('alert')).toHaveTextContent('Solo queda 1 unidad disponible.')
+    expect(screen.getByRole('heading', { name: 'Producto API' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Pagar' })).toHaveAttribute('aria-disabled', 'true')
     expect(guardados()).toEqual(articulos)
   })
   it('un producto ausente conserva su codigo y cantidad y no permite pagar', () => {
     abrir({ activos: [] })
-    expect(screen.getByRole('list')).toHaveTextContent('CL002: 2 unidades')
+    expect(screen.getByRole('heading', { name: 'CL002' })).toBeInTheDocument()
+    expect(document.querySelector('.cantidad-valor')).toHaveTextContent('2')
     expect(screen.getByRole('alert')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Pagar' })).toBeDisabled()
+    expect(screen.getByRole('link', { name: 'Pagar' })).toHaveAttribute('aria-disabled', 'true')
     expect(guardados()).toEqual(articulos)
   })
   it('recupera el carrito tras el error con los nuevos precios API', () => {
@@ -103,5 +113,62 @@ describe('Panel real con disponibilidad del carrito', () => {
   it('no ofrece un reintento ficticio si el catalogo no proporciona recargar', () => {
     abrir({ activos: [], error: 'Sin conexion' })
     expect(screen.queryByRole('button', { name: 'Reintentar catalogo' })).not.toBeInTheDocument()
+  })
+  it.each([{ cargando: true }, { error: 'Sin conexion' }])('el carrito vacío conserva la presentación original con %j', catalogo => {
+    abrir({ activos: [], ...catalogo }, [])
+    expect(screen.getByText('Tu carrito está vacío')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Ver el catálogo' })).toBeInTheDocument()
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+    expect(screen.queryByRole('status')).not.toBeInTheDocument()
+    expect(document.querySelector('.panel-pie')).toBeNull()
+  })
+  it('permite corregir explícitamente la cantidad con stock vigente y recuperar Pagar', async () => {
+    const user = userEvent.setup()
+    abrir({ activos: [{ ...producto, stock: 1 }] })
+    expect(guardados()).toEqual(articulos)
+    await user.click(screen.getByRole('button', { name: 'Quitar una unidad' }))
+    expect(guardados()).toEqual([{ codigo: 'CL002', cantidad: 1 }])
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Pagar' })).not.toHaveAttribute('aria-disabled')
+    expect(document.querySelector('.panel-total strong')).toHaveTextContent('$15.000')
+  })
+  it.each([1, 2])('resta exactamente una unidad por clic cuando el stock es %i', async stock => {
+    const user = userEvent.setup()
+    let cantidad = stock + 3
+    abrir({ activos: [{ ...producto, stock }] }, [{ codigo: 'CL002', cantidad }])
+    expect(screen.getByRole('alert')).toHaveTextContent(stock === 1
+      ? 'Solo queda 1 unidad disponible.' : 'Solo quedan 2 unidades disponibles.')
+    while (cantidad > stock) {
+      expect(screen.getByRole('link', { name: 'Pagar' })).toHaveAttribute('aria-disabled', 'true')
+      await user.click(screen.getByRole('link', { name: 'Pagar' }))
+      expect(screen.queryByRole('heading', { name: 'Destino checkout' })).not.toBeInTheDocument()
+      await user.click(screen.getByRole('button', { name: 'Quitar una unidad' }))
+      cantidad -= 1
+      expect(guardados()).toEqual([{ codigo: 'CL002', cantidad }])
+      expect(document.querySelector('.cantidad-valor')).toHaveTextContent(String(cantidad))
+    }
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Pagar' })).not.toHaveAttribute('aria-disabled')
+    expect(document.querySelector('.panel-total strong')).toHaveTextContent(stock === 1 ? '$15.000' : '$30.000')
+  })
+  it('con stock cero permite restar de una en una sin habilitar Pagar', async () => {
+    const user = userEvent.setup()
+    abrir({ activos: [{ ...producto, stock: 0 }] }, [{ codigo: 'CL002', cantidad: 3 }])
+    for (const cantidad of [2, 1]) {
+      await user.click(screen.getByRole('button', { name: 'Quitar una unidad' }))
+      expect(guardados()).toEqual([{ codigo: 'CL002', cantidad }])
+      expect(screen.getByRole('link', { name: 'Pagar' })).toHaveAttribute('aria-disabled', 'true')
+      expect(screen.getByRole('button', { name: 'Agregar una unidad' })).toBeDisabled()
+    }
+    expect(screen.getByRole('button', { name: 'Quitar una unidad' })).toBeDisabled()
+  })
+  it('bloquea la navegación por teclado cuando el total no está verificado', async () => {
+    const user = userEvent.setup()
+    abrir({ activos: [], error: 'Sin conexion' })
+    const pagar = screen.getByRole('link', { name: 'Pagar' })
+    pagar.focus()
+    await user.keyboard('{Enter}')
+    expect(screen.queryByRole('heading', { name: 'Destino checkout' })).not.toBeInTheDocument()
+    expect(guardados()).toEqual(articulos)
   })
 })

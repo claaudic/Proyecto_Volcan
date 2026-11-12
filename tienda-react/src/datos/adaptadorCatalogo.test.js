@@ -10,6 +10,17 @@ const producto = {
 }
 
 describe('Adaptador del contrato real de catálogo', () => {
+  it.each([0, 7, Number.MAX_SAFE_INTEGER])('conserva versión válida %s sin modificar el DTO', version => {
+    const dto = Object.freeze({ ...producto, version })
+    expect(adaptarProducto(dto).version).toBe(version)
+    expect(dto.version).toBe(version)
+  })
+  it('mantiene lectura compatible sin versión pero no inventa una versión editable', () => {
+    expect(adaptarProducto(producto)).toMatchObject({ id: 501, version: null, stock: 7 })
+  })
+  it.each([null, undefined, -1, 1.5, '0', NaN, Infinity, Number.MAX_SAFE_INTEGER + 1])('rechaza versión presente inválida %s', version => {
+    expect(() => adaptarProducto({ ...producto, version })).toThrow(ErrorContratoCatalogo)
+  })
   it('conserva IDs reales y adapta la categoría sin cambiar los DTO de entrada', () => {
     const original = structuredClone(producto)
     const resultado = adaptarCatalogo([producto], [categoria])

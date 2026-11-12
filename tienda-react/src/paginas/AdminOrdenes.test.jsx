@@ -1,11 +1,11 @@
-import { describe, it, expect, beforeEach } from 'vitest'
-import { screen, within } from '@testing-library/react'
+import { describe, it, expect } from 'vitest'
+import { screen, within, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import AdminOrdenes from './AdminOrdenes'
 import AdminDashboard from './AdminDashboard'
 import { leerPedidos } from '../datos/pedidos'
-import { renderizar, ADMIN, pedidoDeEjemplo } from '../test/renderizar'
-import { simularApiDeUsuarios, simularApiApagada } from '../test/api'
+import { ADMIN, pedidoDeEjemplo } from '../test/renderizar'
+import { abrirPedidos as renderizar } from '../test/pedidosHttp'
 
 // Pruebas de las vistas del administrador que leen los pedidos:
 // Ordenes y el inicio del panel.
@@ -14,7 +14,7 @@ const PEDIDOS = [
   pedidoDeEjemplo({ numero: 1, fecha: '2026-10-01T12:00:00.000Z', estado: 'Entregado', total: 6500, repartidor: 'repartidor@gaselvolcan.cl' }),
   pedidoDeEjemplo({ numero: 2, fecha: '2026-10-03T12:00:00.000Z', estado: 'En camino', total: 12000, repartidor: 'repartidor@gaselvolcan.cl' }),
   pedidoDeEjemplo({ numero: 3, fecha: '2026-10-05T12:00:00.000Z', estado: 'Pendiente', total: 8990 }),
-  pedidoDeEjemplo({ numero: 4, fecha: 'no es una fecha', estado: 'Cancelado', total: 50000 })
+  pedidoDeEjemplo({ numero: 4, fecha: '2026-09-30T12:00:00', estado: 'Cancelado', total: 50000 })
 ]
 
 function filas() {
@@ -25,38 +25,33 @@ function filaConPedido(numero) {
   return filas().find((fila) => fila.textContent.includes(`#${numero}`))
 }
 
-// Los repartidores llegan de ms-usuarios (simulado)
-beforeEach(() => {
-  simularApiDeUsuarios()
-})
-
 describe('Órdenes del administrador', () => {
 
-  it('lista todos los pedidos, del más reciente al más antiguo', () => {
-    renderizar(<AdminOrdenes />, { usuario: ADMIN, pedidos: PEDIDOS })
+  it('lista todos los pedidos, del más reciente al más antiguo', async () => {
+    await renderizar(<AdminOrdenes />, { usuario: ADMIN, pedidos: PEDIDOS })
 
     const numeros = filas().map((fila) => within(fila).getAllByRole('cell')[0].textContent)
     expect(numeros).toEqual(['#3', '#2', '#1', '#4'])
   })
 
-  it('pinta cada estado con su color y avisa si falta el repartidor', () => {
-    renderizar(<AdminOrdenes />, { usuario: ADMIN, pedidos: PEDIDOS })
+  it('pinta cada estado con su color y avisa si falta el repartidor', async () => {
+    await renderizar(<AdminOrdenes />, { usuario: ADMIN, pedidos: PEDIDOS })
 
     expect(screen.getByText('En camino')).toHaveClass('estado-camino')
     expect(screen.getByText('Pendiente')).toHaveClass('estado-pendiente')
     expect(screen.getAllByText('Sin asignar')).toHaveLength(2)
-    expect(screen.getByText('Sin fecha')).toBeInTheDocument()
+    expect(screen.queryByText('Sin fecha')).not.toBeInTheDocument()
   })
 
-  it('sin pedidos lo dice', () => {
-    renderizar(<AdminOrdenes />, { usuario: ADMIN })
+  it('sin pedidos lo dice', async () => {
+    await renderizar(<AdminOrdenes />, { usuario: ADMIN })
 
     expect(screen.getByText(/no hay pedidos|todavía no hay/i)).toBeInTheDocument()
   })
 
   it('muestra la boleta con productos, entrega y total', async () => {
     const user = userEvent.setup()
-    renderizar(<AdminOrdenes />, { usuario: ADMIN, pedidos: PEDIDOS })
+    await renderizar(<AdminOrdenes />, { usuario: ADMIN, pedidos: PEDIDOS })
 
     await user.click(
       within(filaConPedido(3)).getByRole('button', { name: /Ver boleta/ })
@@ -74,7 +69,8 @@ describe('Órdenes del administrador', () => {
     expect(within(boleta).getByText('Repartidor')).toBeInTheDocument()
     expect(within(boleta).getByText('Sin asignar')).toBeInTheDocument()
     expect(within(boleta).getByText('Pago')).toBeInTheDocument()
-    expect(within(boleta).getByText('•••• 1111')).toBeInTheDocument()
+    expect(within(boleta).getByText('Sin registrar')).toBeInTheDocument()
+    expect(within(boleta).queryByText('•••• 1111')).not.toBeInTheDocument()
     expect(within(boleta).getByText('Camila Rojas')).toBeInTheDocument()
     expect(within(boleta).getByText('Libertad 123')).toBeInTheDocument()
     expect(within(boleta).getByText('Cilindro GLP 5 kg')).toBeInTheDocument()
@@ -83,7 +79,7 @@ describe('Órdenes del administrador', () => {
 
   it('edita estado y asigna repartidor activo', async () => {
     const user = userEvent.setup()
-    renderizar(<AdminOrdenes />, { usuario: ADMIN, pedidos: PEDIDOS })
+    const vista = await renderizar(<AdminOrdenes />, { usuario: ADMIN, pedidos: PEDIDOS })
 
     await user.click(
       within(filaConPedido(3)).getByRole('button', { name: /Editar/ })
@@ -92,52 +88,59 @@ describe('Órdenes del administrador', () => {
     await screen.findByRole('option', { name: /Matías Vera/ })
     await user.selectOptions(
       screen.getByLabelText('Repartidor'),
-      'repartidor@gaselvolcan.cl'
+      '3'
     )
     await user.click(screen.getByRole('button', { name: 'Guardar cambios' }))
 
-    const pedido = leerPedidos().find((uno) => uno.numero === 3)
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+    const pedido = vista.gestiones.find((uno) => uno.boleta.id === 3).boleta
 
-    expect(pedido.estado).toBe('En camino')
-    expect(pedido.repartidor).toBe('repartidor@gaselvolcan.cl')
+    expect(pedido.estado).toBe('EN_CAMINO')
+    expect(pedido.repartidorId).toBe(3)
+    expect(leerPedidos().find(p => p.numero === 3).estado).toBe('Pendiente')
     expect(within(filaConPedido(3)).getByText('En camino')).toHaveClass('estado-camino')
     expect(within(filaConPedido(3)).getByText('Matías Vera')).toBeInTheDocument()
   })
 
   it('si el backend no responde, avisa que faltan los repartidores', async () => {
-    simularApiApagada()
-    renderizar(<AdminOrdenes />, { usuario: ADMIN, pedidos: PEDIDOS })
+    await renderizar(<AdminOrdenes />, { usuario: ADMIN, pedidos: PEDIDOS,
+      rutas: { 'GET /usuarios/repartidores': () => [503, { mensaje: 'Sin conexión' }] } })
 
     expect(await screen.findByRole('alert')).toHaveTextContent('No se pudo cargar la lista de repartidores.')
     expect(filas()).toHaveLength(4)
   })
 
-  it('elimina una orden solo después de confirmar', async () => {
+  it('anula una orden pendiente solo después de confirmar y conserva su historial', async () => {
     const user = userEvent.setup()
-    renderizar(<AdminOrdenes />, { usuario: ADMIN, pedidos: PEDIDOS })
+    const vista = await renderizar(<AdminOrdenes />, { usuario: ADMIN, pedidos: PEDIDOS })
 
     await user.click(
-      within(filaConPedido(2)).getByRole('button', { name: /Eliminar/ })
+      within(filaConPedido(3)).getByRole('button', { name: /Eliminar/ })
     )
     await user.click(screen.getByRole('button', { name: 'Cancelar' }))
 
-    expect(leerPedidos().some((pedido) => pedido.numero === 2)).toBe(true)
+    expect(vista.escrituras()).toHaveLength(0)
 
     await user.click(
-      within(filaConPedido(2)).getByRole('button', { name: /Eliminar/ })
+      within(filaConPedido(3)).getByRole('button', { name: /Eliminar/ })
     )
     await user.click(screen.getByRole('button', { name: 'Sí, eliminar' }))
 
-    expect(leerPedidos().some((pedido) => pedido.numero === 2)).toBe(false)
-    expect(screen.queryByText('#2')).not.toBeInTheDocument()
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+    expect(filaConPedido(3)).toHaveTextContent('Cancelado')
+    expect(vista.gestiones).toHaveLength(4)
+    expect(vista.escrituras()).toHaveLength(1)
+    expect(vista.escrituras()[0][0]).toMatch(/\/boletas\/3\/anulacion$/)
+    expect(JSON.parse(vista.escrituras()[0][1].body)).toEqual({ versionEsperada: 0 })
+    expect(leerPedidos()).toEqual(PEDIDOS)
   })
 
 })
 
 describe('Inicio del panel de administración', () => {
 
-  it('calcula los indicadores con los pedidos guardados', () => {
-    renderizar(<AdminDashboard />, { usuario: ADMIN, pedidos: PEDIDOS })
+  it('calcula los indicadores con los pedidos HTTP', async () => {
+    await renderizar(<AdminDashboard />, { usuario: ADMIN, pedidos: PEDIDOS })
 
     // 1 pendiente, 2 sin repartidor, y el total sin contar el cancelado
     expect(screen.getByText('Pedidos pendientes').nextElementSibling).toHaveTextContent('1')
@@ -145,8 +148,8 @@ describe('Inicio del panel de administración', () => {
     expect(screen.getByText('$27.490')).toBeInTheDocument()
   })
 
-  it('muestra los últimos pedidos con su estado', () => {
-    renderizar(<AdminDashboard />, { usuario: ADMIN, pedidos: PEDIDOS })
+  it('muestra los últimos pedidos con su estado', async () => {
+    await renderizar(<AdminDashboard />, { usuario: ADMIN, pedidos: PEDIDOS })
 
     expect(screen.getByText('En camino')).toHaveClass('estado-camino')
     expect(screen.getByText('#3')).toBeInTheDocument()
@@ -172,10 +175,10 @@ describe('Órdenes: pedidos con otros formatos', () => {
     pago: 'Efectivo'
   }
 
-  it('muestra un pedido guardado con el formato antiguo', async () => {
+  it('muestra un pedido histórico mediante contacto y entrega del servidor', async () => {
     // 1 Preparar
     const user = userEvent.setup()
-    renderizar(<AdminOrdenes />, { usuario: ADMIN, pedidos: [PEDIDO_ANTIGUO] })
+    await renderizar(<AdminOrdenes />, { usuario: ADMIN, pedidos: [PEDIDO_ANTIGUO] })
 
     // 2 Actuar: abrir su boleta
     expect(filaConPedido(7)).toHaveTextContent('Felipe González')
@@ -185,13 +188,15 @@ describe('Órdenes: pedidos con otros formatos', () => {
     const boleta = screen.getByRole('dialog', { name: /Boleta del pedido #7/ })
     expect(within(boleta).getByText('felipe@gmail.com')).toBeInTheDocument()
     expect(within(boleta).getByText('Los Puelches 430')).toBeInTheDocument()
-    expect(within(boleta).getByText('Efectivo')).toBeInTheDocument()
+    expect(within(boleta).getByText('Sin registrar')).toBeInTheDocument()
+    expect(within(boleta).queryByText('Efectivo')).not.toBeInTheDocument()
     expect(within(boleta).getByText('Cilindro GLP 11 kg')).toBeInTheDocument()
   })
 
-  it('resume varios productos y avisa cuando faltan datos', () => {
+  it('resume varios productos y avisa cuando faltan datos históricos opcionales', async () => {
     const conVarios = pedidoDeEjemplo({
       numero: 8,
+      total: 15490,
       productos: [
         { codigo: 'CL001', nombre: 'Cilindro GLP 5 kg', cantidad: 1, precio: 6500, subtotal: 6500 },
         { codigo: 'RG001', nombre: 'Regulador doméstico estándar', cantidad: 1, precio: 8990, subtotal: 8990 }
@@ -199,18 +204,17 @@ describe('Órdenes: pedidos con otros formatos', () => {
     })
     const sinDatos = { numero: 9, estado: 'Pendiente', total: 0 }
 
-    renderizar(<AdminOrdenes />, { usuario: ADMIN, pedidos: [conVarios, sinDatos] })
+    await renderizar(<AdminOrdenes />, { usuario: ADMIN, pedidos: [conVarios, sinDatos] })
 
     expect(filaConPedido(8)).toHaveTextContent('Cilindro GLP 5 kg y 1 más')
-    expect(filaConPedido(9)).toHaveTextContent('Sin productos')
-    expect(filaConPedido(9)).toHaveTextContent('Sin fecha')
+    expect(filaConPedido(9)).toHaveTextContent('Producto')
     expect(filaConPedido(9)).toHaveTextContent('Sin nombre')
     expect(filaConPedido(9)).toHaveTextContent('Sin comuna')
   })
 
   it('las ventanas se cierran sin cambiar nada', async () => {
     const user = userEvent.setup()
-    renderizar(<AdminOrdenes />, { usuario: ADMIN, pedidos: PEDIDOS })
+    const vista = await renderizar(<AdminOrdenes />, { usuario: ADMIN, pedidos: PEDIDOS })
 
     // Boleta: abrir y cerrar
     await user.click(within(filaConPedido(3)).getByRole('button', { name: /Ver boleta/ }))
@@ -223,6 +227,7 @@ describe('Órdenes: pedidos con otros formatos', () => {
     expect(screen.queryByRole('dialog')).toBeNull()
 
     expect(leerPedidos()).toHaveLength(4)
+    expect(vista.escrituras()).toHaveLength(0)
   })
 
 })

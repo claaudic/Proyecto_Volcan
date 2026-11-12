@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import Checkout from './Checkout'
 import { CarritoContexto } from '../contexto/carritoContexto'
@@ -15,6 +15,8 @@ const producto = { id: 901, codigo: 'CL002', nombre: 'Producto oficial HTTP', pr
 const items = [{ codigo: 'CL002', cantidad: 2 }]
 const usuario = { id: 7, rol: 'CLIENTE', nombre: 'Camila Rojas', correo: 'camila@gmail.com' }
 const UUID = 'a1b2c3d4-1111-4222-8333-123456789abc'
+const { navegar } = vi.hoisted(() => ({ navegar: vi.fn() }))
+vi.mock('react-router-dom', async importar => ({ ...await importar(), useNavigate: () => navegar }))
 const llamarApi = (ruta, opciones) => pedir(ruta, { ...opciones, token: 'jwt-sintetico' })
 function boleta(cuerpo, precio = 220) {
   return { id: 51, clienteId: cuerpo.clienteId, direccion: cuerpo.direccion, comuna: cuerpo.comuna,
@@ -50,7 +52,10 @@ function llenar() {
 const enviar = () => fireEvent.submit(document.getElementById('formCheckout'))
 const posts = api => api.mock.calls.filter(([, opciones]) => opciones.method === 'POST')
 async function listo() { await screen.findByText('Producto oficial HTTP') }
-async function confirmado() { return screen.findByText(/Boleta registrada N.º 51/) }
+async function confirmado() {
+  await waitFor(() => expect(navegar).toHaveBeenCalledWith('/compra-exitosa', expect.any(Object)))
+  return navegar.mock.calls.at(-1)[1].state.pedido
+}
 function prepararGuardado(estado = 'incierto', cuenta = null) {
   prepararCompra({ items, productos: [producto], usuario: cuenta, fecha: '2026-11-10T12:30:00',
     entrega: { direccion: 'Original 123', comuna: 'Chillán' },
@@ -59,6 +64,7 @@ function prepararGuardado(estado = 'incierto', cuenta = null) {
   if (!['preparado', 'enviado'].includes(estado)) cambiarEstadoIntento(UUID, estado, { boletaId: estado === 'confirmado' ? 51 : null })
 }
 beforeEach(() => {
+  navegar.mockClear()
   sessionStorage.clear()
   vi.spyOn(crypto, 'randomUUID').mockReturnValue(UUID)
   localStorage.setItem('carritoVolcan', JSON.stringify(items))
@@ -75,15 +81,16 @@ describe('Checkout registra por HTTP simulado con catálogo oficial', () => {
     expect(posts(api)).toHaveLength(0)
     expect(leerIntentoCompra()).toBeNull()
     expect(crypto.randomUUID).not.toHaveBeenCalled()
-    expect(screen.getByRole('button', { name: 'Registrar boleta' })).toBeEnabled()
+    expect(screen.getByRole('button', { name: 'Confirmar pedido' })).toBeEnabled()
   })
-  it.each([null, usuario])('registra explícitamente como %j, conserva carrito y no simula pagos', async cuenta => {
+  it.each([null, usuario])('registra explícitamente como %j, vacía solo tras 201 y no simula pagos', async cuenta => {
     const api = backend()
     const vista = abrir({ usuario: cuenta })
     await listo()
     if (cuenta) await waitFor(() => expect(screen.getByLabelText('Dirección')).toHaveValue('Libertad 123'))
     llenar()
-    fireEvent.click(screen.getByRole('button', { name: 'Registrar boleta' }))
+    expect(vista.vaciar).not.toHaveBeenCalled()
+    fireEvent.click(screen.getByRole('button', { name: 'Confirmar pedido' }))
     await confirmado()
     const [[url, opciones]] = posts(api)
     expect(url).toBe(API_URL + '/boletas')
@@ -97,11 +104,11 @@ describe('Checkout registra por HTTP simulado con catálogo oficial', () => {
     expect(api.mock.calls.filter(([, o]) => o.method === 'GET' && String(o.body) === 'undefined').length).toBeGreaterThanOrEqual(4)
     expect(api.mock.calls.filter(([u]) => u === API_URL + '/productos')).toHaveLength(2)
     expect(api.mock.calls.filter(([u]) => u === API_URL + '/categorias')).toHaveLength(2)
-    expect(screen.getByRole('button', { name: 'Boleta registrada' })).toBeDisabled()
-    expect(screen.getByText(/Esto no confirma un pago bancario/)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Pedido registrado' })).toBeDisabled()
+    expect(navegar.mock.calls[0][1].state.pedido).not.toHaveProperty('pago')
     expect(document.querySelector('[autocomplete="cc-number"]')).toBeNull()
     expect(document.querySelector('#cvv')).toBeNull()
-    expect(vista.vaciar).not.toHaveBeenCalled()
+    expect(vista.vaciar).toHaveBeenCalledTimes(1)
     expect(vista.descontar).not.toHaveBeenCalled()
     expect(JSON.parse(localStorage.getItem('carritoVolcan'))).toEqual(items)
     expect(JSON.parse(localStorage.getItem('productosSistema'))).toEqual([producto])
@@ -131,13 +138,13 @@ describe('Checkout registra por HTTP simulado con catálogo oficial', () => {
       'POST /boletas': c => { cuerpo = c; return respuesta.promesa } })
     abrir(); await listo(); llenar()
     act(() => { enviar(); enviar() })
-    expect(screen.getByText('Comprobando catálogo oficial…')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Procesando pedido…' })).toBeDisabled()
     expect(leerIntentoCompra()).toBeNull()
     await act(async () => { productos.resolver([200, [producto]]) })
     expect(posts(api)).toHaveLength(0)
     await act(async () => { categorias.resolver([200, [categoria]]) })
     await waitFor(() => expect(posts(api)).toHaveLength(1))
-    expect(screen.getByText('Registrando boleta…')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Procesando pedido…' })).toBeDisabled()
     enviar(); enviar()
     expect(posts(api)).toHaveLength(1)
     await act(async () => { respuesta.resolver([201, boleta(cuerpo)]) })
@@ -152,7 +159,7 @@ describe('Checkout registra por HTTP simulado con catálogo oficial', () => {
     await screen.findByText(/Los precios o productos cambiaron/)
     expect(posts(api)).toHaveLength(0)
     expect(leerIntentoCompra()).toBeNull()
-    expect(screen.getByRole('button', { name: 'Registrar boleta' })).toBeEnabled()
+    expect(screen.getByRole('button', { name: 'Confirmar pedido' })).toBeEnabled()
     enviar()
     await confirmado()
     expect(JSON.parse(posts(api)[0][1].body).detalles[0].productoId).toBe(nuevo.id)
@@ -191,19 +198,19 @@ describe('Checkout registra por HTTP simulado con catálogo oficial', () => {
   })
   it('muestra el total confirmado por el backend, aunque difiera de la estimación', async () => {
     backend({ 'POST /boletas': c => [201, boleta(c, 250)] })
-    abrir(); await listo(); llenar(); enviar(); await confirmado()
-    const total = screen.getByText('Total boleta').parentElement
-    expect(total).toHaveTextContent(/500/)
-    expect(within(screen.getByLabelText('Datos del intento guardado')).getByText('Producto 901 × 2')).toBeInTheDocument()
+    abrir(); await listo(); llenar(); enviar()
+    const pedido = await confirmado()
+    expect(pedido.total).toBe(500)
+    expect(pedido.productos).toEqual([expect.objectContaining({ nombre: producto.nombre, cantidad: 2, precio: 250, subtotal: 500 })])
+    expect(screen.queryByLabelText('Datos del intento guardado')).not.toBeInTheDocument()
   })
   it('permite actualizar el catálogo y registrar después de recuperar stock', async () => {
     let llamadas = 0
     const api = backend({ 'GET /productos': () => [200, [{ ...producto, stock: ++llamadas === 2 ? 1 : 8 }]] })
     abrir(); await listo(); llenar(); enviar()
     await screen.findByText(/El catálogo actualizado no permite/)
-    expect(screen.getByRole('button', { name: 'Registrar boleta' })).toBeDisabled()
-    fireEvent.click(screen.getByRole('button', { name: 'Actualizar catálogo' }))
-    await waitFor(() => expect(screen.getByRole('button', { name: 'Registrar boleta' })).toBeEnabled())
+    fireEvent.click(screen.getByRole('button', { name: 'Reintentar' }))
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Confirmar pedido' })).toBeEnabled())
     enviar(); await confirmado()
     expect(posts(api)).toHaveLength(1)
   })
@@ -228,7 +235,7 @@ describe('Checkout recupera sin reemplazar intentos', () => {
     prepararGuardado('confirmado')
     const api = backend()
     abrir(); await listo(); enviar()
-    expect(screen.getByRole('button', { name: 'Boleta registrada' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Pedido registrado' })).toBeDisabled()
     expect(posts(api)).toHaveLength(0)
   })
   it('no permite recuperar con otra identidad ni convertir a invitado', async () => {
@@ -240,7 +247,7 @@ describe('Checkout recupera sin reemplazar intentos', () => {
     vista.cambiar({ usuario: null }); enviar()
     expect(posts(api)).toHaveLength(0)
     expect(sessionStorage.getItem(CLAVE_INTENTO_COMPRA)).toBe(original)
-    expect(screen.getByRole('button', { name: 'Registrar boleta' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Confirmar pedido' })).toBeDisabled()
   })
   it.each([400, 401, 403, 409, 500, 503, 200, 202])('HTTP %s no confirma y permite reintentar con el mismo cuerpo, UUID y fecha', async estado => {
     let numero = 0
@@ -265,7 +272,7 @@ describe('Checkout recupera sin reemplazar intentos', () => {
     abrir(); await listo(); llenar(); enviar()
     await screen.findByRole('button', { name: 'Reintentar registro' })
     expect(leerIntentoCompra().estado).toBe('incierto')
-    expect(screen.queryByText(/Boleta registrada N.º/)).not.toBeInTheDocument()
+    expect(navegar).not.toHaveBeenCalled()
     expect(posts(api)).toHaveLength(1)
   })
   it.each(['identidad', 'desmontaje'])('no muestra una confirmación obsoleta tras %s durante POST', async cambio => {
@@ -277,7 +284,7 @@ describe('Checkout recupera sin reemplazar intentos', () => {
     if (cambio === 'identidad') vista.cambiar({ usuario })
     else vista.unmount()
     await act(async () => { pendiente.resolver([201, boleta(cuerpo)]) })
-    expect(screen.queryByText(/Boleta registrada N.º/)).not.toBeInTheDocument()
+    expect(navegar).not.toHaveBeenCalled()
     expect(leerIntentoCompra()).toMatchObject({ estado: 'confirmado', cuerpo })
   })
   it('almacenamiento corrupto bloquea sin reemplazar ni enviar', async () => {
@@ -286,5 +293,80 @@ describe('Checkout recupera sin reemplazar intentos', () => {
     abrir(); await listo(); enviar()
     expect(posts(api)).toHaveLength(0)
     expect(sessionStorage.getItem(CLAVE_INTENTO_COMPRA)).toBe('{corrupto')
+  })
+})
+
+describe('Fidelidad del Checkout sin simulación bancaria', () => {
+  it('conserva las columnas, pasos y resumen originales sin controles técnicos permanentes', async () => {
+    backend(); abrir(); await listo()
+    expect(document.querySelector('.checkout .row.g-4 > .col-lg-7 form#formCheckout')).not.toBeNull()
+    expect(document.querySelector('.checkout .row.g-4 > .col-lg-5 aside.checkout-lateral')).not.toBeNull()
+    expect(document.querySelectorAll('.checkout-paso')).toHaveLength(3)
+    expect([...document.querySelectorAll('.paso-numero')].map(n => n.textContent)).toEqual(['1', '2', '3'])
+    expect(screen.getByText('Total', { selector: '.checkout-total span' })).toBeInTheDocument()
+    expect(screen.queryByText('Datos confirmados por el servidor')).not.toBeInTheDocument()
+    expect(screen.queryByText('Datos del registro guardado')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Actualizar catálogo' })).not.toBeInTheDocument()
+    expect(screen.getAllByRole('button')).toHaveLength(1)
+    expect(document.querySelector('[autocomplete^="cc-"]')).toBeNull()
+  })
+
+  it('no acepta indicaciones que el contrato no puede guardar', async () => {
+    const api = backend(); abrir(); await listo(); llenar()
+    expect(screen.getByLabelText('Indicaciones para la entrega (opcional)')).toBeDisabled()
+    fireEvent.change(screen.getByLabelText('Indicaciones para la entrega (opcional)'), { target: { value: 'No descartar' } })
+    expect(screen.getByLabelText('Indicaciones para la entrega (opcional)')).toHaveValue('')
+    enviar(); await confirmado()
+    expect(JSON.parse(posts(api)[0][1].body)).not.toHaveProperty('indicaciones')
+  })
+
+  it('muestra contacto de la cuenta como solo lectura y mantiene editable la dirección de entrega', async () => {
+    backend(); abrir({ usuario }); await listo()
+    await waitFor(() => expect(screen.getByLabelText('Teléfono')).toHaveValue('+56912345678'))
+    for (const etiqueta of ['Nombre', 'Correo electrónico', 'Teléfono']) {
+      expect(screen.getByLabelText(etiqueta)).toHaveAttribute('readonly')
+      const original = screen.getByLabelText(etiqueta).value
+      fireEvent.change(screen.getByLabelText(etiqueta), { target: { value: 'Descartado' } })
+      expect(screen.getByLabelText(etiqueta)).toHaveValue(original)
+    }
+    expect(screen.getByLabelText('Dirección')).not.toHaveAttribute('readonly')
+  })
+
+  it('bloquea si no puede comprobar la cuenta, sin guardar contacto escrito que no se enviaría', async () => {
+    const api = backend({ 'GET /usuarios/yo': () => [503, { mensaje: 'Sin cuenta' }] })
+    abrir({ usuario }); await listo(); llenar(); enviar()
+    expect(posts(api)).toHaveLength(0)
+    expect(leerIntentoCompra()).toBeNull()
+  })
+
+  it.each(['carrito', 'formulario'])('una respuesta 201 tardía tras cambiar %s no vacía ni navega', async cambio => {
+    const pendiente = diferida()
+    let cuerpo
+    const api = backend({ 'POST /boletas': c => { cuerpo = c; return pendiente.promesa } })
+    const vista = abrir(); await listo(); llenar(); enviar()
+    await waitFor(() => expect(posts(api)).toHaveLength(1))
+    if (cambio === 'carrito') vista.cambiar({ items: [{ codigo: 'CL002', cantidad: 1 }] })
+    else fireEvent.change(screen.getByLabelText('Dirección'), { target: { value: 'Otra 456' } })
+    await act(async () => { pendiente.resolver([201, boleta(cuerpo)]) })
+    expect(vista.vaciar).not.toHaveBeenCalled()
+    expect(navegar).not.toHaveBeenCalled()
+    expect(leerIntentoCompra().estado).toBe('confirmado')
+  })
+
+  it('recupera el resumen original tras remontar con otro carrito y no borra artículos nuevos', async () => {
+    let numero = 0
+    const api = backend({ 'POST /boletas': c => ++numero === 1 ? [503, { mensaje: 'Temporal' }] : [201, boleta(c)] })
+    const vista = abrir(); await listo(); llenar(); enviar()
+    await screen.findByRole('button', { name: 'Reintentar registro' })
+    const original = leerIntentoCompra()
+    vista.unmount()
+    const nueva = abrir({ items: [{ codigo: 'CL002', cantidad: 1 }] })
+    enviar()
+    const pedido = await confirmado()
+    expect(pedido.cliente.nombre).toBe('Camila Rojas')
+    expect(pedido.productos[0]).toMatchObject({ nombre: producto.nombre, cantidad: 2 })
+    expect(pedido.entrega.direccion).toBe(original.cuerpo.direccion)
+    expect(posts(api)[0][1]).toEqual(posts(api)[1][1])
+    expect(nueva.vaciar).not.toHaveBeenCalled()
   })
 })

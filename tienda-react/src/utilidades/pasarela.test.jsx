@@ -7,6 +7,7 @@ import ProveedorCatalogo from "../contexto/ProveedorCatalogo";
 import ProveedorCarrito from "../contexto/ProveedorCarrito";
 import Checkout from "../paginas/Checkout";
 import PagoRechazado from "../paginas/PagoRechazado";
+import CompraExitosa from "../paginas/CompraExitosa";
 import { leerPedidos } from "../datos/pedidos";
 import { simularApi } from "../test/api";
 import { leerIntentoCompra } from "../datos/intentoCompra";
@@ -98,7 +99,7 @@ describe("Pasarela: checkout completo", () => {
                             <Routes>
                                 <Route path="/checkout" element={<Checkout />} />
                                 <Route path="/pago-rechazado" element={<PagoRechazado />} />
-                                <Route path="/compra-exitosa" element={<p>Compra exitosa</p>} />
+                                <Route path="/compra-exitosa" element={<CompraExitosa />} />
                             </Routes>
                         </ProveedorCarrito>
                     </ProveedorCatalogo>
@@ -153,21 +154,20 @@ describe("Pasarela: checkout completo", () => {
         });
     }
 
-    function comprobarConservacion(numeroPosts = 1) {
-        expect(pantalla.textContent).toContain("Registrar una boleta no acredita un pago bancario");
-        expect(pantalla.querySelector("form")).not.toBeNull();
+    function comprobarConservacion(numeroPosts = 1, confirmado = false) {
+        expect(Boolean(pantalla.querySelector("form"))).toBe(!confirmado);
         expect(leerPedidos()).toEqual([]);
         expect(localStorage.getItem("pedidos_volcan")).toBeNull();
         expect(localStorage.getItem("productosSistema")).toBe(catalogoOriginal);
         expect(producto.stock).toBe(3);
-        expect(JSON.parse(localStorage.getItem("carritoVolcan"))).toEqual([{ codigo: "CL002", cantidad: 1 }]);
+        expect(JSON.parse(localStorage.getItem("carritoVolcan"))).toEqual(confirmado ? [] : [{ codigo: "CL002", cantidad: 1 }]);
         const posts = api.mock.calls.filter(([, opciones]) => opciones.method === "POST");
         expect(api).toHaveBeenCalledTimes(4 + numeroPosts);
         expect(api.mock.calls.filter(([, opciones]) => opciones.method === "GET")).toHaveLength(4);
         expect(posts).toHaveLength(numeroPosts);
         for (const [url, opciones] of posts) {
             expect(String(url)).toMatch(/\/api\/v1\/boletas$/);
-            expect(opciones.headers['idempotency-key']).toBe(leerIntentoCompra().clave);
+            expect(opciones.headers['idempotency-key']).toBe(posts[0][1].headers['idempotency-key']);
             expect(opciones.headers.Authorization).toBeUndefined();
             expect(JSON.parse(opciones.body)).toMatchObject({ clienteId: null, detalles: [{ productoId: 901, cantidad: 1 }] });
             expect(opciones.body).not.toMatch(/numeroTarjeta|cvv|titular|vencimiento|4111|9995/);
@@ -177,6 +177,8 @@ describe("Pasarela: checkout completo", () => {
         expect(pantalla.textContent).not.toContain("Pago rechazado");
         expect(pantalla.textContent).not.toContain("Fondos insuficientes.");
         expect(pantalla.textContent).not.toContain("Compra exitosa");
+        expect(pantalla.textContent).not.toContain("Total pagado");
+        expect(pantalla.textContent).not.toContain("Pagado con");
     }
 
     it("bloquea doble envío mientras registra y no vuelve a enviar una boleta confirmada", async () => {
@@ -186,16 +188,16 @@ describe("Pasarela: checkout completo", () => {
 
         const boton = pantalla.querySelector('button[type="submit"]');
         expect(boton.disabled).toBe(true);
-        expect(boton.textContent).toBe("Procesando registro…");
+        expect(boton.textContent).toBe("Procesando pedido…");
         await act(async () => {
             pantalla.querySelector("form").dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
         });
         comprobarConservacion();
         await responder();
-        expect(pantalla.textContent).toContain("Boleta registrada N.º 81");
+        expect(pantalla.textContent).toContain("Pedido registrado con éxito");
         expect(boton.disabled).toBe(true);
-        expect(leerIntentoCompra().estado).toBe("confirmado");
-        comprobarConservacion();
+        expect(leerIntentoCompra()).toBeNull();
+        comprobarConservacion(1, true);
     });
 
     it("un registro HTTP 201 no simula pago, no crea pedidos locales ni guarda datos bancarios", async () => {
@@ -203,9 +205,8 @@ describe("Pasarela: checkout completo", () => {
         await responder();
         act(() => { vi.advanceTimersByTime(1200); });
 
-        expect(pantalla.textContent).toContain("Boleta registrada N.º 81");
-        expect(pantalla.textContent).toContain("Esto no confirma un pago bancario");
-        comprobarConservacion();
+        expect(pantalla.textContent).toContain("Pedido registrado con éxito");
+        comprobarConservacion(1, true);
     });
 
     it("un fallo HTTP conserva el intento y reintenta sin inventar un rechazo bancario", async () => {
@@ -226,7 +227,7 @@ describe("Pasarela: checkout completo", () => {
         expect(posts[0][1]).toEqual(posts[1][1]);
         expect(leerIntentoCompra().cuerpo).toEqual(original.cuerpo);
         await responder();
-        comprobarConservacion(2);
+        comprobarConservacion(2, true);
     });
 
 });

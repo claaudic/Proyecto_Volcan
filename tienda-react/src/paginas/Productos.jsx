@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import TarjetaProducto from '../components/TarjetaProducto'
+import EstadoCatalogo from '../components/EstadoCatalogo'
 import { formatearPrecio, imagenDe } from '../datos/productos'
 import { ofertaDeProducto, precioProducto } from '../datos/ofertas'
 import { useCatalogo } from '../contexto/catalogoContexto'
@@ -16,7 +17,7 @@ function Productos() {
   const { agregar } = useCarrito()
 
   // Solo los productos activos: los que el administrador desactiva no se muestran
-  const { activos } = useCatalogo()
+  const { activos, error, recargar } = useCatalogo()
 
   // Agrega una unidad y, si se pudo, abre el panel del carrito
   function anadirAlCarrito(codigo) {
@@ -49,7 +50,12 @@ function Productos() {
   function limpiarFiltros() {
     setBusqueda("")
     setCategoria("")
+    if (error) recargar?.()
   }
+
+  const verCatalogo = <button type="button" className="btn btn-secundario" onClick={limpiarFiltros}>
+    Ver todo el catálogo
+  </button>
 
   return (
     <main>
@@ -119,13 +125,12 @@ function Productos() {
             </p>
           </div>
 
+          <EstadoCatalogo recuperacion={verCatalogo}>
           {filtrados.length === 0 ? (
             <div className="sin-resultados">
               <p className="sin-resultados-titulo">No encontramos productos</p>
               <p>Prueba con otra palabra o revisa todas las categorías.</p>
-              <button type="button" className="btn btn-secundario" onClick={limpiarFiltros}>
-                Ver todo el catálogo
-              </button>
+              {verCatalogo}
             </div>
           ) : (
             <ul className="row g-4 list-unstyled">
@@ -156,6 +161,7 @@ function Productos() {
               ))}
             </ul>
           )}
+          </EstadoCatalogo>
         </div>
       </section>
     </main>

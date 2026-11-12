@@ -1,372 +1,251 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
+import { describe, it, expect, beforeEach } from 'vitest'
+import { render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import Checkout from './Checkout'
-import { CarritoContexto } from '../contexto/carritoContexto'
-import { SesionContexto } from '../contexto/sesionContexto'
-import { pedir, API_URL } from '../utilidades/api'
-import { simularApi } from '../test/api'
-import { prepararCompra } from '../datos/boletasApi'
-import { cambiarEstadoIntento, CLAVE_INTENTO_COMPRA, leerIntentoCompra } from '../datos/intentoCompra'
+import CompraExitosa from './CompraExitosa'
+import PagoRechazado from './PagoRechazado'
+import ProveedorSesion from '../contexto/ProveedorSesion'
+import ProveedorCatalogo from '../contexto/ProveedorCatalogo'
+import ProveedorCarrito from '../contexto/ProveedorCarrito'
+import { simularApi, guardarSesionDePrueba, CUENTAS } from '../test/api'
 
-const categoria = { id: 91, nombre: 'Categoría oficial' }
-const producto = { id: 901, codigo: 'CL002', nombre: 'Producto oficial HTTP', precioResidencial: 220,
-  precioComercial: 200, precioOferta: null, stock: 8, activo: true, unidad: 'Unidad', categoria }
-const items = [{ codigo: 'CL002', cantidad: 2 }]
-const usuario = { id: 7, rol: 'CLIENTE', nombre: 'Camila Rojas', correo: 'camila@gmail.com' }
-const UUID = 'a1b2c3d4-1111-4222-8333-123456789abc'
-const { navegar } = vi.hoisted(() => ({ navegar: vi.fn() }))
-vi.mock('react-router-dom', async importar => ({ ...await importar(), useNavigate: () => navegar }))
-const llamarApi = (ruta, opciones) => pedir(ruta, { ...opciones, token: 'jwt-sintetico' })
-function boleta(cuerpo, precio = 220) {
-  return { id: 51, clienteId: cuerpo.clienteId, direccion: cuerpo.direccion, comuna: cuerpo.comuna,
-    estado: 'PENDIENTE', repartidorId: null, fecha: cuerpo.fecha, total: precio * 2,
-    detalles: [{ id: 101, productoId: cuerpo.detalles[0].productoId, cantidad: 2, precio }] }
-}
-function diferida() {
-  let resolver
-  const promesa = new Promise(resolve => { resolver = resolve })
-  return { promesa, resolver }
-}
-function backend(rutas = {}) {
-  return simularApi({ 'GET /productos': () => [200, [producto]], 'GET /categorias': () => [200, [categoria]],
-    'GET /usuarios/yo': () => [200, { ...usuario, telefono: '+56912345678', direccion: 'Libertad 123', comuna: 'chillan' }],
-    'POST /boletas': cuerpo => [201, boleta(cuerpo)], ...rutas })
-}
-function abrir(inicial = {}) {
-  let datos = { items, usuario: null, ...inicial }
-  const vaciar = vi.fn()
-  const descontar = vi.fn()
-  const vista = () => <MemoryRouter><SesionContexto.Provider value={{ usuario: datos.usuario, llamarApi }}>
-    <CarritoContexto.Provider value={{ items: datos.items, vaciar, descontar }}><Checkout /></CarritoContexto.Provider>
-  </SesionContexto.Provider></MemoryRouter>
-  const renderizado = render(vista())
-  return { ...renderizado, vaciar, descontar, cambiar: cambios => { datos = { ...datos, ...cambios }; renderizado.rerender(vista()) } }
-}
-function llenar() {
-  for (const [etiqueta, value] of [['Nombre', 'Camila Rojas'], ['Correo electrónico', 'camila@gmail.com'],
-    ['Teléfono', '+56912345678'], ['Dirección', 'Libertad 123'], ['Comuna', 'Chillán']]) {
-    fireEvent.change(screen.getByLabelText(etiqueta), { target: { value } })
-  }
-}
-const enviar = () => fireEvent.submit(document.getElementById('formCheckout'))
-const posts = api => api.mock.calls.filter(([, opciones]) => opciones.method === 'POST')
-async function listo() { await screen.findByText('Producto oficial HTTP') }
-async function confirmado() {
-  await waitFor(() => expect(navegar).toHaveBeenCalledWith('/compra-exitosa', expect.any(Object)))
-  return navegar.mock.calls.at(-1)[1].state.pedido
-}
-function prepararGuardado(estado = 'incierto', cuenta = null) {
-  prepararCompra({ items, productos: [producto], usuario: cuenta, fecha: '2026-11-10T12:30:00',
-    entrega: { direccion: 'Original 123', comuna: 'Chillán' },
-    invitado: { nombre: 'Persona original', correo: 'original@example.test', telefono: '+56912345678' } })
-  if (estado !== 'preparado') cambiarEstadoIntento(UUID, 'enviado')
-  if (!['preparado', 'enviado'].includes(estado)) cambiarEstadoIntento(UUID, estado, { boletaId: estado === 'confirmado' ? 51 : null })
-}
-beforeEach(() => {
-  navegar.mockClear()
-  sessionStorage.clear()
-  vi.spyOn(crypto, 'randomUUID').mockReturnValue(UUID)
-  localStorage.setItem('carritoVolcan', JSON.stringify(items))
-  localStorage.setItem('productosSistema', JSON.stringify([producto]))
-})
-afterEach(() => { sessionStorage.clear() })
+// Flujo completo del checkout: pasarela simulada + POST /boletas por el Gateway
 
-describe('Checkout registra por HTTP simulado con catálogo oficial', () => {
-  it('montar y renderizar de nuevo no prepara ni envía compras', async () => {
-    const api = backend()
-    const vista = abrir()
-    await listo()
-    vista.cambiar({ items: [...items] })
-    expect(posts(api)).toHaveLength(0)
-    expect(leerIntentoCompra()).toBeNull()
-    expect(crypto.randomUUID).not.toHaveBeenCalled()
-    expect(screen.getByRole('button', { name: 'Confirmar pedido' })).toBeEnabled()
-  })
-  it.each([null, usuario])('registra explícitamente como %j, vacía solo tras 201 y no simula pagos', async cuenta => {
-    const api = backend()
-    const vista = abrir({ usuario: cuenta })
-    await listo()
-    if (cuenta) await waitFor(() => expect(screen.getByLabelText('Dirección')).toHaveValue('Libertad 123'))
-    llenar()
-    expect(vista.vaciar).not.toHaveBeenCalled()
-    fireEvent.click(screen.getByRole('button', { name: 'Confirmar pedido' }))
-    await confirmado()
-    const [[url, opciones]] = posts(api)
-    expect(url).toBe(API_URL + '/boletas')
-    expect(opciones.headers['idempotency-key']).toBe(UUID)
-    expect(opciones.headers.Authorization).toBe(cuenta ? 'Bearer jwt-sintetico' : undefined)
-    const cuerpo = JSON.parse(opciones.body)
-    expect(cuerpo).toMatchObject({ clienteId: cuenta?.id ?? null, detalles: [{ productoId: 901, cantidad: 2 }] })
-    expect(Object.keys(cuerpo).sort()).toEqual((cuenta
-      ? ['clienteId', 'direccion', 'comuna', 'estado', 'repartidorId', 'fecha', 'detalles']
-      : ['clienteId', 'direccion', 'comuna', 'estado', 'repartidorId', 'fecha', 'detalles', 'nombreInvitado', 'correoInvitado', 'telefonoInvitado']).sort())
-    expect(api.mock.calls.filter(([, o]) => o.method === 'GET' && String(o.body) === 'undefined').length).toBeGreaterThanOrEqual(4)
-    expect(api.mock.calls.filter(([u]) => u === API_URL + '/productos')).toHaveLength(2)
-    expect(api.mock.calls.filter(([u]) => u === API_URL + '/categorias')).toHaveLength(2)
-    expect(screen.getByRole('button', { name: 'Pedido registrado' })).toBeDisabled()
-    expect(navegar.mock.calls[0][1].state.pedido).not.toHaveProperty('pago')
-    expect(document.querySelector('[autocomplete="cc-number"]')).toBeNull()
-    expect(document.querySelector('#cvv')).toBeNull()
-    expect(vista.vaciar).toHaveBeenCalledTimes(1)
-    expect(vista.descontar).not.toHaveBeenCalled()
-    expect(JSON.parse(localStorage.getItem('carritoVolcan'))).toEqual(items)
-    expect(JSON.parse(localStorage.getItem('productosSistema'))).toEqual([producto])
-    expect(localStorage.getItem('pedidos_volcan')).toBeNull()
-    expect(sessionStorage.getItem(CLAVE_INTENTO_COMPRA)).not.toMatch(/numeroTarjeta|cvv|jwt-sintetico/)
-    enviar()
-    expect(posts(api)).toHaveLength(1)
-  })
-  it('valida el formulario antes de consultar nuevamente o preparar', async () => {
-    const api = backend()
-    abrir(); await listo(); enviar()
-    expect(screen.getByLabelText('Nombre').className).toContain('campo-invalido')
-    expect(api).toHaveBeenCalledTimes(2)
-    expect(leerIntentoCompra()).toBeNull()
-  })
-  it.each([{ ...usuario, id: null }, { ...usuario, rol: 'ADMINISTRADOR' }])('bloquea identidad no válida %j', async cuenta => {
-    const api = backend()
-    abrir({ usuario: cuenta }); await listo(); llenar(); enviar()
-    expect(posts(api)).toHaveLength(0)
-    expect(leerIntentoCompra()).toBeNull()
-  })
-  it('espera ambos GET nuevos antes de preparar y bloquea doble submit durante el GET y el POST', async () => {
-    const productos = diferida(), categorias = diferida(), respuesta = diferida()
-    let numeroProductos = 0, numeroCategorias = 0, cuerpo
-    const api = backend({ 'GET /productos': () => ++numeroProductos === 1 ? [200, [producto]] : productos.promesa,
-      'GET /categorias': () => ++numeroCategorias === 1 ? [200, [categoria]] : categorias.promesa,
-      'POST /boletas': c => { cuerpo = c; return respuesta.promesa } })
-    abrir(); await listo(); llenar()
-    act(() => { enviar(); enviar() })
-    expect(screen.getByRole('button', { name: 'Procesando pedido…' })).toBeDisabled()
-    expect(leerIntentoCompra()).toBeNull()
-    await act(async () => { productos.resolver([200, [producto]]) })
-    expect(posts(api)).toHaveLength(0)
-    await act(async () => { categorias.resolver([200, [categoria]]) })
-    await waitFor(() => expect(posts(api)).toHaveLength(1))
-    expect(screen.getByRole('button', { name: 'Procesando pedido…' })).toBeDisabled()
-    enviar(); enviar()
-    expect(posts(api)).toHaveLength(1)
-    await act(async () => { respuesta.resolver([201, boleta(cuerpo)]) })
-    await confirmado()
-    expect(crypto.randomUUID).toHaveBeenCalledTimes(1)
-  })
-  it.each([{ precioResidencial: 330 }, { id: 902 }, { precioOferta: 180 }])('reconfirma cambios del catálogo %j', async cambio => {
-    let llamadas = 0
-    const nuevo = { ...producto, ...cambio }
-    const api = backend({ 'GET /productos': () => [200, [++llamadas === 1 ? producto : nuevo]] })
-    abrir(); await listo(); llenar(); enviar()
-    await screen.findByText(/Los precios o productos cambiaron/)
-    expect(posts(api)).toHaveLength(0)
-    expect(leerIntentoCompra()).toBeNull()
-    expect(screen.getByRole('button', { name: 'Confirmar pedido' })).toBeEnabled()
-    enviar()
-    await confirmado()
-    expect(JSON.parse(posts(api)[0][1].body).detalles[0].productoId).toBe(nuevo.id)
-    expect(llamadas).toBe(3)
-  })
-  it.each([{ stock: 1 }, { activo: false }, { codigo: 'OTRO' }, { id: null }, { precioResidencial: -1 }])(
-    'bloquea datos nuevos no disponibles o inválidos %j', async cambio => {
-      let llamadas = 0
-      const api = backend({ 'GET /productos': () => [200, [++llamadas === 1 ? producto : { ...producto, ...cambio }]] })
-      abrir(); await listo(); llenar(); enviar()
-      await waitFor(() => expect(document.body.textContent).toMatch(/actualizado no permite|formato inesperado/))
-      expect(posts(api)).toHaveLength(0)
-      expect(leerIntentoCompra()).toBeNull()
+const categoria = { id: 91, nombre: 'Categoría de prueba' }
+const producto = {
+    id: 901, codigo: 'CL002', nombre: 'Cilindro de prueba', precioResidencial: 22000,
+    precioComercial: 20000, precioOferta: null, stock: 3, activo: true, unidad: 'Unidad', categoria
+}
+
+// Respuesta 201 del backend, con el total calculado por él
+function boletaCreada(cuerpo) {
+    return [201, {
+        id: 77, clienteId: cuerpo.clienteId, direccion: cuerpo.direccion, comuna: cuerpo.comuna,
+        estado: 'PENDIENTE', repartidorId: null, fecha: cuerpo.fecha, total: 22000,
+        detalles: [{ id: 1, productoId: 901, cantidad: 1, precio: 22000 }]
+    }]
+}
+
+function simular(rutas = {}, p = producto) {
+    return simularApi({
+        'GET /productos': () => [200, [p]],
+        'GET /categorias': () => [200, [categoria]],
+        ...rutas
     })
-  it('un fallo al refrescar no usa datos antiguos para enviar', async () => {
-    let llamadas = 0
-    const api = backend({ 'GET /productos': () => ++llamadas === 1 ? [200, [producto]] : [503, { mensaje: 'Catálogo caído' }] })
-    abrir(); await listo(); llenar(); enviar()
-    await screen.findByText('Catálogo caído')
-    expect(posts(api)).toHaveLength(0)
-    expect(leerIntentoCompra()).toBeNull()
-  })
-  it.each(['carrito', 'formulario', 'identidad', 'identidad-ida-vuelta', 'desmontaje'])('cancela si cambia %s durante GET', async cambio => {
-    const pendiente = diferida()
-    let llamadas = 0
-    const api = backend({ 'GET /productos': () => ++llamadas === 1 ? [200, [producto]] : pendiente.promesa })
-    const vista = abrir(); await listo(); llenar(); enviar()
-    if (cambio === 'carrito') vista.cambiar({ items: [{ codigo: 'CL002', cantidad: 1 }] })
-    if (cambio === 'formulario') fireEvent.change(screen.getByLabelText('Dirección'), { target: { value: 'Otra 456' } })
-    if (cambio.startsWith('identidad')) vista.cambiar({ usuario })
-    if (cambio === 'identidad-ida-vuelta') vista.cambiar({ usuario: null })
-    if (cambio === 'desmontaje') vista.unmount()
-    await act(async () => { pendiente.resolver([200, [producto]]) })
-    expect(posts(api)).toHaveLength(0)
-    expect(leerIntentoCompra()).toBeNull()
-  })
-  it('muestra el total confirmado por el backend, aunque difiera de la estimación', async () => {
-    backend({ 'POST /boletas': c => [201, boleta(c, 250)] })
-    abrir(); await listo(); llenar(); enviar()
-    const pedido = await confirmado()
-    expect(pedido.total).toBe(500)
-    expect(pedido.productos).toEqual([expect.objectContaining({ nombre: producto.nombre, cantidad: 2, precio: 250, subtotal: 500 })])
-    expect(screen.queryByLabelText('Datos del intento guardado')).not.toBeInTheDocument()
-  })
-  it('permite actualizar el catálogo y registrar después de recuperar stock', async () => {
-    let llamadas = 0
-    const api = backend({ 'GET /productos': () => [200, [{ ...producto, stock: ++llamadas === 2 ? 1 : 8 }]] })
-    abrir(); await listo(); llenar(); enviar()
-    await screen.findByText(/El catálogo actualizado no permite/)
-    fireEvent.click(screen.getByRole('button', { name: 'Reintentar' }))
-    await waitFor(() => expect(screen.getByRole('button', { name: 'Confirmar pedido' })).toBeEnabled())
-    enviar(); await confirmado()
-    expect(posts(api)).toHaveLength(1)
-  })
-})
+}
 
-describe('Checkout recupera sin reemplazar intentos', () => {
-  it.each(['preparado', 'enviado', 'incierto', 'bloqueado', 'conflicto'])('recupera %s con carrito vacío, formulario vacío y catálogo caído', async estado => {
-    prepararGuardado(estado)
-    const anterior = leerIntentoCompra()
-    const api = backend({ 'GET /productos': () => [503, { mensaje: 'Sin catálogo' }] })
-    abrir({ items: [] })
-    await screen.findByText(/Sin catálogo/)
-    expect(posts(api)).toHaveLength(0)
-    fireEvent.click(screen.getByRole('button', { name: 'Reintentar registro' }))
-    await confirmado()
-    expect(JSON.parse(posts(api)[0][1].body)).toEqual(anterior.cuerpo)
-    expect(posts(api)[0][1].headers['idempotency-key']).toBe(anterior.clave)
-    expect(api.mock.calls.filter(([u]) => u === API_URL + '/productos')).toHaveLength(1)
-    expect(crypto.randomUUID).toHaveBeenCalledTimes(1)
-  })
-  it('un intento confirmado no se vuelve a enviar al recargar', async () => {
-    prepararGuardado('confirmado')
-    const api = backend()
-    abrir(); await listo(); enviar()
-    expect(screen.getByRole('button', { name: 'Pedido registrado' })).toBeDisabled()
-    expect(posts(api)).toHaveLength(0)
-  })
-  it('no permite recuperar con otra identidad ni convertir a invitado', async () => {
-    prepararGuardado('incierto', usuario)
-    const original = sessionStorage.getItem(CLAVE_INTENTO_COMPRA)
-    const api = backend()
-    const vista = abrir({ usuario: { ...usuario, id: 9 } })
-    await listo(); enviar()
-    vista.cambiar({ usuario: null }); enviar()
-    expect(posts(api)).toHaveLength(0)
-    expect(sessionStorage.getItem(CLAVE_INTENTO_COMPRA)).toBe(original)
-    expect(screen.getByRole('button', { name: 'Confirmar pedido' })).toBeDisabled()
-  })
-  it.each([400, 401, 403, 409, 500, 503, 200, 202])('HTTP %s no confirma y permite reintentar con el mismo cuerpo, UUID y fecha', async estado => {
-    let numero = 0
-    const api = backend({ 'POST /boletas': c => ++numero === 1 ? [estado, boleta(c)] : [201, boleta(c)] })
-    const vista = abrir(); await listo(); llenar(); enviar()
-    await screen.findByRole('button', { name: 'Reintentar registro' })
-    const original = leerIntentoCompra()
-    expect(original.estado).not.toBe('confirmado')
-    vista.unmount()
-    abrir({ items: [] })
-    fireEvent.click(screen.getByRole('button', { name: 'Reintentar registro' }))
-    await confirmado()
-    expect(posts(api)[0][1]).toEqual(posts(api)[1][1])
-    expect(leerIntentoCompra().cuerpo).toEqual(original.cuerpo)
-    expect(crypto.randomUUID).toHaveBeenCalledTimes(1)
-  })
-  it.each(['red', 'incompleta', 'total-incoherente'])('conserva resultado incierto ante %s', async tipo => {
-    const api = backend({ 'POST /boletas': c => {
-      if (tipo === 'red') throw new TypeError('Respuesta perdida')
-      return [201, tipo === 'incompleta' ? { id: 51 } : { ...boleta(c), total: 1 }]
-    } })
-    abrir(); await listo(); llenar(); enviar()
-    await screen.findByRole('button', { name: 'Reintentar registro' })
-    expect(leerIntentoCompra().estado).toBe('incierto')
-    expect(navegar).not.toHaveBeenCalled()
-    expect(posts(api)).toHaveLength(1)
-  })
-  it.each(['identidad', 'desmontaje'])('no muestra una confirmación obsoleta tras %s durante POST', async cambio => {
-    const pendiente = diferida()
-    let cuerpo
-    const api = backend({ 'POST /boletas': c => { cuerpo = c; return pendiente.promesa } })
-    const vista = abrir(); await listo(); llenar(); enviar()
-    await waitFor(() => expect(posts(api)).toHaveLength(1))
-    if (cambio === 'identidad') vista.cambiar({ usuario })
-    else vista.unmount()
-    await act(async () => { pendiente.resolver([201, boleta(cuerpo)]) })
-    expect(navegar).not.toHaveBeenCalled()
-    expect(leerIntentoCompra()).toMatchObject({ estado: 'confirmado', cuerpo })
-  })
-  it('almacenamiento corrupto bloquea sin reemplazar ni enviar', async () => {
-    sessionStorage.setItem(CLAVE_INTENTO_COMPRA, '{corrupto')
-    const api = backend()
-    abrir(); await listo(); enviar()
-    expect(posts(api)).toHaveLength(0)
-    expect(sessionStorage.getItem(CLAVE_INTENTO_COMPRA)).toBe('{corrupto')
-  })
-})
+function abrir() {
+    localStorage.setItem('carritoVolcan', JSON.stringify([{ codigo: 'CL002', cantidad: 1 }]))
+    render(
+        <MemoryRouter initialEntries={['/checkout']}>
+            <ProveedorSesion>
+                <ProveedorCatalogo>
+                    <ProveedorCarrito>
+                        <Routes>
+                            <Route path="/checkout" element={<Checkout />} />
+                            <Route path="/compra-exitosa" element={<CompraExitosa />} />
+                            <Route path="/pago-rechazado" element={<PagoRechazado />} />
+                        </Routes>
+                    </ProveedorCarrito>
+                </ProveedorCatalogo>
+            </ProveedorSesion>
+        </MemoryRouter>
+    )
+}
 
-describe('Fidelidad del Checkout sin simulación bancaria', () => {
-  it('conserva las columnas, pasos y resumen originales sin controles técnicos permanentes', async () => {
-    backend(); abrir(); await listo()
-    expect(document.querySelector('.checkout .row.g-4 > .col-lg-7 form#formCheckout')).not.toBeNull()
-    expect(document.querySelector('.checkout .row.g-4 > .col-lg-5 aside.checkout-lateral')).not.toBeNull()
-    expect(document.querySelectorAll('.checkout-paso')).toHaveLength(3)
-    expect([...document.querySelectorAll('.paso-numero')].map(n => n.textContent)).toEqual(['1', '2', '3'])
-    expect(screen.getByText('Total', { selector: '.checkout-total span' })).toBeInTheDocument()
-    expect(screen.queryByText('Datos confirmados por el servidor')).not.toBeInTheDocument()
-    expect(screen.queryByText('Datos del registro guardado')).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Actualizar catálogo' })).not.toBeInTheDocument()
-    expect(screen.getAllByRole('button')).toHaveLength(1)
-    expect(document.querySelector('[autocomplete^="cc-"]')).toBeNull()
-  })
+const pagar = () => screen.getByRole('button', { name: 'Pagar y confirmar' })
+const carritoGuardado = () => JSON.parse(localStorage.getItem('carritoVolcan') || '[]')
+const llamadasA = (api, ruta) => api.mock.calls.filter(([url, op]) => op?.method === 'POST' && String(url).endsWith(ruta))
 
-  it('no acepta indicaciones que el contrato no puede guardar', async () => {
-    const api = backend(); abrir(); await listo(); llenar()
-    expect(screen.getByLabelText('Indicaciones para la entrega (opcional)')).toBeDisabled()
-    fireEvent.change(screen.getByLabelText('Indicaciones para la entrega (opcional)'), { target: { value: 'No descartar' } })
-    expect(screen.getByLabelText('Indicaciones para la entrega (opcional)')).toHaveValue('')
-    enviar(); await confirmado()
-    expect(JSON.parse(posts(api)[0][1].body)).not.toHaveProperty('indicaciones')
-  })
-
-  it('muestra contacto de la cuenta como solo lectura y mantiene editable la dirección de entrega', async () => {
-    backend(); abrir({ usuario }); await listo()
-    await waitFor(() => expect(screen.getByLabelText('Teléfono')).toHaveValue('+56912345678'))
-    for (const etiqueta of ['Nombre', 'Correo electrónico', 'Teléfono']) {
-      expect(screen.getByLabelText(etiqueta)).toHaveAttribute('readonly')
-      const original = screen.getByLabelText(etiqueta).value
-      fireEvent.change(screen.getByLabelText(etiqueta), { target: { value: 'Descartado' } })
-      expect(screen.getByLabelText(etiqueta)).toHaveValue(original)
+async function completar(usuario, tarjeta = '4111 1111 1111 1111', { invitado = true } = {}) {
+    if (invitado) {
+        await usuario.type(screen.getByLabelText('Nombre'), 'Pedro Soto')
+        await usuario.type(screen.getByLabelText('Correo electrónico'), 'pedro@gmail.com')
+        await usuario.type(screen.getByLabelText('Teléfono'), '+56 9 1234 5678')
     }
-    expect(screen.getByLabelText('Dirección')).not.toHaveAttribute('readonly')
-  })
+    await usuario.type(screen.getByLabelText('Dirección'), 'Libertad 123')
+    await usuario.selectOptions(screen.getByLabelText('Comuna'), 'Chillán')
+    await usuario.type(screen.getByLabelText('Número de la tarjeta'), tarjeta)
+    await usuario.type(screen.getByLabelText('Nombre del titular'), 'Pedro Soto')
+    await usuario.type(screen.getByLabelText('Vencimiento'), '12/40')
+    await usuario.type(screen.getByLabelText('CVV'), '123')
+}
 
-  it('bloquea si no puede comprobar la cuenta, sin guardar contacto escrito que no se enviaría', async () => {
-    const api = backend({ 'GET /usuarios/yo': () => [503, { mensaje: 'Sin cuenta' }] })
-    abrir({ usuario }); await listo(); llenar(); enviar()
-    expect(posts(api)).toHaveLength(0)
-    expect(leerIntentoCompra()).toBeNull()
-  })
+describe('Checkout: pago y registro de la boleta', () => {
 
-  it.each(['carrito', 'formulario'])('una respuesta 201 tardía tras cambiar %s no vacía ni navega', async cambio => {
-    const pendiente = diferida()
-    let cuerpo
-    const api = backend({ 'POST /boletas': c => { cuerpo = c; return pendiente.promesa } })
-    const vista = abrir(); await listo(); llenar(); enviar()
-    await waitFor(() => expect(posts(api)).toHaveLength(1))
-    if (cambio === 'carrito') vista.cambiar({ items: [{ codigo: 'CL002', cantidad: 1 }] })
-    else fireEvent.change(screen.getByLabelText('Dirección'), { target: { value: 'Otra 456' } })
-    await act(async () => { pendiente.resolver([201, boleta(cuerpo)]) })
-    expect(vista.vaciar).not.toHaveBeenCalled()
-    expect(navegar).not.toHaveBeenCalled()
-    expect(leerIntentoCompra().estado).toBe('confirmado')
-  })
+    beforeEach(() => localStorage.clear())
 
-  it('recupera el resumen original tras remontar con otro carrito y no borra artículos nuevos', async () => {
-    let numero = 0
-    const api = backend({ 'POST /boletas': c => ++numero === 1 ? [503, { mensaje: 'Temporal' }] : [201, boleta(c)] })
-    const vista = abrir(); await listo(); llenar(); enviar()
-    await screen.findByRole('button', { name: 'Reintentar registro' })
-    const original = leerIntentoCompra()
-    vista.unmount()
-    const nueva = abrir({ items: [{ codigo: 'CL002', cantidad: 1 }] })
-    enviar()
-    const pedido = await confirmado()
-    expect(pedido.cliente.nombre).toBe('Camila Rojas')
-    expect(pedido.productos[0]).toMatchObject({ nombre: producto.nombre, cantidad: 2 })
-    expect(pedido.entrega.direccion).toBe(original.cuerpo.direccion)
-    expect(posts(api)[0][1]).toEqual(posts(api)[1][1])
-    expect(nueva.vaciar).not.toHaveBeenCalled()
-  })
+    it('valida el formulario y la tarjeta antes de enviar nada', async () => {
+        const api = simular()
+        const usuario = userEvent.setup()
+        abrir()
+        await screen.findByText('Cilindro de prueba')
+
+        await usuario.click(pagar())
+
+        expect(screen.getByLabelText('Nombre')).toHaveClass('campo-invalido')
+        expect(screen.getByText('Ingresa el número de la tarjeta.')).toBeInTheDocument()
+        expect(llamadasA(api, '/boletas')).toHaveLength(0)
+    })
+
+    it('invitado con tarjeta aprobada: crea la boleta, vacía el carrito y muestra el pago', async () => {
+        let solicitud
+        const api = simular({
+            'POST /boletas': (cuerpo, encabezados) => {
+                solicitud = { cuerpo, encabezados }
+                return boletaCreada(cuerpo)
+            }
+        })
+        const usuario = userEvent.setup()
+        abrir()
+        await screen.findByText('Cilindro de prueba')
+
+        await completar(usuario)
+        await usuario.click(pagar())
+
+        expect(await screen.findByText('Compra realizada con éxito')).toBeInTheDocument()
+        expect(screen.getByText('#77')).toBeInTheDocument()
+        expect(screen.getByText('Total pagado')).toBeInTheDocument()
+        expect(screen.getByText('Tarjeta •••• 1111')).toBeInTheDocument()
+        expect(carritoGuardado()).toEqual([])
+
+        // Lo que llegó al backend: ids reales, datos del invitado y la clave de idempotencia
+        expect(llamadasA(api, '/boletas')).toHaveLength(1)
+        expect(solicitud.encabezados['idempotency-key']).toMatch(/^[0-9a-f-]{36}$/)
+        expect(solicitud.cuerpo).toMatchObject({
+            clienteId: null, direccion: 'Libertad 123', comuna: 'Chillán', estado: 'PENDIENTE',
+            detalles: [{ productoId: 901, cantidad: 1 }],
+            nombreInvitado: 'Pedro Soto', correoInvitado: 'pedro@gmail.com', telefonoInvitado: '+56 9 1234 5678'
+        })
+        // La tarjeta nunca viaja al backend
+        expect(JSON.stringify(solicitud.cuerpo)).not.toContain('4111')
+    })
+
+    it('tarjeta rechazada: va a pago rechazado, no crea boleta y conserva el carrito', async () => {
+        const api = simular()
+        const usuario = userEvent.setup()
+        abrir()
+        await screen.findByText('Cilindro de prueba')
+
+        await completar(usuario, '4000 0000 0000 9995')
+        await usuario.click(pagar())
+
+        expect(await screen.findByText('Pago rechazado')).toBeInTheDocument()
+        expect(screen.getByText('Fondos insuficientes.')).toBeInTheDocument()
+        expect(llamadasA(api, '/boletas')).toHaveLength(0)
+        expect(carritoGuardado()).toEqual([{ codigo: 'CL002', cantidad: 1 }])
+    })
+
+    it('si el backend rechaza la compra (400), muestra el motivo y deja corregir', async () => {
+        const claves = []
+        simular({
+            'POST /boletas': (cuerpo, encabezados) => {
+                claves.push(encabezados['idempotency-key'])
+                return claves.length === 1
+                    ? [400, { estado: 400, mensaje: 'Stock insuficiente para Cilindro de prueba.' }]
+                    : boletaCreada(cuerpo)
+            }
+        })
+        const usuario = userEvent.setup()
+        abrir()
+        await screen.findByText('Cilindro de prueba')
+
+        await completar(usuario)
+        await usuario.click(pagar())
+
+        expect(await screen.findByText('Stock insuficiente para Cilindro de prueba.')).toBeInTheDocument()
+        expect(pagar()).toBeEnabled()
+        expect(carritoGuardado()).toEqual([{ codigo: 'CL002', cantidad: 1 }])
+
+        // Un 400 es definitivo: el nuevo intento es otra compra, con otra clave
+        await usuario.click(pagar())
+        expect(await screen.findByText('Compra realizada con éxito')).toBeInTheDocument()
+        expect(claves[1]).not.toBe(claves[0])
+    })
+
+    it('si el servidor no responde bien (503), el reintento usa la misma clave', async () => {
+        const claves = []
+        simular({
+            'POST /boletas': (cuerpo, encabezados) => {
+                claves.push(encabezados['idempotency-key'])
+                return claves.length === 1
+                    ? [503, { estado: 503, mensaje: 'Servicio no disponible.' }]
+                    : boletaCreada(cuerpo)
+            }
+        })
+        const usuario = userEvent.setup()
+        abrir()
+        await screen.findByText('Cilindro de prueba')
+
+        await completar(usuario)
+        await usuario.click(pagar())
+        expect(await screen.findByText('Servicio no disponible.')).toBeInTheDocument()
+
+        // No sabemos si se creó: con la misma clave el backend no duplica la boleta
+        await usuario.click(pagar())
+        expect(await screen.findByText('Compra realizada con éxito')).toBeInTheDocument()
+        expect(claves[1]).toBe(claves[0])
+    })
+
+    it('un cliente con sesión y sin teléfono puede comprar; el backend toma su id del token', async () => {
+        let solicitud
+        guardarSesionDePrueba({ nombre: 'Camila Rojas', correo: 'camila@gmail.com', rol: 'CLIENTE', id: 5 })
+        simular({
+            'GET /usuarios/yo': () => [200, { ...CUENTAS.camila, telefono: null, direccion: 'Libertad 123', comuna: 'chillan' }],
+            'POST /boletas': (cuerpo, encabezados) => {
+                solicitud = { cuerpo, encabezados }
+                return boletaCreada(cuerpo)
+            }
+        })
+        const usuario = userEvent.setup()
+        abrir()
+        await screen.findByText('Cilindro de prueba')
+        await waitFor(() => expect(screen.getByLabelText('Dirección')).toHaveValue('Libertad 123'))
+
+        expect(screen.getByLabelText('Nombre')).toHaveAttribute('readonly')
+        expect(screen.getByLabelText('Teléfono (opcional)')).not.toHaveAttribute('readonly')
+
+        await completar(usuario, '4111 1111 1111 1111', { invitado: false })
+        await usuario.click(pagar())
+
+        expect(await screen.findByText('Compra realizada con éxito')).toBeInTheDocument()
+        expect(solicitud.encabezados.Authorization).toMatch(/^Bearer /)
+        expect(solicitud.cuerpo.nombreInvitado).toBeUndefined()
+    })
+
+    it('una cuenta interna (no cliente) no puede comprar', async () => {
+        guardarSesionDePrueba({ nombre: 'Sofía Pérez', correo: 'admin@gaselvolcan.cl', rol: 'ADMINISTRADOR' })
+        simular({ 'GET /usuarios/yo': () => [200, CUENTAS.admin] })
+        abrir()
+        await screen.findByText('Cilindro de prueba')
+
+        expect(screen.getByText('Para comprar debes usar una cuenta de cliente.')).toBeInTheDocument()
+        expect(pagar()).toBeDisabled()
+    })
+
+    it('sin stock suficiente no deja pagar', async () => {
+        simular({}, { ...producto, stock: 0 })
+        abrir()
+
+        expect(await screen.findByText(/sin stock suficiente/)).toBeInTheDocument()
+        expect(pagar()).toBeDisabled()
+    })
+
+    it('si el catálogo no responde, se puede reintentar', async () => {
+        let falla = true
+        simularApi({
+            'GET /productos': () => falla ? [503, { estado: 503, mensaje: 'Catálogo apagado.' }] : [200, [producto]],
+            'GET /categorias': () => [200, [categoria]]
+        })
+        const usuario = userEvent.setup()
+        abrir()
+
+        expect(await screen.findByText(/Catálogo apagado/)).toBeInTheDocument()
+        falla = false
+        await usuario.click(screen.getByRole('button', { name: 'Reintentar' }))
+
+        expect(await screen.findByText('Cilindro de prueba')).toBeInTheDocument()
+        expect(pagar()).toBeEnabled()
+    })
 })

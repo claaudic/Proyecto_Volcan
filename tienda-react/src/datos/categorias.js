@@ -11,16 +11,7 @@ export function slugCategoria(nombre) {
 
 // Agrupa los productos por categoria, en el orden en que aparecen:
 // [{ nombre, slug, productos: [...] }, ...]
-export function agruparPorCategoria(productos, categorias) {
-  // En HTTP, también se conservan categorías oficiales sin productos activos.
-  if (Array.isArray(categorias)) {
-    return categorias.map(categoria => ({
-      id: categoria.id,
-      nombre: categoria.nombre,
-      slug: categoria.slug ?? slugCategoria(categoria.nombre),
-      productos: productos.filter(producto => producto.categoriaId === categoria.id)
-    }));
-  }
+export function agruparPorCategoria(productos) {
   const grupos = [];
 
   productos.forEach((producto) => {

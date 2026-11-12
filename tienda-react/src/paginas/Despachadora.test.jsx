@@ -49,6 +49,18 @@ describe('Panel de despachadora', () => {
     expect(filaConPedido(3)).toBeDefined()
   })
 
+  it('cancela un pedido pendiente por /anulacion', async () => {
+    const user = userEvent.setup()
+    const vista = await renderizar(<Despachadora />, { usuario: DESPACHADORA, pedidos: PEDIDOS })
+
+    await user.selectOptions(within(filaConPedido(3)).getByLabelText('Cambiar estado del pedido 3'), 'Cancelado')
+
+    await waitFor(() => expect(within(filaConPedido(3)).getAllByText('Cancelado').length).toBeGreaterThan(0))
+    const rutas = vista.escrituras().map(([url]) => String(url))
+    expect(rutas.some((url) => url.endsWith('/boletas/3/anulacion'))).toBe(true)
+    expect(rutas.some((url) => url.endsWith('/boletas/3/estado'))).toBe(false)
+  })
+
   it('asigna repartidor y cambia estado de un pedido', async () => {
     const user = userEvent.setup()
     const vista = await renderizar(<Despachadora />, { usuario: DESPACHADORA, pedidos: PEDIDOS })

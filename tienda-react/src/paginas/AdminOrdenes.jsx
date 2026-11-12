@@ -14,83 +14,38 @@ const ESTADOS_PEDIDO = [
     'Cancelado'
 ]
 
+// Los pedidos llegan de ms-pedidos (GET /boletas/gestion) siempre con la misma forma:
+// productos [], cliente { nombre, correo, telefono } y entrega { direccion, comuna }
 function obtenerLineas(pedido) {
-    if (Array.isArray(pedido.productos)) {
-        return pedido.productos
-    }
-
-    if (Array.isArray(pedido.lineas)) {
-        return pedido.lineas
-    }
-
-    if (pedido.producto) {
-        return [
-            {
-                nombre: pedido.producto,
-                cantidad: pedido.cantidad || 1,
-                precio: pedido.total,
-                subtotal: pedido.total
-            }
-        ]
-    }
-
-    return []
+    return pedido.productos || []
 }
 
 function nombreCliente(pedido) {
-    if (pedido.cliente && typeof pedido.cliente === 'object') {
-        return pedido.cliente.nombre || 'Sin nombre'
-    }
-
-    return pedido.cliente || 'Sin nombre'
+    return pedido.cliente?.nombre || 'Sin nombre'
 }
 
 function correoCliente(pedido) {
-    if (pedido.cliente && typeof pedido.cliente === 'object') {
-        return pedido.cliente.correo || ''
-    }
-
-    return pedido.correo || ''
+    return pedido.cliente?.correo || ''
 }
 
 function telefonoCliente(pedido) {
-    if (pedido.cliente && typeof pedido.cliente === 'object') {
-        return pedido.cliente.telefono || ''
-    }
-
-    return ''
+    return pedido.cliente?.telefono || ''
 }
 
 function direccionEntrega(pedido) {
-    if (pedido.entrega && typeof pedido.entrega === 'object') {
-        return pedido.entrega.direccion || 'Sin dirección'
-    }
-
-    return pedido.direccion || 'Sin dirección'
+    return pedido.entrega?.direccion || 'Sin dirección'
 }
 
 function comunaEntrega(pedido) {
-    if (pedido.entrega && typeof pedido.entrega === 'object') {
-        return pedido.entrega.comuna || 'Sin comuna'
-    }
-
-    return pedido.comuna || 'Sin comuna'
+    return pedido.entrega?.comuna || 'Sin comuna'
 }
 
 function indicacionesEntrega(pedido) {
-    if (pedido.entrega && typeof pedido.entrega === 'object') {
-        return pedido.entrega.indicaciones || ''
-    }
-
-    return ''
+    return pedido.entrega?.indicaciones || ''
 }
 
 function medioPago(pedido) {
-    if (pedido.pago && typeof pedido.pago === 'object') {
-        return pedido.pago.tarjeta || pedido.pago.metodo || ''
-    }
-
-    return pedido.pago || ''
+    return pedido.pago?.tarjeta || ''
 }
 
 function resumenProductos(pedido) {

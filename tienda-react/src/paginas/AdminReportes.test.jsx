@@ -1,14 +1,16 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { screen, within, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import AdminReportes from './AdminReportes'
-import { renderizar, ADMIN, pedidoDeEjemplo } from '../test/renderizar'
-import { simularApiDeUsuarios, simularApiApagada } from '../test/api'
+import { pedidoDeEjemplo } from '../test/renderizar'
+import { CUENTAS } from '../test/api'
+import { abrirPedidos } from '../test/pedidosHttp'
 
+// Los pedidos llegan de ms-pedidos (GET /boletas/gestion, simulado)
 const PEDIDOS = [
-  pedidoDeEjemplo({ numero: 1, estado: 'Pendiente', total: 6500 }),
-  pedidoDeEjemplo({ numero: 2, estado: 'En camino', total: 12000 }),
+  pedidoDeEjemplo({ numero: 1, estado: 'Pendiente', total: 6500, repartidor: '' }),
+  pedidoDeEjemplo({ numero: 2, estado: 'En camino', total: 12000, repartidor: 'repartidor@gaselvolcan.cl' }),
   pedidoDeEjemplo({ numero: 3, estado: 'Entregado', total: 8990 }),
   pedidoDeEjemplo({ numero: 4, estado: 'Cancelado', total: 50000 })
 ]
@@ -25,13 +27,16 @@ function filaCon(texto) {
 
 describe('Reportes del administrador', () => {
 
-  // Las cuentas llegan de ms-usuarios (simulado)
-  beforeEach(() => {
-    simularApiDeUsuarios()
-  })
+  // Las cuentas llegan de ms-usuarios y los pedidos de ms-pedidos (simulados)
+  function abrir(rutas = {}) {
+    return abrirPedidos(<AdminReportes />, {
+      pedidos: PEDIDOS,
+      rutas: { 'GET /usuarios': () => [200, Object.values(CUENTAS)], ...rutas }
+    })
+  }
 
   it('muestra resumen de usuarios y pedidos', async () => {
-    renderizar(<AdminReportes />, { usuario: ADMIN, pedidos: PEDIDOS })
+    await abrir()
 
     expect(screen.getByRole('heading', { name: 'Reportes del sistema' })).toBeInTheDocument()
     await waitFor(() => expect(valorDeTarjeta('Usuarios registrados')).toHaveTextContent('5'))
@@ -42,7 +47,7 @@ describe('Reportes del administrador', () => {
   })
 
   it('agrupa usuarios por rol y pedidos por estado', async () => {
-    renderizar(<AdminReportes />, { usuario: ADMIN, pedidos: PEDIDOS })
+    await abrir()
 
     expect(await within(filaCon('Administradores')).findByText('1')).toBeInTheDocument()
     expect(within(filaCon('Despachadoras')).getByText('1')).toBeInTheDocument()
@@ -55,12 +60,34 @@ describe('Reportes del administrador', () => {
     expect(within(filaCon('Entregado')).getByText('1')).toBeInTheDocument()
   })
 
-  it('si el backend no responde, avisa y muestra los pedidos igual', async () => {
-    simularApiApagada()
-    renderizar(<AdminReportes />, { usuario: ADMIN, pedidos: PEDIDOS })
+  it('si ms-usuarios no responde, avisa y muestra los pedidos igual', async () => {
+    await abrir({ 'GET /usuarios': () => [503, { estado: 503, mensaje: 'Servicio no disponible.' }] })
 
     expect(await screen.findByRole('alert')).toHaveTextContent('No se pudo cargar la lista de usuarios.')
     expect(valorDeTarjeta('Pedidos registrados')).toHaveTextContent('4')
+  })
+
+  it('si ms-pedidos no responde, lo avisa', async () => {
+    await abrir({ 'GET /boletas/gestion': () => [503, { estado: 503, mensaje: 'Servicio no disponible.' }] })
+
+    expect(await screen.findByText(/No se pudieron cargar los pedidos/)).toBeInTheDocument()
+    expect(valorDeTarjeta('Pedidos registrados')).toHaveTextContent('0')
+  })
+
+  it('el CSV muestra el nombre del repartidor asignado', async () => {
+    let contenido = ''
+    vi.spyOn(URL, 'createObjectURL').mockImplementation((blob) => { contenido = blob; return 'blob:reporte' })
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {})
+    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
+    const user = userEvent.setup()
+    await abrir()
+    await waitFor(() => expect(valorDeTarjeta('Usuarios registrados')).toHaveTextContent('5'))
+
+    await user.click(screen.getByRole('button', { name: 'Descargar reporte' }))
+    const texto = await contenido.text()
+
+    expect(texto).toContain('Matías Vera')
+    expect(texto).toContain('Sin asignar')
   })
 
   it('descarga un reporte CSV', async () => {
@@ -75,7 +102,7 @@ describe('Reportes del administrador', () => {
       .spyOn(HTMLAnchorElement.prototype, 'click')
       .mockImplementation(() => {})
 
-    renderizar(<AdminReportes />, { usuario: ADMIN, pedidos: PEDIDOS })
+    await abrir()
 
     await user.click(screen.getByRole('button', { name: 'Descargar reporte' }))
 

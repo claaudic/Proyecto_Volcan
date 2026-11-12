@@ -3,7 +3,6 @@ import { screen, within, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import AdminOrdenes from './AdminOrdenes'
 import AdminDashboard from './AdminDashboard'
-import { leerPedidos } from '../datos/pedidos'
 import { ADMIN, pedidoDeEjemplo } from '../test/renderizar'
 import { abrirPedidos as renderizar } from '../test/pedidosHttp'
 
@@ -97,7 +96,7 @@ describe('Órdenes del administrador', () => {
 
     expect(pedido.estado).toBe('EN_CAMINO')
     expect(pedido.repartidorId).toBe(3)
-    expect(leerPedidos().find(p => p.numero === 3).estado).toBe('Pendiente')
+    expect(JSON.parse(localStorage.getItem('pedidos_volcan')).find(p => p.numero === 3).estado).toBe('Pendiente')
     expect(within(filaConPedido(3)).getByText('En camino')).toHaveClass('estado-camino')
     expect(within(filaConPedido(3)).getByText('Matías Vera')).toBeInTheDocument()
   })
@@ -132,7 +131,7 @@ describe('Órdenes del administrador', () => {
     expect(vista.escrituras()).toHaveLength(1)
     expect(vista.escrituras()[0][0]).toMatch(/\/boletas\/3\/anulacion$/)
     expect(JSON.parse(vista.escrituras()[0][1].body)).toEqual({ versionEsperada: 0 })
-    expect(leerPedidos()).toEqual(PEDIDOS)
+    expect(JSON.parse(localStorage.getItem('pedidos_volcan'))).toEqual(PEDIDOS)
   })
 
 })
@@ -226,7 +225,7 @@ describe('Órdenes: pedidos con otros formatos', () => {
     await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Cerrar' }))
     expect(screen.queryByRole('dialog')).toBeNull()
 
-    expect(leerPedidos()).toHaveLength(4)
+    expect(JSON.parse(localStorage.getItem('pedidos_volcan'))).toHaveLength(4)
     expect(vista.escrituras()).toHaveLength(0)
   })
 

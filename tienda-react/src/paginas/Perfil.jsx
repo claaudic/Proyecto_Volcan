@@ -2,7 +2,6 @@ import { startTransition, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useSesion } from '../contexto/sesionContexto'
 import { nombreCompleto, nombreDeRol, panelDeRol } from '../datos/usuarios'
-import { leerPedidos } from '../datos/pedidos'
 import { formatearPrecio } from '../datos/productos'
 import { buscarZona } from '../datos/zonas'
 import { claseCampo } from '../utilidades/formularios'
@@ -42,6 +41,14 @@ function CargaPerfil({ usuario }) {
 }
 
 const COMUNAS = ["Chillán", "Chillán Viejo", "El Carmen", "Pinto", "San Ignacio", "Bulnes", "Quillón"]
+
+// El backend manda el estado en mayúsculas; aquí se muestra con su nombre
+const NOMBRE_ESTADO = {
+  PENDIENTE: "Pendiente",
+  EN_CAMINO: "En camino",
+  ENTREGADO: "Entregado",
+  CANCELADO: "Cancelado"
+}
 
 // Color de la etiqueta segun el estado del pedido
 const CLASE_ESTADO = {
@@ -87,9 +94,25 @@ function FichaPerfil({ usuario, cuenta }) {
 
   const zona = buscarZona(datos.comuna)
 
-  // Los pedidos de esta cuenta, del mas reciente al mas antiguo
-  const pedidos = leerPedidos()
-    .filter((pedido) => String(pedido.cliente?.correo).toLowerCase() === usuario.correo.toLowerCase())
+  // Pedidos reales del cliente: GET /boletas devuelve solo los suyos (lo filtra ms-pedidos
+  // con el id del token). Los nombres de los productos salen del catálogo.
+  const boletas = useApi(esCliente ? "/boletas" : null)
+  const catalogo = useApi(esCliente ? "/productos" : null)
+
+  // Del más reciente al más antiguo
+  const pedidos = (boletas.datos || [])
+    .map((boleta) => ({
+      numero: boleta.id,
+      fecha: boleta.fecha,
+      estado: NOMBRE_ESTADO[boleta.estado] || boleta.estado,
+      total: boleta.total,
+      productos: boleta.detalles.map((detalle) => ({
+        id: detalle.id,
+        nombre: (catalogo.datos || []).find((p) => p.id === detalle.productoId)?.nombre || "Producto",
+        cantidad: detalle.cantidad,
+        subtotal: detalle.precio * detalle.cantidad
+      }))
+    }))
     .sort((a, b) => b.numero - a.numero)
 
   function cambiar(evento) {
@@ -303,6 +326,8 @@ function FichaPerfil({ usuario, cuenta }) {
             {esCliente ? (
               <div className="tarjeta-panel">
                 <h2>Mis pedidos</h2>
+                {boletas.cargando && <p role="status">Cargando tus pedidos…</p>}
+                {boletas.error && <p className="mensaje-error-campo" role="alert">{boletas.error}</p>}
                 <p className="panel-bajada">
                   {pedidos.length === 0
                     ? "Aquí verás el detalle de cada compra."
@@ -311,7 +336,7 @@ function FichaPerfil({ usuario, cuenta }) {
                       : "Tienes " + pedidos.length + " pedidos registrados."}
                 </p>
 
-                {pedidos.length === 0 ? (
+                {boletas.cargando || boletas.error ? null : pedidos.length === 0 ? (
                   <div className="perfil-sin-pedidos">
                     <p>Todavía no has hecho ningún pedido.</p>
                     <Link className="btn btn-secundario" to="/productos">Ver el catálogo</Link>
@@ -339,7 +364,7 @@ function FichaPerfil({ usuario, cuenta }) {
 
                         <ul className="pedido-lineas list-unstyled">
                           {pedido.productos.map((linea) => (
-                            <li key={linea.codigo}>
+                            <li key={linea.id}>
                               {linea.cantidad} × {linea.nombre}
                               <span>{formatearPrecio(linea.subtotal)}</span>
                             </li>

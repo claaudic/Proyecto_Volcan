@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
-import { leerPedidos } from '../datos/pedidos'
 import { formatearPrecio } from '../datos/productos'
 import { nombreCompleto } from '../datos/usuarios'
 import { useApi } from '../utilidades/useApi'
+import { usePedidosHttp } from '../utilidades/usePedidosHttp'
 
 const ROLES_REPORTE = [
     ['ADMINISTRADOR', 'Administradores'],
@@ -207,7 +207,10 @@ function AdminReportes() {
     const lista = useApi('/usuarios')
 
     const usuarios = lista.datos || []
-    const pedidos = leerPedidos()
+
+    // Pedidos reales de ms-pedidos (GET /boletas/gestion), igual que el panel de inicio
+    const datosPedidos = usePedidosHttp()
+    const pedidos = datosPedidos.pedidos
 
     const usuariosActivos = usuarios.filter(
         (cuenta) => cuenta.activo !== false
@@ -231,18 +234,17 @@ function AdminReportes() {
         return total + Number(pedido.total || 0)
     }, 0)
 
-    function nombreRepartidor(correo) {
-        if (!correo) {
+    // El pedido guarda el id del repartidor; aquí se muestra su nombre
+    function nombreRepartidor(idRepartidor) {
+        if (!idRepartidor) {
             return 'Sin asignar'
         }
 
         const repartidor = usuarios.find(
-            (cuenta) =>
-                cuenta.correo.toLowerCase() ===
-                String(correo).toLowerCase()
+            (cuenta) => String(cuenta.id) === String(idRepartidor)
         )
 
-        return repartidor ? nombreCompleto(repartidor) : correo
+        return repartidor ? nombreCompleto(repartidor) : `Repartidor ${idRepartidor}`
     }
 
     function descargarReporte() {
@@ -349,6 +351,12 @@ function AdminReportes() {
                         {lista.error && (
                             <div className="alert alert-warning" role="alert">
                                 No se pudo cargar la lista de usuarios. {lista.error}
+                            </div>
+                        )}
+
+                        {datosPedidos.error && (
+                            <div className="alert alert-warning" role="alert">
+                                No se pudieron cargar los pedidos. {datosPedidos.error}
                             </div>
                         )}
 

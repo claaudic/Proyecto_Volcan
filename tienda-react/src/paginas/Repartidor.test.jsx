@@ -3,7 +3,6 @@ import { screen, within, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import Repartidor from './Repartidor'
-import { leerPedidos } from '../datos/pedidos'
 import { pedidoDeEjemplo } from '../test/renderizar'
 import { abrirPedidos as renderizar } from '../test/pedidosHttp'
 
@@ -67,7 +66,7 @@ describe('Panel de repartidor', () => {
     const pedido = vista.gestiones.find((uno) => uno.boleta.id === 4).boleta
 
     expect(pedido.estado).toBe('EN_CAMINO')
-    expect(leerPedidos()).toEqual(PEDIDOS)
+    expect(JSON.parse(localStorage.getItem('pedidos_volcan'))).toEqual(PEDIDOS)
     expect(valorDeTarjeta('Pendientes')).toHaveTextContent('0')
     expect(valorDeTarjeta('En camino')).toHaveTextContent('2')
   })

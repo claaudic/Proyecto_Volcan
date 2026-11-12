@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { renderizar, CLIENTE, pedidoDeEjemplo } from "../test/renderizar";
+import { renderizar, CLIENTE } from "../test/renderizar";
 import { simularApi, simularApiApagada, CUENTAS } from "../test/api";
 import { SIN_CONEXION } from "../utilidades/api";
 import Perfil from "./Perfil";
@@ -67,6 +67,7 @@ describe("Perfil: página conectada a ms-usuarios", () => {
     it("muestra el mensaje del backend si rechaza los datos", async () => {
         simularApi({
             "GET /usuarios/yo": () => [200, CAMILA_EN_BASE],
+            "GET /boletas": () => [200, []],
             "PUT /usuarios/yo": () => [400, { estado: 400, mensaje: "El teléfono solo admite números, espacios y el signo +." }]
         });
         const user = userEvent.setup();
@@ -104,16 +105,45 @@ describe("Perfil: página conectada a ms-usuarios", () => {
         expect(localStorage.getItem(CLAVE_SESION)).toBeNull();
     });
 
-    it("muestra solo los pedidos del cliente con sesión iniciada", async () => {
-        simularApi({ "GET /usuarios/yo": () => [200, CAMILA_EN_BASE] });
-        localStorage.setItem("pedidos_volcan", JSON.stringify([
-            pedidoDeEjemplo({ numero: 1 }),
-            pedidoDeEjemplo({ numero: 2, cliente: { nombre: "Otra persona", correo: "otra@gmail.com" } })
-        ]));
+    it("muestra los pedidos reales del cliente (GET /boletas) con el nombre de cada producto", async () => {
+        const api = simularApi({
+            "GET /usuarios/yo": () => [200, CAMILA_EN_BASE],
+            // ms-pedidos ya devuelve solo las boletas de esta cuenta
+            "GET /boletas": () => [200, [
+                { id: 7, clienteId: 5, direccion: "Libertad 123", comuna: "Chillán", estado: "EN_CAMINO",
+                    repartidorId: 3, fecha: "2026-11-12T11:00:00", total: 13000,
+                    detalles: [{ id: 70, productoId: 1, cantidad: 2, precio: 6500 }] },
+                { id: 4, clienteId: 5, direccion: "Libertad 123", comuna: "Chillán", estado: "ENTREGADO",
+                    repartidorId: 3, fecha: "2026-11-10T09:00:00", total: 14500,
+                    detalles: [{ id: 40, productoId: 2, cantidad: 1, precio: 14500 }] }
+            ]],
+            "GET /productos": () => [200, [
+                { id: 1, codigo: "CL001", nombre: "Cilindro GLP 5 kg" },
+                { id: 2, codigo: "CL002", nombre: "Cilindro GLP 11 kg" }
+            ]]
+        });
         abrirPerfil();
 
-        expect(await screen.findByText("Pedido N° 1")).toBeInTheDocument();
-        expect(screen.queryByText("Pedido N° 2")).toBeNull();
+        expect(await screen.findByText("Pedido N° 7")).toBeInTheDocument();
+        expect(screen.getByText("Pedido N° 4")).toBeInTheDocument();
+        expect(screen.getByText("En camino")).toBeInTheDocument();
+        expect(await screen.findByText(/2 × Cilindro GLP 5 kg/)).toBeInTheDocument();
+        expect(screen.getByText("Tienes 2 pedidos registrados.")).toBeInTheDocument();
+        // El más reciente va primero
+        const numeros = screen.getAllByText(/^Pedido N°/).map((n) => n.textContent);
+        expect(numeros).toEqual(["Pedido N° 7", "Pedido N° 4"]);
+        expect(api).toHaveBeenCalledWith(expect.stringContaining("/boletas"), expect.anything());
+    });
+
+    it("sin compras invita a ver el catálogo", async () => {
+        simularApi({
+            "GET /usuarios/yo": () => [200, CAMILA_EN_BASE],
+            "GET /boletas": () => [200, []],
+            "GET /productos": () => [200, []]
+        });
+        abrirPerfil();
+
+        expect(await screen.findByText("Todavía no has hecho ningún pedido.")).toBeInTheDocument();
     });
 
 });

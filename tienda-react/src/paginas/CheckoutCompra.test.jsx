@@ -254,4 +254,29 @@ describe('Checkout: pago y registro de la boleta', () => {
         expect(await screen.findByText('Cilindro de prueba')).toBeInTheDocument()
         expect(pagar()).toBeEnabled()
     })
+
+    it('en http (sin HTTPS, como la EC2) también compra: arma la clave sin randomUUID', async () => {
+        const original = crypto.randomUUID
+        // En una página http el navegador no ofrece randomUUID
+        Object.defineProperty(crypto, 'randomUUID', { value: undefined, configurable: true })
+        let clave
+        simular({
+            'POST /boletas': (cuerpo, encabezados) => {
+                clave = encabezados['idempotency-key']
+                return boletaCreada(cuerpo)
+            }
+        })
+        const usuario = userEvent.setup()
+        try {
+            abrir()
+            await screen.findByText('Cilindro de prueba')
+            await completar(usuario)
+            await usuario.click(pagar())
+
+            expect(await screen.findByText('Compra realizada con éxito')).toBeInTheDocument()
+            expect(clave).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/)
+        } finally {
+            Object.defineProperty(crypto, 'randomUUID', { value: original, configurable: true })
+        }
+    })
 })

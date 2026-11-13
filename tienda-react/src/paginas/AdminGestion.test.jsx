@@ -189,6 +189,18 @@ describe('Gestión de usuarios (con ms-usuarios simulado)', () => {
     expect(screen.getByText('Selecciona un rol.')).toBeInTheDocument()
   })
 
+  it('pide calle y número en la dirección, igual que el registro', async () => {
+    const user = userEvent.setup()
+    await abrirAdmin()
+
+    await abrirCrear(user)
+    await llenar(user, { ...NUEVO, direccionUsuario: 'Calle sin numero' })
+    await user.click(screen.getByRole('button', { name: 'Guardar usuario' }))
+
+    expect(screen.getByText('Escribe la calle y el número, por ejemplo: Libertad 123.')).toBeInTheDocument()
+    expect(cuenta('pedro.soto@gaselvolcan.cl')).toBeUndefined()
+  })
+
   it('no acepta una fecha de nacimiento futura', async () => {
     const user = userEvent.setup()
     await abrirAdmin()

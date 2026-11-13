@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useSesion } from '../contexto/sesionContexto'
 import { pedir } from '../utilidades/api'
-import { buscarZona } from '../datos/zonas'
+import { COMUNAS_COBERTURA } from '../datos/zonas'
+import AvisoCobertura from '../components/AvisoCobertura'
 import { claseCampo } from '../utilidades/formularios'
 import {
   validarTexto,
@@ -36,8 +37,6 @@ const REGLAS = {
   telefono: (d) => validarTelefono(d.telefono)
 }
 
-const COMUNAS = ["Chillán", "Chillán Viejo", "El Carmen", "Pinto", "San Ignacio", "Bulnes", "Quillón"]
-
 function Registro() {
   const [datos, setDatos] = useState(VACIO)
   const [errores, setErrores] = useState({})
@@ -47,9 +46,6 @@ function Registro() {
 
   const { iniciarSesion } = useSesion()
   const navegar = useNavigate()
-
-  // El aviso de cobertura no necesita estado: se calcula desde la comuna escrita
-  const zona = buscarZona(datos.comuna)
 
   // Un solo manejador para todos los campos, como en Contacto
   function cambiar(evento) {
@@ -252,17 +248,11 @@ function Registro() {
                     value={datos.comuna} onChange={cambiar}
                   />
                   <datalist id="comunasRegistro">
-                    {COMUNAS.map((comuna) => <option key={comuna} value={comuna} />)}
+                    {COMUNAS_COBERTURA.map((comuna) => <option key={comuna} value={comuna} />)}
                   </datalist>
 
                   {/* Avisa, pero no impide registrarse */}
-                  {datos.comuna.trim() !== "" && (
-                    <small className={zona ? "mensaje-ayuda aviso-cobertura-ok" : "mensaje-ayuda aviso-cobertura-no"}>
-                      {zona
-                        ? "Llegamos a tu comuna: " + zona.zona + "."
-                        : "Todavía no tenemos reparto en esa comuna."}
-                    </small>
-                  )}
+                  <AvisoCobertura comuna={datos.comuna} />
                 </div>
               </div>
 

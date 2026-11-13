@@ -6,6 +6,7 @@ import { useCarrito } from '../contexto/carritoContexto'
 import { estadoDelCarrito } from '../datos/estadoCarrito'
 import { useCatalogoCheckout } from '../utilidades/useCatalogoCheckout'
 import { pedir } from '../utilidades/api'
+import { nuevaClaveCompra } from '../utilidades/claveCompra'
 import { formatearPrecio, imagenDe } from '../datos/productos'
 import { COMUNAS_COBERTURA, normalizar } from '../datos/zonas'
 import { usarImagenRespaldo } from '../utilidades/imagenes'
@@ -209,9 +210,10 @@ function Checkout() {
 
         // 2. Pago aprobado: se registra la boleta en ms-pedidos (descuenta el stock)
         setProcesando(true)
-        claveCompra.current = claveCompra.current || crypto.randomUUID()
 
         try {
+            // Dentro del try: si algo falla aquí, se muestra el error y el botón se libera
+            claveCompra.current = claveCompra.current || nuevaClaveCompra()
             const enviar = usuario ? llamarApi : pedir
             const boleta = await enviar('/boletas', {
                 metodo: 'POST',

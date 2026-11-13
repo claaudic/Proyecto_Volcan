@@ -1,6 +1,6 @@
 # Tienda Gas El Volcán · React
 
-Tienda online de la **Distribuidora de Gas El Volcán**, empresa familiar de Chillán, Región de Ñuble. Esta es la versión en **React** del sitio (Evaluación Parcial 2), migrada desde el sitio en HTML de la EP1.
+Tienda online de la **Distribuidora de Gas El Volcán**, empresa familiar de Chillán, Región de Ñuble. Es la versión en **React** del sitio (migrada en la EP2) y, desde la **Evaluación Parcial 3**, trabaja con datos reales: se conecta por API REST al backend de microservicios Spring Boot ([gas-volcan-backend](https://github.com/claaudic/gas-volcan-backend)), a través del API Gateway.
 
 Los clientes revisan el catálogo, consultan si hay reparto en su comuna, compran con una pasarela de pago simulada y siguen sus pedidos desde su perfil. El administrador, la despachadora y los repartidores tienen cada uno su panel de trabajo.
 
@@ -15,14 +15,26 @@ Los clientes revisan el catálogo, consultan si hay reparto en su comuna, compra
 | Navegación | React Router 7 |
 | Estilos | Bootstrap 5.3.8 · CSS propio · tipografía Figtree |
 | Estado compartido | Context de React (carrito, sesión y catálogo) |
-| Persistencia | `localStorage` del navegador |
+| Datos | API REST del backend (MySQL), siempre a través del API Gateway (`/api/v1`) |
+| En el navegador | Solo la sesión (token JWT) y el carrito, en `localStorage` |
 | Pruebas | Vitest + Testing Library · jsdom (navegador simulado) · cobertura con @vitest/coverage-v8 |
 
 ---
 
 ## Cómo ejecutarlo
 
-Requiere **Node.js** instalado.
+La tienda necesita el **backend encendido**: sin él no hay catálogo, ni sesión, ni pedidos.
+
+**Opción 1 · Todo con Docker (recomendada).** Desde el repositorio `gas-volcan-backend` (los dos repositorios uno al lado del otro):
+
+```bash
+cp .env.example .env          # y FRONTEND_CARPETA=../Proyecto_Volcan/tienda-react
+docker compose up -d --build  # MySQL, 3 microservicios, Gateway y esta tienda
+```
+
+La tienda queda en `http://localhost` y Swagger en `http://localhost:8080/swagger-ui.html`.
+
+**Opción 2 · Modo desarrollo.** Con el backend encendido (Gateway en el puerto 8080) y **Node.js** instalado:
 
 ```bash
 cd tienda-react
@@ -30,7 +42,7 @@ npm install      # solo la primera vez: descarga las dependencias
 npm run dev      # inicia el sitio en http://localhost:5173
 ```
 
-Para cerrar el servidor: **Ctrl + C** en la terminal.
+La dirección de la API se toma de `VITE_API_URL` (por defecto `http://localhost:8080/api/v1`). En Docker se compila con `/api/v1` y nginx pasa `/api` al Gateway. Para cerrar el servidor: **Ctrl + C** en la terminal.
 
 | Comando | Qué hace |
 |---|---|
@@ -57,7 +69,7 @@ También se puede crear una cuenta de cliente nueva desde **Crear cuenta**.
 
 **Dominios de correo aceptados:** `@gaselvolcan.cl`, `@duoc.cl`, `@profesor.duoc.cl`, `@gmail.com`
 
-Son datos de demostración: el sistema no maneja datos reales.
+Son las cuentas que crea el backend la primera vez (en un servidor público se cambian con `CLAVE_CUENTAS_DEMO`). Son datos de demostración: el sistema no maneja datos reales.
 
 ---
 
@@ -143,7 +155,7 @@ npm run test:coverage   # con cobertura
 
 Las pruebas usan **Vitest** y corren en **jsdom**, un navegador simulado: no abren un navegador real. Cada archivo de prueba está junto al código que prueba, con el nombre `*.test.jsx` (por ejemplo `src/utilidades/pasarela.test.jsx`). `src/test/setup.js` limpia `localStorage` antes y después de cada prueba para que no se afecten entre sí.
 
-Hay **194 pruebas en 31 archivos**: renderizado, props, estado, eventos, las funciones CRUD de los datos, las validaciones de los formularios, los paneles de administración, despacho y reparto, y el recorrido completo de la compra (pago aprobado y rechazado).
+Hay **622 pruebas en 47 archivos**: renderizado, props, estado, eventos, la conexión con la API (simulada con un fetch falso), la sesión y su renovación, las validaciones de los formularios, los paneles de administración, despacho y reparto, y el recorrido completo de la compra (pago aprobado y rechazado).
 
 `npm run test:coverage` muestra la tabla en la terminal y genera el informe detallado en `coverage/index.html`. Se mide todo `src/`, excepto `main.jsx`, la configuración de pruebas y las pruebas mismas. La cobertura total es de **93 % de líneas**, y **cada archivo tiene al menos 80 %**: si alguno baja de ese mínimo, `npm run test:coverage` falla.
 
@@ -151,11 +163,15 @@ Hay **194 pruebas en 31 archivos**: renderizado, props, estado, eventos, las fun
 
 ## Notas técnicas
 
-**Persistencia local.** Los datos (carrito, catálogo, cuentas, pedidos y sesión) viven en el `localStorage` de cada navegador. Los cambios de un usuario no los ve otro. Es propio de esta etapa, que no tiene servidor.
+**Comunicación con el backend.** Todas las llamadas pasan por `src/utilidades/api.js` (`pedir`) y van solo al API Gateway: nunca directo a un microservicio. Las rutas con sesión usan `llamarApi` (agrega `Authorization: Bearer <token>`) y las pantallas que cargan datos usan `useApi`, que muestra "Cargando…" o el mensaje de error que manda el backend.
 
-**Datos iniciales.** El catálogo y las cuentas base están en `src/datos/`. Si el navegador no tiene datos guardados, el sistema parte desde ahí, así la tienda funciona desde la primera visita.
+**Sesión.** `src/contexto/ProveedorSesion.jsx` guarda el token y los datos visibles de la cuenta en `localStorage` (`sesionVolcan`), así la sesión sobrevive a una recarga. Al abrir la app se descarta un token vencido y se confirma la cuenta con `GET /usuarios/yo`. Un minuto antes de que venza (dura 30 minutos) se pide uno nuevo con `POST /auth/renovar`. Si el backend responde 401, la sesión se cierra. El rol, el correo y el id se leen del token firmado, no de datos editables.
 
-**Autenticación.** Se resuelve en el navegador y no es una barrera de seguridad real. Es aceptable porque el sistema no maneja datos reales; en la EP3 se moverá al backend.
+**Restricciones por rol.** `src/components/RutaProtegida.jsx` envía al login a quien no tiene sesión y muestra "No tienes permiso" (`SinPermiso.jsx`) a un rol que no corresponde; las rutas están en `App.jsx`. Es una ayuda para la persona: la seguridad real está en el backend, que vuelve a revisar el token y el rol en cada petición (401 / 403).
+
+**Compra.** El pago usa una pasarela simulada. Solo si se aprueba se envía `POST /boletas` con una `Idempotency-Key`, para que un doble clic o un reintento no duplique la boleta. El precio, el total, el stock y la fecha los calcula el backend.
+
+**Cabeceras de seguridad.** En Docker, `nginx.conf` envía una `Content-Security-Policy` que solo permite scripts de la misma dirección (reduce el riesgo de que un XSS lea el token), además de `X-Frame-Options` y `X-Content-Type-Options`.
 
 ---
 

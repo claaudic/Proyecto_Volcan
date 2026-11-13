@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { buscarZona } from '../datos/zonas'
+import { buscarZona, COMUNAS_COBERTURA } from '../datos/zonas'
 
 // Migrado desde nosotros.html y el buscador de js/zonas.js.
 function Nosotros() {
@@ -168,13 +168,7 @@ function Nosotros() {
                 value={comuna}
                 onChange={cambiar} />
               <datalist id="comunasCubiertas">
-                <option value="Chillán"></option>
-                <option value="Chillán Viejo"></option>
-                <option value="El Carmen"></option>
-                <option value="Pinto"></option>
-                <option value="San Ignacio"></option>
-                <option value="Bulnes"></option>
-                <option value="Quillón"></option>
+                {COMUNAS_COBERTURA.map((nombre) => <option key={nombre} value={nombre}></option>)}
               </datalist>
               <button type="submit" className="btn btn-principal">Revisar</button>
             </div>

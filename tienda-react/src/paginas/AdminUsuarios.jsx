@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 import { useSesion } from '../contexto/sesionContexto'
-import { validarCorreo, runValido } from '../utilidades/validaciones'
+import { validarCorreo, validarTexto, validarDireccion, runValido } from '../utilidades/validaciones'
 import { useApi } from '../utilidades/useApi'
 import { COMUNAS_COBERTURA } from '../datos/zonas'
 import { nombreCompleto, nombreDeRol } from '../datos/usuarios'
@@ -177,8 +177,6 @@ function AdminUsuarios() {
         const nuevosErrores = {}
 
         const run = formulario.run.trim().toUpperCase()
-        const nombre = formulario.nombre.trim()
-        const apellidos = formulario.apellidos.trim()
         const correo = formulario.correo.trim().toLowerCase()
         // La contraseña no se recorta: se guarda tal cual, igual que en el registro y el backend
         const contrasena = formulario.contrasena
@@ -201,16 +199,15 @@ function AdminUsuarios() {
             nuevosErrores.run = 'Ese RUN no es válido. Revisa el dígito verificador.'
         }
 
-        if (nombre === '') {
-            nuevosErrores.nombre = 'Ingresa el nombre.'
-        } else if (nombre.length > 50) {
-            nuevosErrores.nombre = 'El nombre no puede superar los 50 caracteres.'
+        // Mismas reglas que el registro y el perfil (utilidades/validaciones.js)
+        const errorNombre = validarTexto(formulario.nombre, 50, 'Ingresa el nombre.')
+        if (errorNombre) {
+            nuevosErrores.nombre = errorNombre
         }
 
-        if (apellidos === '') {
-            nuevosErrores.apellidos = 'Ingresa los apellidos.'
-        } else if (apellidos.length > 100) {
-            nuevosErrores.apellidos = 'Los apellidos no pueden superar los 100 caracteres.'
+        const errorApellidos = validarTexto(formulario.apellidos, 100, 'Ingresa los apellidos.')
+        if (errorApellidos) {
+            nuevosErrores.apellidos = errorApellidos
         }
 
         const errorCorreo = validarCorreo(correo)
@@ -236,12 +233,13 @@ function AdminUsuarios() {
             nuevosErrores.comuna = 'Selecciona una comuna.'
         }
 
+        // Calle y número, como en el registro: "Libertad 123"
         if (direccion === '') {
             if (exigirDireccion) {
                 nuevosErrores.direccion = 'Ingresa la dirección.'
             }
-        } else if (direccion.length > 300) {
-            nuevosErrores.direccion = 'La dirección no puede superar los 300 caracteres.'
+        } else if (validarDireccion(direccion)) {
+            nuevosErrores.direccion = validarDireccion(direccion)
         }
 
         if (formulario.rol === '') {

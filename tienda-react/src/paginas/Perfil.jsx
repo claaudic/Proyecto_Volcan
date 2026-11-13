@@ -3,7 +3,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useSesion } from '../contexto/sesionContexto'
 import { nombreCompleto, nombreDeRol, panelDeRol } from '../datos/usuarios'
 import { formatearPrecio } from '../datos/productos'
-import { buscarZona } from '../datos/zonas'
+import { COMUNAS_COBERTURA } from '../datos/zonas'
+import AvisoCobertura from '../components/AvisoCobertura'
 import { claseCampo } from '../utilidades/formularios'
 import { validarTexto, validarTelefono, validarDireccion } from '../utilidades/validaciones'
 import { useApi } from '../utilidades/useApi'
@@ -39,8 +40,6 @@ function CargaPerfil({ usuario }) {
 
   return <FichaPerfil usuario={usuario} cuenta={cuenta} />
 }
-
-const COMUNAS = ["Chillán", "Chillán Viejo", "El Carmen", "Pinto", "San Ignacio", "Bulnes", "Quillón"]
 
 // El backend manda el estado en mayúsculas; aquí se muestra con su nombre
 const NOMBRE_ESTADO = {
@@ -91,8 +90,6 @@ function FichaPerfil({ usuario, cuenta }) {
       direccion: (d) => validarDireccion(d.direccion)
     })
   }
-
-  const zona = buscarZona(datos.comuna)
 
   // Pedidos reales del cliente: GET /boletas devuelve solo los suyos (lo filtra ms-pedidos
   // con el id del token). Los nombres de los productos salen del catálogo.
@@ -279,13 +276,9 @@ function FichaPerfil({ usuario, cuenta }) {
                       value={datos.comuna} onChange={cambiar}
                     />
                     <datalist id="comunasPerfil">
-                      {COMUNAS.map((comuna) => <option key={comuna} value={comuna} />)}
+                      {COMUNAS_COBERTURA.map((comuna) => <option key={comuna} value={comuna} />)}
                     </datalist>
-                    {datos.comuna.trim() !== "" && (
-                      <small className={zona ? "mensaje-ayuda aviso-cobertura-ok" : "mensaje-ayuda aviso-cobertura-no"}>
-                        {zona ? "Llegamos a tu comuna: " + zona.zona + "." : "Todavía no tenemos reparto en esa comuna."}
-                      </small>
-                    )}
+                    <AvisoCobertura comuna={datos.comuna} />
                   </div>
                 </>
               )}

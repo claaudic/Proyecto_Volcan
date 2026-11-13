@@ -1,7 +1,7 @@
 # Tienda Gas El Volcán
 
-> **EP2 (React):** la versión actual del sitio está en la carpeta [`tienda-react/`](tienda-react/README.md), con sus instrucciones, cuentas y tarjetas de prueba.
-> Este documento describe el sitio en HTML de la **EP1**, que se conserva como referencia.
+> **EP3 (versión actual):** la tienda en React está en [`tienda-react/`](tienda-react/README.md) y se conecta al backend de microservicios del repositorio [gas-volcan-backend](https://github.com/claaudic/gas-volcan-backend), que también la despliega con Docker.
+> Este documento describe el sitio en HTML de la **EP1**, que se conserva como referencia (sus cuentas de prueba son las de esa versión).
 
 Tienda online para la **Distribuidora de Gas El Volcán**, empresa familiar de Chillán, Región de Ñuble, dedicada a la distribución de gas licuado a domicilio desde 1998.
 

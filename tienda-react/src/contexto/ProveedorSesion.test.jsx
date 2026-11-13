@@ -4,7 +4,7 @@ import { act, render, screen } from "@testing-library/react";
 import ProveedorSesion from "./ProveedorSesion";
 import { useSesion } from "./sesionContexto";
 import { CLAVE_SESION } from "../datos/usuarios";
-import { simularApi, respuestaLogin, guardarSesionDePrueba, CUENTAS } from "../test/api";
+import { simularApi, simularApiApagada, respuestaLogin, guardarSesionDePrueba, CUENTAS } from "../test/api";
 import { leerToken, msHastaVencer, API_URL } from "../utilidades/api";
 
 // Pruebas de la sesion con token: se recupera al recargar, se renueva sola
@@ -72,7 +72,19 @@ describe("Sesión: renovación del token", () => {
         expect(screen.getByText("Sesión de Camila Rojas")).toBeInTheDocument();
     });
 
-    it("si la renovación falla, cierra la sesión", async () => {
+    it("si solo se cortó la conexión al renovar, la sesión se mantiene", async () => {
+        vi.useFakeTimers({ shouldAdvanceTime: true });
+        guardarSesionDePrueba(CAMILA, 30);
+        simularApiApagada();
+        montar();
+
+        await act(() => vi.advanceTimersByTimeAsync(29 * 60 * 1000));
+
+        expect(screen.getByText("Sesión de Camila Rojas")).toBeInTheDocument();
+        expect(localStorage.getItem(CLAVE_SESION)).not.toBeNull();
+    });
+
+    it("si el backend rechaza la renovación (401), cierra la sesión", async () => {
         vi.useFakeTimers({ shouldAdvanceTime: true });
         guardarSesionDePrueba(CAMILA, 30);
         simularApi({ "POST /auth/renovar": () => [401, { estado: 401, mensaje: "La cuenta está desactivada." }] });

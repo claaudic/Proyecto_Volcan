@@ -72,9 +72,12 @@ function ProveedorSesion({ children }) {
       try {
         const respuesta = await pedir("/auth/renovar", { metodo: "POST", token: sesion.token });
         setSesion(desdeRespuesta(respuesta));
-      } catch {
-        // No se pudo renovar (cuenta desactivada, token vencido o sin conexion): se pide entrar de nuevo
-        setSesion(null);
+      } catch (error) {
+        // El backend rechazo el token (vencido, cuenta desactivada): se pide entrar de nuevo.
+        // Si solo fallo la conexion, la sesion se mantiene: la proxima llamada con 401 la cierra.
+        if (error.estado === 401 || error.estado === 403) {
+          setSesion(null);
+        }
       }
     }, espera);
 

@@ -66,7 +66,9 @@ async function completar(usuario, tarjeta = '4111 1111 1111 1111', { invitado = 
     }
     await usuario.type(screen.getByLabelText('Dirección'), 'Libertad 123')
     await usuario.selectOptions(screen.getByLabelText('Comuna'), 'Chillán')
-    await usuario.type(screen.getByLabelText('Número de la tarjeta'), tarjeta)
+    await usuario.type(screen.getByLabelText('Número de la tarjeta'), tarjeta.replaceAll(' ', ''))
+    // Se escribe solo con números: los espacios aparecen solos
+    expect(screen.getByLabelText('Número de la tarjeta')).toHaveValue(tarjeta)
     await usuario.type(screen.getByLabelText('Nombre del titular'), 'Pedro Soto')
     // Solo números: la "/" se agrega sola
     await usuario.type(screen.getByLabelText('Vencimiento'), '1240')

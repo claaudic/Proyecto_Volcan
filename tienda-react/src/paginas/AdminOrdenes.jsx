@@ -44,8 +44,10 @@ function indicacionesEntrega(pedido) {
     return pedido.entrega?.indicaciones || ''
 }
 
-function medioPago(pedido) {
-    return pedido.pago?.tarjeta || ''
+// Toda compra pasa por la pasarela del checkout antes de crear la boleta.
+// El número de la tarjeta no se guarda en el backend (por seguridad), por eso no se muestra.
+function medioPago() {
+    return 'Pagado en línea con tarjeta'
 }
 
 function resumenProductos(pedido) {
@@ -301,13 +303,13 @@ function AdminOrdenes() {
                                                 <button
                                                     type="button"
                                                     className="btn btn-sm btn-peligro mb-1"
-                                                    aria-label={`Eliminar pedido ${pedido.numero}`}
+                                                    aria-label={`Anular pedido ${pedido.numero}`}
                                                     disabled={datos.ocupado || datos.obsoleto(pedido) || pedido.estado !== 'Pendiente'}
                                                     onClick={() =>
                                                         setPedidoABorrar({ ...pedido, identidadVista: datos.identidad })
                                                     }
                                                 >
-                                                    Eliminar
+                                                    Anular
                                                 </button>
                                             </td>
                                         </tr>
@@ -396,9 +398,7 @@ function AdminOrdenes() {
                                                         Pago
                                                     </p>
                                                     <strong>
-                                                        {medioPago(
-                                                            pedidoDetalle
-                                                        ) || 'Sin registrar'}
+                                                        {medioPago()}
                                                     </strong>
                                                 </div>
                                             </div>
@@ -664,7 +664,7 @@ function AdminOrdenes() {
                                         id="titulo-eliminar-pedido"
                                         className="modal-title fs-5"
                                     >
-                                        ¿Eliminar pedido?
+                                        ¿Anular pedido?
                                     </h2>
 
                                     <button
@@ -679,11 +679,13 @@ function AdminOrdenes() {
 
                                 <div className="modal-body">
                                     <p className="mb-0">
-                                        Vas a eliminar el pedido{' '}
+                                        Vas a anular el pedido{' '}
                                         <strong>
                                             #{pedidoABorrar.numero}
                                         </strong>{' '}
-                                        de {nombreCliente(pedidoABorrar)}.
+                                        de {nombreCliente(pedidoABorrar)}. Quedará como
+                                        Cancelado y el stock vuelve al catálogo. El pedido no
+                                        se borra: sigue en el historial.
                                     </p>
                                 </div>
 
@@ -704,7 +706,7 @@ function AdminOrdenes() {
                                         onClick={confirmarEliminar}
                                         disabled={datos.ocupado || datos.obsoleto(pedidoABorrar) || pedidoABorrar.estado !== 'Pendiente'}
                                     >
-                                        Sí, eliminar
+                                        Sí, anular
                                     </button>
                                 </div>
                             </div>

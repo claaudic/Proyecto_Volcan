@@ -22,12 +22,12 @@ describe('Pedidos HTTP: seguridad y recuperación sin rediseño', () => {
     expect(screen.queryByText('#999')).not.toBeInTheDocument()
     expect(leer.mock.calls.some(([k]) => k === 'pedidos_volcan')).toBe(false)
     expect(screen.getAllByRole('columnheader')).toHaveLength(9)
-    expect(screen.getAllByRole('button').map(b => b.textContent.trim())).toEqual(['Ver boleta', 'Editar', 'Eliminar'])
+    expect(screen.getAllByRole('button').map(b => b.textContent.trim())).toEqual(['Ver boleta', 'Editar', 'Anular'])
     expect(document.querySelector('.tabla-marco.table-responsive .tabla-panel')).not.toBeNull()
   })
-  it('bloquea eliminar pedidos en reparto, entregados y cancelados', async () => {
+  it('bloquea anular pedidos en reparto, entregados y cancelados', async () => {
     await abrirPedidos(<AdminOrdenes />, { pedidos: ['En camino', 'Entregado', 'Cancelado'].map((estado, i) => pedidoDeEjemplo({ numero: i + 1, estado })) })
-    for (const n of [1, 2, 3]) expect(within(fila(n)).getByRole('button', { name: /Eliminar/ })).toBeDisabled()
+    for (const n of [1, 2, 3]) expect(within(fila(n)).getByRole('button', { name: /Anular/ })).toBeDisabled()
   })
   it('un doble submit bloquea inmediatamente la consulta y el PUT', async () => {
     const respuesta = diferida()

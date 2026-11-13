@@ -68,7 +68,7 @@ describe('Órdenes del administrador', () => {
     expect(within(boleta).getByText('Repartidor')).toBeInTheDocument()
     expect(within(boleta).getByText('Sin asignar')).toBeInTheDocument()
     expect(within(boleta).getByText('Pago')).toBeInTheDocument()
-    expect(within(boleta).getByText('Sin registrar')).toBeInTheDocument()
+    expect(within(boleta).getByText('Pagado en línea con tarjeta')).toBeInTheDocument()
     expect(within(boleta).queryByText('•••• 1111')).not.toBeInTheDocument()
     expect(within(boleta).getByText('Camila Rojas')).toBeInTheDocument()
     expect(within(boleta).getByText('Libertad 123')).toBeInTheDocument()
@@ -114,16 +114,16 @@ describe('Órdenes del administrador', () => {
     const vista = await renderizar(<AdminOrdenes />, { usuario: ADMIN, pedidos: PEDIDOS })
 
     await user.click(
-      within(filaConPedido(3)).getByRole('button', { name: /Eliminar/ })
+      within(filaConPedido(3)).getByRole('button', { name: /Anular/ })
     )
     await user.click(screen.getByRole('button', { name: 'Cancelar' }))
 
     expect(vista.escrituras()).toHaveLength(0)
 
     await user.click(
-      within(filaConPedido(3)).getByRole('button', { name: /Eliminar/ })
+      within(filaConPedido(3)).getByRole('button', { name: /Anular/ })
     )
-    await user.click(screen.getByRole('button', { name: 'Sí, eliminar' }))
+    await user.click(screen.getByRole('button', { name: 'Sí, anular' }))
 
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
     expect(filaConPedido(3)).toHaveTextContent('Cancelado')
@@ -187,7 +187,7 @@ describe('Órdenes: pedidos con otros formatos', () => {
     const boleta = screen.getByRole('dialog', { name: /Boleta del pedido #7/ })
     expect(within(boleta).getByText('felipe@gmail.com')).toBeInTheDocument()
     expect(within(boleta).getByText('Los Puelches 430')).toBeInTheDocument()
-    expect(within(boleta).getByText('Sin registrar')).toBeInTheDocument()
+    expect(within(boleta).getByText('Pagado en línea con tarjeta')).toBeInTheDocument()
     expect(within(boleta).queryByText('Efectivo')).not.toBeInTheDocument()
     expect(within(boleta).getByText('Cilindro GLP 11 kg')).toBeInTheDocument()
   })
@@ -220,8 +220,8 @@ describe('Órdenes: pedidos con otros formatos', () => {
     await user.click(within(screen.getByRole('dialog')).getAllByRole('button', { name: /Cerrar/ })[0])
     expect(screen.queryByRole('dialog')).toBeNull()
 
-    // Eliminar: abrir la confirmación y cerrarla con la X
-    await user.click(within(filaConPedido(3)).getByRole('button', { name: /Eliminar/ }))
+    // Anular: abrir la confirmación y cerrarla con la X
+    await user.click(within(filaConPedido(3)).getByRole('button', { name: /Anular/ }))
     await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Cerrar' }))
     expect(screen.queryByRole('dialog')).toBeNull()
 
